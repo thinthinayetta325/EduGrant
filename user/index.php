@@ -257,7 +257,7 @@ $images = [
 <!-- stay informed -->
 <section class="px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto w-full">
     <!-- Changed max-w-4xl to max-w-6xl for a beautifully balanced wide-width display card layout -->
-    <div class="bg-[#004D4A]/70 rounded-3xl p-8 sm:p-12 text-center shadow-lg max-w-6xl mx-auto mb-16 border border-white/5">
+    <div class="bg-[#006D69] rounded-3xl p-8 sm:p-12 text-center shadow-lg max-w-6xl mx-auto mb-16 border border-white/5">
         <h3 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             <?php echo $page_lang['sub_title']; ?>
         </h3>

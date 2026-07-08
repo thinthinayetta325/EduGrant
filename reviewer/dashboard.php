@@ -11,6 +11,9 @@ require_once '../config/db.php';
 
 $reviewer_name = $_SESSION['reviewer_name'] ?? 'Reviewer';
 
+// Fetch profile image
+$reviewer_img = $conn->query("SELECT profile_image FROM reviewers WHERE id = " . (int)$_SESSION['reviewer_id'])->fetch_assoc()['profile_image'] ?? null;
+
 // UPDATED QUERY: Removed the JOIN to reviewer_scheme so ALL applications appear.
 // I have also included the LEFT JOIN just in case you want to show names/amounts later.
 $query = "SELECT a.id as app_id, a.application_no, a.family_income, a.apply_date, a.status,
@@ -36,9 +39,28 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviewer Workspace | EduGrant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 50: '#1e293b', 100: '#0f172a', 200: '#162032', 300: '#0d1520' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .theme-toggle { position: relative; width: 52px; height: 28px; border-radius: 14px; cursor: pointer; transition: background 0.3s; }
+        .theme-toggle .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform 0.3s, background 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .dark .theme-toggle { background: #1e293b; }
+        .theme-toggle { background: #006D69; }
+        .dark .theme-toggle .toggle-thumb { transform: translateX(24px); background: #0f172a; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-slate-200">
 
     <header class="bg-[#006D69] text-white px-4 sm:px-6 py-3 sm:py-4 shadow-md sticky top-0 z-50 flex flex-wrap items-center justify-between gap-2">
         <a href="../index.php" class="min-w-0 flex-shrink block hover:opacity-90 transition">
@@ -55,9 +77,20 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
             </div>
         </a>
         <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-            <span class="text-[11px] sm:text-sm font-medium bg-white/10 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md border border-white/10 truncate max-w-[120px] sm:max-w-none">
-                👤 <?php echo htmlspecialchars($reviewer_name); ?>
-            </span>
+            <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+                <div class="toggle-thumb">
+                    <svg class="w-3.5 h-3.5 text-amber-400 dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+                    <svg class="w-3.5 h-3.5 text-blue-400 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </div>
+            </div>
+            <a href="profile.php" class="flex items-center gap-2 text-[11px] sm:text-sm font-medium bg-white/10 dark:bg-white/5 hover:bg-white/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md border border-white/10 transition truncate max-w-[120px] sm:max-w-none">
+                <?php if (!empty($reviewer_img) && file_exists('../uploads/profile_pics/' . $reviewer_img)): ?>
+                    <img src="../uploads/profile_pics/<?php echo htmlspecialchars($reviewer_img); ?>" alt="" class="w-6 h-6 rounded-full object-cover border border-white/20">
+                <?php else: ?>
+                    <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold text-white"><?php echo strtoupper(substr($reviewer_name, 0, 1)); ?></span>
+                <?php endif; ?>
+                <span class="truncate hidden sm:inline"><?php echo htmlspecialchars($reviewer_name); ?></span>
+            </a>
             <a href="../auth/logout.php" class="text-[11px] sm:text-sm bg-red-600/20 hover:bg-red-600/40 text-red-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md border border-red-500/30 transition whitespace-nowrap">
                 Logout
             </a>
@@ -67,43 +100,43 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
     <!-- KPI Metric Cards -->
     <section class="max-w-7xl mx-auto px-4 pt-10 pb-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
-                <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Assigned</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-0.5"><?php echo $total_assigned; ?></p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white mt-0.5"><?php echo $total_assigned; ?></p>
                     <p class="text-xs text-slate-400">Applications waiting for review</p>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Reviews</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-0.5"><?php echo $pending_reviews; ?></p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white mt-0.5"><?php echo $pending_reviews; ?></p>
                     <p class="text-xs text-slate-400">Not yet touched</p>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
-                <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Approved / Recommended</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-0.5"><?php echo $approved; ?></p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white mt-0.5"><?php echo $approved; ?></p>
                     <p class="text-xs text-slate-400">Reviewed and forwarded</p>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
-                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Flagged / Returned</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-0.5"><?php echo $flagged; ?></p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white mt-0.5"><?php echo $flagged; ?></p>
                     <p class="text-xs text-slate-400">Sent back or rejected</p>
                 </div>
             </div>
@@ -112,14 +145,14 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
 
     <main class="max-w-7xl mx-auto px-3 sm:px-4 pb-10">
         <div class="mb-6">
-            <h2 class="text-2xl font-bold text-slate-900">All Applications</h2>
-            <p class="text-sm text-slate-500 mt-1">Reviewing all incoming scholarship applications.</p>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">All Applications</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Reviewing all incoming scholarship applications.</p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
             <table class="w-full text-left min-w-[600px]">
-                <thead class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase">
+                <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
                     <tr>
                         <th class="px-6 py-4">App No</th>
                         <th class="px-6 py-4">Student</th>
@@ -153,38 +186,35 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                         </tr>
                     <?php endif; ?>
                 </tbody> -->
-                <tbody class="divide-y divide-slate-100 text-sm">
-    <?php 
-    // Reset the pointer just in case
-    if ($result && $result->num_rows > 0): 
-        // Use data_seek to ensure we start from the beginning
-        $result->data_seek(0); 
-        
-        while ($row = $result->fetch_assoc()): 
-            // 1. Define color based on status
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-sm">
+    <?php
+    if ($result && $result->num_rows > 0):
+        $result->data_seek(0);
+
+        while ($row = $result->fetch_assoc()):
             $status = $row['status'] ?? 'Unknown';
-            $status_class = "bg-slate-100 text-slate-800 border-slate-200"; // Default
-            
+            $status_class = "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-600";
+
             if ($status == 'Submitted') {
-                $status_class = "bg-blue-100 text-blue-800 border-blue-200";
+                $status_class = "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700";
             } elseif ($status == 'Under Review') {
-                $status_class = "bg-amber-100 text-amber-800 border-amber-200";
+                $status_class = "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700";
             } elseif ($status == 'Recommended') {
-                $status_class = "bg-green-100 text-green-800 border-green-200";
+                $status_class = "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700";
             } elseif ($status == 'Rejected') {
-                $status_class = "bg-red-100 text-red-800 border-red-200";
+                $status_class = "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700";
             }
     ?>
-            <tr class="hover:bg-slate-50">
-                <td class="px-6 py-4 font-mono font-bold text-slate-700">
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <td class="px-6 py-4 font-mono font-bold text-slate-700 dark:text-slate-300">
                     <?php echo htmlspecialchars($row['application_no'] ?? 'N/A'); ?>
                 </td>
                 <td class="px-6 py-4">
-                    <div class="font-semibold text-slate-900"><?php echo htmlspecialchars($row['student_name'] ?? 'N/A'); ?></div>
+                    <div class="font-semibold text-slate-900 dark:text-white"><?php echo htmlspecialchars($row['student_name'] ?? 'N/A'); ?></div>
                     <div class="text-xs text-slate-400">Roll: <?php echo htmlspecialchars($row['roll_no'] ?? 'N/A'); ?></div>
                 </td>
                 <td class="px-6 py-4">
-                    <div class="font-medium text-slate-800"><?php echo htmlspecialchars($row['scheme_name'] ?? 'N/A'); ?></div>
+                    <div class="font-medium text-slate-800 dark:text-slate-200"><?php echo htmlspecialchars($row['scheme_name'] ?? 'N/A'); ?></div>
                 </td>
                 <td class="px-6 py-4">
                     <span class="px-2.5 py-1 text-xs font-semibold rounded-full border <?php echo $status_class; ?>">
@@ -197,9 +227,9 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                     </a>
                 </td>
             </tr>
-    <?php 
-        endwhile; 
-    else: 
+    <?php
+        endwhile;
+    else:
     ?>
         <tr>
             <td colspan="5" class="text-center py-12 text-slate-400 text-sm">
@@ -212,6 +242,19 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
             </div>
         </div>
     </main>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </body>
 </html>
 <?php $conn->close(); ?>

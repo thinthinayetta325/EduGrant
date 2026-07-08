@@ -61,9 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 } 
 
-// ==========================================
+
 // 3. PROCESS GET REQUEST (DISPLAY APP DETAILS)
-// ==========================================
 else {
     if (isset($_GET["id"]) && !empty(trim($_GET["id"]))) {
         $application_id = intval($_GET["id"]);
@@ -103,31 +102,74 @@ else {
 <head>
     <meta charset="UTF-8">
     <title>Evaluate Application File</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #f8fafc; color: #1e293b; padding: 40px 20px; }
-        .container { max-width: 650px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .title { color: #003D3B; margin-top: 0; font-size: 22px; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
-        .info-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
-        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px; transition: background-color 0.3s, color 0.3s; }
+        body.light-mode { background-color: #f8fafc; color: #1e293b; }
+        body:not(.light-mode) { background-color: #0f172a; color: #e2e8f0; }
+        .container { width: 50%; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 12px; transition: all 0.3s; }
+        body.light-mode .container { background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        body:not(.light-mode) .container { background: #1e293b; border: 1px solid rgba(255,255,255,0.08); }
+        .title { margin-top: 0; font-size: 16px; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        body.light-mode .title { color: #003D3B; border-bottom: 2px solid #f1f5f9; }
+        body:not(.light-mode) .title { color: #fff; border-bottom: 2px solid rgba(255,255,255,0.08); }
+        .info-card { padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
+        body.light-mode .info-card { background: #f8fafc; border: 1px solid #e2e8f0; }
+        body:not(.light-mode) .info-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .info-row { display: flex; justify-content: space-between; padding: 6px 0; }
+        body.light-mode .info-row { border-bottom: 1px dashed #e2e8f0; }
+        body:not(.light-mode) .info-row { border-bottom: 1px dashed rgba(255,255,255,0.08); }
         .info-row:last-child { border-bottom: none; }
-        .label-text { font-weight: bold; color: #64748b; }
-        .value-text { color: #0f172a; font-weight: 500; }
-        .error-alert { background: #fef2f2; border: 1px solid #fee2e2; color: #b91c1c; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; }
-        .form-label { display: block; font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
-        .radio-group { display: flex; gap: 20px; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
-        .radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
-        .textarea-input { width: 100%; height: 120px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: vertical; margin-bottom: 20px; }
+        .label-text { font-weight: bold; }
+        body.light-mode .label-text { color: #64748b; }
+        body:not(.light-mode) .label-text { color: rgba(255,255,255,0.5); }
+        .value-text { font-weight: 500; }
+        body.light-mode .value-text { color: #0f172a; }
+        body:not(.light-mode) .value-text { color: #fff; }
+        .error-alert { padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; }
+        body.light-mode .error-alert { background: #fef2f2; border: 1px solid #fee2e2; color: #b91c1c; }
+        body:not(.light-mode) .error-alert { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+        .form-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        body.light-mode .form-label { color: #64748b; }
+        body:not(.light-mode) .form-label { color: rgba(255,255,255,0.5); }
+        .textarea-input { width: 100%; height: 120px; padding: 12px; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: vertical; margin-bottom: 20px; outline: none; transition: all 0.25s; }
+        body.light-mode .textarea-input { border: 1px solid #cbd5e1; background: #fff; color: #1e293b; }
+        body:not(.light-mode) .textarea-input { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; }
+        .textarea-input:focus { border-color: #006D69; box-shadow: 0 0 0 3px rgba(0,109,105,0.15); }
         .actions { display: flex; gap: 10px; }
-        .btn-submit { flex: 2; padding: 12px; background: #0f6d6aff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .btn-cancel { flex: 1; padding: 12px; background: #e2e8f0; color: #475569; text-align: center; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-sizing: border-box; }
-        .btn-submit:hover { background: #0c5653; }
-        .btn-cancel:hover { background: #cbd5e1; }
+        .btn-submit { flex: 2; padding: 12px; background: #006D69; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.25s; }
+        .btn-submit:hover { background: #005a56; transform: translateY(-1px); }
+        .btn-cancel { flex: 1; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-sizing: border-box; transition: all 0.25s; }
+        body.light-mode .btn-cancel { background: #e2e8f0; color: #475569; }
+        body:not(.light-mode) .btn-cancel { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
+        body.light-mode .btn-cancel:hover { background: #cbd5e1; }
+        body:not(.light-mode) .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
+        .theme-toggle { position: relative; width: 44px; height: 24px; border-radius: 12px; cursor: pointer; transition: background 0.3s; }
+        .theme-toggle .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; transition: transform 0.3s, background 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        body.light-mode .theme-toggle { background: #006D69; }
+        body:not(.light-mode) .theme-toggle { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); }
+        body.light-mode .theme-toggle .toggle-thumb { transform: translateX(20px); background: #fff; }
+        body:not(.light-mode) .theme-toggle .toggle-thumb { background: #0f172a; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 class="title">📋 Review & Recommend Application</h2>
+    <div class="title">
+        <span>📋 Review & Recommend Application</span>
+        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+            <div class="toggle-thumb">
+                <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+                <svg class="w-3 h-3 text-blue-400 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+            </div>
+        </div>
+    </div>
     
     <?php if (!empty($error_message)): ?>
         <div class="error-alert">❌ <?php echo htmlspecialchars($error_message); ?></div>
@@ -158,6 +200,18 @@ else {
     </form>
 </div>
 
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+
+        // Load saved theme (default dark)
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
 </body>
 </html>
 <?php $conn->close(); ?>
