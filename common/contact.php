@@ -65,28 +65,26 @@ $unread_count = 0;
 $student_data = ['name' => ''];
 
 if ($is_logged_in) {
-    $conn = new mysqli("localhost", "root", "", "grant_portal");
-    if (!$conn->connect_error) {
-        $student_id = $_SESSION['student_id'];
-        
-        // Get name
-        $stmt = $conn->prepare("SELECT name FROM student WHERE id = ?");
-        $stmt->bind_param("i", $student_id);
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
-        if ($res) { $student_data['name'] = $res['name']; }
-        $stmt->close();
+    include '../config/db.php';
+    $student_id = $_SESSION['student_id'];
+    
+    // Get name
+    $stmt = $conn->prepare("SELECT name FROM student WHERE id = ?");
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $res = $stmt->get_result()->fetch_assoc();
+    if ($res) { $student_data['name'] = $res['name']; }
+    $stmt->close();
 
-        // Get unread notification counts
-        $count_query = $conn->prepare("SELECT COUNT(*) AS unread FROM notifications WHERE student_id = ? AND is_read = 0");
-        if ($count_query) {
-            $count_query->bind_param("i", $student_id);
-            $count_query->execute();
-            $unread_count = $count_query->get_result()->fetch_assoc()['unread'] ?? 0;
-            $count_query->close();
-        }
-        $conn->close();
+    // Get unread notification counts
+    $count_query = $conn->prepare("SELECT COUNT(*) AS unread FROM notifications WHERE student_id = ? AND is_read = 0");
+    if ($count_query) {
+        $count_query->bind_param("i", $student_id);
+        $count_query->execute();
+        $unread_count = $count_query->get_result()->fetch_assoc()['unread'] ?? 0;
+        $count_query->close();
     }
+    $conn->close();
 }
 ?>
 <!DOCTYPE html>
@@ -137,7 +135,7 @@ if ($is_logged_in) {
                 <a href="../user/index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active(['index.php','home.php']) ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_home']; ?></a>
                 <a href="../user/scholarships.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('scholarships.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_scholarships']; ?></a>
                 <a href="../user/status.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('status.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_status']; ?></a>
-                <a href="../user/contact.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
+                <a href="../common/contact.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
             </nav>
 
             <!-- Language Switcher and Status Actions -->
@@ -181,8 +179,8 @@ if ($is_logged_in) {
                             <?php echo $lang['nav_logout']; ?>
                         </a>
                     <?php else: ?>
-                        <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="text-teal-100 hover:text-white text-xs sm:text-sm font-semibold transition px-2">Login</a>
-                        <a href="../auth/register.php?lang=<?php echo $lang_param; ?>" class="bg-white text-[#006D69] hover:bg-teal-50 text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 rounded-md transition shadow-sm">Sign Up</a>
+                        <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] hover:bg-[#003D3B] hover:text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 rounded-md transition shadow-sm">Sign In</a>
+                        <a href="../auth/register.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] hover:bg-[#003D3B] hover:text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 rounded-md transition shadow-sm">Sign Up</a>
                     <?php endif; ?>
                 </div>
             </div>

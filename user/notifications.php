@@ -122,9 +122,6 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
         </div>
     </main>
 
-    <footer class="bg-[#003D3B] text-teal-200/80 text-xs text-center py-6 border-t border-white/10">
-        <div class="max-w-7xl mx-auto px-4">&copy; 2026 EduGrant Portal. All rights reserved.</div>
-    </footer>
 </div>
 
 </body>

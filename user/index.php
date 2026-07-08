@@ -12,12 +12,8 @@ if (isset($_SESSION['user_id']) || isset($_SESSION['student_id'])) {
 
 // Include the header
 include_once('../includes/header.php');
-
-// DB connection for dynamic scheme cards
-$conn = new mysqli("localhost", "root", "", "grant_portal");
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
-}
+// DB connection
+include_once '../config/db.php';
 
 // Define content words for bilingual support
 if (isset($is_mm) && $is_mm) {
@@ -118,7 +114,7 @@ $images = [
              style="background-image:url('<?php echo $img; ?>');
                     background-size:cover;
                     background-position:center;
-                    filter: blur(6px);
+                    filter: blur(2px);
                     opacity: <?php echo $i == 0 ? '1' : '0'; ?>;">
         </div>
     <?php endforeach; ?>
@@ -167,68 +163,45 @@ $images = [
 </div>
 </section>
 
-<!-- categories section -->
-<section class="px-6 lg:px-12 py-12 bg-slate-50/50">
-    <div class="max-w-7xl mx-auto">
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-slate-900"><?php echo $page_lang['explore_title']; ?></h3>
-            <p class="text-sm text-slate-500 mt-1"><?php echo $page_lang['explore_desc']; ?></p>
-        </div>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php
-            $schemes = $conn->query("SELECT id, scheme_name FROM schemes WHERE status='Active' ORDER BY scheme_name");
-            $card_index = 0;
-            $emojis = ['🎓', '💰', '🏛️', '🌟', '📜', '🌍'];
-            $bg_colors = ['bg-blue-100', 'bg-purple-100', 'bg-red-100', 'bg-amber-100'];
-
-            if ($schemes && $schemes->num_rows > 0):
-                while($scheme = $schemes->fetch_assoc()):
-                    $current_emoji = $emojis[$card_index % count($emojis)];
-                    $current_bg = $bg_colors[$card_index % count($bg_colors)];
-                    $card_index++;
-
-                    $db_name = strtolower(trim($scheme['scheme_name']));
-                    if ($db_name === 'merit scholarship') {
-                        $current_desc = $is_mm ? "ထူးချွန်ထက်မြက်ပြီး ပညာရေးရလဒ် အလွန်ကောင်းမွန်သော ကျောင်းသားများအတွက် ချီးမြှင့်သည့် ပညာသင်ဆုဖြစ်ပါသည်။" : "Awarded to academically outstanding students with exceptional performance.";
-                    } elseif ($db_name === 'need-based scholarship') {
-                        $current_desc = $is_mm ? "ဝင်ငွေနည်းပါးသော မိသားစုများမှ ကျောင်းသားကျောင်းသူများကို ထောက်ပံ့ကူညီပေးရန် ဖြစ်ပါသည်။" : "Supporting students from low-income families.";
-                    } elseif ($db_name === 'government scholarship') {
-                        $current_desc = $is_mm ? "တက္ကသိုလ်ပထမဘွဲ့ သင်တန်းသားများအတွက် နိုင်ငံတော်မှ အပြည့်အဝ ထောက်ပံ့ပေးသော အစီအစဉ်ဖြစ်ပါသည်။" : "Fully funded national program for undergraduate students.";
-                    } else {
-                        $current_desc = $is_mm ? "မိတ်ဖက်ကွန်ရက်များရှိ အရည်အချင်းပြည့်မီသော တက္ကသိုလ်ကျောင်းသားများကို ထောက်ပံ့ရန် ရည်ရွယ်ထားသော ပညာသင်ဆုဖြစ်ပါသည်။" : "Financial assistance scheme constructed to support eligible high-potential university students inside partner networks.";
-                    }
-            ?>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between transition-all  hover:shadow-2xl">
-                        <div>
-                            <div class="flex justify-between items-start">
-                                <div class="w-12 h-12 rounded-xl <?php echo $current_bg; ?> flex items-center justify-center text-2xl">
-                                    <?php echo $current_emoji; ?>
-                                </div>
-                                <span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">Active</span>
-                            </div>
-                            <h4 class="mt-4 text-xl font-bold text-slate-800"><?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
-                            <p class="mt-2 text-sm text-slate-500 leading-relaxed"><?php echo htmlspecialchars($current_desc); ?></p>
-                        </div>
-                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
-                            <span class="text-sm font-bold text-teal-700"><?php echo $is_mm ? 'ထောက်ပံ့မှုပမာဏ -၁၅၀,၀၀၀ ကျပ်' : 'Funding: 150,000 MMK'; ?></span>
-                            <a href="/grant_portal/auth/login.php?redirect=<?php echo urlencode('user/scholarships.php?lang=' . ($is_mm ? 'mm' : 'en') . '&scheme_id=' . $scheme['id']); ?>" class="bg-[#004D4A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#003D3B]"><?php echo $is_mm ? 'လော့ဂ်အင်ဝင်ပြီး လျှောက်ထားရန်' : 'Login to Apply'; ?></a>
-                        </div>
+<!-- scholarships section -->
+<section class="max-w-7xl mx-auto px-6 py-12">
+    <div class="mb-10">
+        <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['explore_title']; ?></h3>
+        <p class="text-slate-500 mt-2"><?php echo $page_lang['explore_desc']; ?></p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+        <?php
+        $schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY scheme_name");
+        while($scheme = $schemes->fetch_assoc()):
+            $upload_path = "../uploads/schemes/";
+            $has_file = !empty($scheme['image']) && file_exists($upload_path . $scheme['image']);
+            $img_src = $has_file ? ($upload_path . htmlspecialchars($scheme['image'])) : ('https://picsum.photos/seed/' . $scheme['id'] . '/600/400');
+        ?>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex overflow-hidden hover:shadow-xl transition-all">
+            <div class="w-2/5 relative bg-slate-200">
+                <img src="<?php echo $img_src; ?>" alt="<?php echo htmlspecialchars($scheme['scheme_name']); ?>" 
+                     class="absolute inset-0 w-full h-full object-cover">
+            </div>
+            
+            <div class="flex-1 p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-bold text-lg text-slate-900"><?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
+                        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">Active</span>
                     </div>
-            <?php
-                endwhile;
-            else:
-            ?>
-                <div class="col-span-full text-center py-12 bg-white border border-slate-200 rounded-2xl">
-                    <p class="text-sm text-slate-500"><?php echo $is_mm ? 'လောလောဆယ် လျှောက်ထားနိုင်သော ပညာသင်ဆုများ မရှိသေးပါ။' : 'No active scholarship records available at the moment.'; ?></p>
+                    <p class="text-sm text-slate-500 mt-3 line-clamp-2"><?php echo htmlspecialchars($scheme['description'] ?? ''); ?></p>
                 </div>
-            <?php
-                endif;
-            ?>
+                
+                <div class="mt-6 pt-4 border-t flex items-center justify-between">
+                    <span class="text-xs font-bold text-teal-700"><?php echo $is_mm ? 'ထောက်ပံ့မှု -၁၅၀,၀၀၀ ကျပ်' : 'Funding: 150,000 MMK'; ?></span>
+                    <a href="../auth/login.php" class="bg-[#004D4A] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#003D3B] transition">
+                        <?php echo $is_mm ? 'လော့ဂ်အင်ဝင်ပြီး လျှောက်ထားရန်' : 'Login to Apply'; ?>
+                    </a>
+                </div>
+            </div>
         </div>
-        <!-- all card button -->
-        <!-- <a href="/grant_portal/auth/register.php" class="w-full md:w-auto mx-auto block mt-8 border border-slate-300 px-8 py-3 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition text-center">
-            <?php echo $page_lang['btn_view_all']; ?>
-        </a> -->
+        <?php endwhile; ?>
     </div>
 </section>
 

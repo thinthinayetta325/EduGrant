@@ -223,15 +223,6 @@ $current_page = 'reports';
 
     </div>
 
-    <footer class="bottom-bar">
-        <div>⚡ <strong>UCSMT Education Grant Portal Workspace</strong></div>
-        <div style="font-weight: 500;">စီမံခန့်ခွဲရေး ကွန်ပျူတာတက္ကသိုလ် (မိတ္ထီလာ)</div>
-        <div class="bottom-links">
-            <span>📞 +95 9 123 456 789</span>
-            <a href="mailto:info@ucsmt.edu.mm">📧 info@ucsmt.edu.mm</a>
-            <span style="margin-left:15px;">© 2026 Computer University</span>
-        </div>
-    </footer>
 </div>
 
 </body>

@@ -41,7 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $status = $conn->real_escape_string($_POST['status']);
         $desc = $conn->real_escape_string($_POST['description']);
         $elig = $conn->real_escape_string($_POST['eligibility']);
-        $conn->query("INSERT INTO schemes (scheme_name, amount, deadline, status, description, eligibility) VALUES ('$name', '$amount', '$deadline', '$status', '$desc', '$elig')");
+        $image = '';
+        if (isset($_FILES['scheme_image']) && $_FILES['scheme_image']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['scheme_image']['name'], PATHINFO_EXTENSION));
+            $filename = uniqid('scheme_') . '.' . $ext;
+            move_uploaded_file($_FILES['scheme_image']['tmp_name'], '../uploads/schemes/' . $filename);
+            $image = $conn->real_escape_string($filename);
+        }
+        $conn->query("INSERT INTO schemes (scheme_name, amount, deadline, status, description, eligibility, image) VALUES ('$name', '$amount', '$deadline', '$status', '$desc', '$elig', '$image')");
     } elseif ($_POST['action'] === 'edit') {
         $id = (int)$_POST['id'];
         $name = $conn->real_escape_string($_POST['scheme_name']);
@@ -50,7 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $status = $conn->real_escape_string($_POST['status']);
         $desc = $conn->real_escape_string($_POST['description']);
         $elig = $conn->real_escape_string($_POST['eligibility']);
-        $conn->query("UPDATE schemes SET scheme_name='$name', amount='$amount', deadline='$deadline', status='$status', description='$desc', eligibility='$elig' WHERE id=$id");
+        $image_sql = '';
+        if (isset($_FILES['scheme_image']) && $_FILES['scheme_image']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['scheme_image']['name'], PATHINFO_EXTENSION));
+            $filename = uniqid('scheme_') . '.' . $ext;
+            move_uploaded_file($_FILES['scheme_image']['tmp_name'], '../uploads/schemes/' . $filename);
+            $image = $conn->real_escape_string($filename);
+            $image_sql = ", image='$image'";
+        }
+        $conn->query("UPDATE schemes SET scheme_name='$name', amount='$amount', deadline='$deadline', status='$status', description='$desc', eligibility='$elig'$image_sql WHERE id=$id");
     } elseif ($_POST['action'] === 'delete') {
         $id = (int)$_POST['id'];
         $conn->query("DELETE FROM schemes WHERE id=$id");
@@ -143,6 +158,7 @@ $current_page = 'schemes';
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Image</th>
                         <th>Scheme Name</th>
                         <th>Amount (MMK)</th>
                         <th>Deadline</th>
@@ -155,6 +171,13 @@ $current_page = 'schemes';
                         <?php while ($row = $schemes->fetch_assoc()): ?>
                             <tr>
                                 <td><?php echo $row['id']; ?></td>
+                                <td>
+                                    <?php if (!empty($row['image'])): ?>
+                                        <img src="../uploads/schemes/<?php echo htmlspecialchars($row['image']); ?>" style="width:50px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #e2e8f0;">
+                                    <?php else: ?>
+                                        <span style="color:#94a3b8;font-size:10px;">—</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><strong><?php echo htmlspecialchars($row['scheme_name']); ?></strong></td>
                                 <td><?php echo number_format(floatval(str_replace(',', '', $row['amount']))); ?></td>
                                 <td><?php echo $row['deadline'] ?? 'N/A'; ?></td>
@@ -177,7 +200,7 @@ $current_page = 'schemes';
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">No schemes found.</td></tr>
+                        <tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">No schemes found.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -200,7 +223,7 @@ $current_page = 'schemes';
     <div class="modal-box">
         <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
         <h3>➕ Add New Scheme</h3>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add">
             <div class="grid-2">
                 <div>
@@ -224,6 +247,8 @@ $current_page = 'schemes';
                     </select>
                 </div>
             </div>
+            <label class="field-lbl">Scheme Image</label>
+            <input type="file" name="scheme_image" class="form-input" accept="image/*">
             <label class="field-lbl">Description</label>
             <textarea name="description" class="form-textarea"></textarea>
             <label class="field-lbl">Eligibility Criteria</label>
@@ -237,7 +262,7 @@ $current_page = 'schemes';
     <div class="modal-box">
         <button class="close-btn" onclick="closeModal('editModal')">&times;</button>
         <h3>✏️ Edit Scheme</h3>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="id" id="edit-id">
             <div class="grid-2">
@@ -262,6 +287,9 @@ $current_page = 'schemes';
                     </select>
                 </div>
             </div>
+            <label class="field-lbl">Scheme Image</label>
+            <input type="file" name="scheme_image" class="form-input" accept="image/*">
+            <div id="edit-image-preview" style="margin-bottom:10px;"></div>
             <label class="field-lbl">Description</label>
             <textarea name="description" id="edit-desc" class="form-textarea"></textarea>
             <label class="field-lbl">Eligibility Criteria</label>
@@ -282,6 +310,12 @@ function editScheme(row) {
     document.getElementById('edit-status').value = row.status;
     document.getElementById('edit-desc').value = row.description || '';
     document.getElementById('edit-elig').value = row.eligibility || '';
+    var preview = document.getElementById('edit-image-preview');
+    if (row.image) {
+        preview.innerHTML = '<img src="../uploads/schemes/' + row.image + '" style="max-width:120px;max-height:80px;border-radius:4px;border:1px solid #e2e8f0;">';
+    } else {
+        preview.innerHTML = '';
+    }
     openModal('editModal');
 }
 document.querySelectorAll('.modal-overlay').forEach(el => {

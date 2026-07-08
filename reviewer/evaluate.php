@@ -148,14 +148,6 @@ else {
     <form action="" method="POST">
         <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($application_id); ?>">
 
-        <label class="form-label">Official Assessment Decision</label>
-        <div class="radio-group" style="background:#f0fdf4;border-color:#bbf7d0;">
-            <label class="radio-label" style="color: #16a34a;font-size:15px;">
-                👍 Recommend File (Reviewers can only recommend)
-            </label>
-            <input type="hidden" name="recommendation" value="Recommended">
-        </div>
-
         <label class="form-label">📋 Assessor Evaluation Remarks (စိစစ်ချက် မှတ်ချက်)</label>
         <textarea name="remarks" required class="textarea-input" placeholder="Type verified eligibility checks, certificate matching status, or regional evaluation comments here..."></textarea>
 

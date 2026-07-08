@@ -1,9 +1,51 @@
 
 <?php
-ob_start(); // Buffer the output
+ob_start();
 session_start();
-// ... rest of your code ...
-// session_start();
+
+$is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
+$lang_param = $is_mm ? 'mm' : 'en';
+
+if ($is_mm) {
+    $page_lang = [
+        'title' => 'ပညာသင်ဆု လျှောက်လွှာ',
+        'applying_for' => 'လျှောက်ထားသည့် ပညာသင်ဆု',
+        'subtitle' => 'အောက်ပါပုံစံကို ဖြည့်သွင်းပြီး လျှောက်ထားပါ။',
+        'label_name' => 'အမည်',
+        'label_roll' => 'ခုံအမှတ်',
+        'label_email' => 'အီးမေးလ်',
+        'label_scheme' => 'ပညာသင်ဆု အစီအစဉ်',
+        'label_income' => 'မိသားစု လစဉ်ဝင်ငွေ (ကျပ်)',
+        'placeholder_income' => 'ဥပမာ - ၃၀၀၀၀၀၀',
+        'btn_submit' => 'လျှောက်လွှာတင်သွင်းမည်',
+        'select_scheme' => 'ပညာသင်ဆုရွေးချယ်ပါ',
+        'success' => 'လျှောက်လွှာ အောင်မြင်စွာ တင်သွင်းပြီးပါပြီ။',
+        'error_fields' => 'ကျေးဇူးပြု၍ အကွက်အားလုံးကို ဖြည့်ပါ။',
+        'error_income' => 'ဝင်ငွေသည် ကိန်းဂဏန်း မှန်ကန်ရပါမည်။',
+        'error_duplicate' => 'ဤပညာသင်ဆုအတွက် သင်လျှောက်ထားပြီးဖြစ်ပါသည်။',
+        'error_submit' => 'လျှောက်လွှာ တင်သွင်းရန် မအောင်မြင်ပါ။',
+    ];
+} else {
+    $page_lang = [
+        'title' => 'Scholarship Application',
+        'applying_for' => 'Applying for',
+        'subtitle' => 'Complete the form below to apply.',
+        'label_name' => 'Name',
+        'label_roll' => 'Roll Number',
+        'label_email' => 'Email',
+        'label_scheme' => 'Scholarship Scheme',
+        'label_income' => 'Family Monthly Income (MMK)',
+        'placeholder_income' => 'e.g. 3000000',
+        'btn_submit' => 'Submit Application',
+        'select_scheme' => 'Select Scholarship Scheme',
+        'success' => 'Application submitted successfully.',
+        'error_fields' => 'Please fill all fields.',
+        'error_income' => 'Income must be a valid number (no leading zeros).',
+        'error_duplicate' => 'You have already applied for this scholarship.',
+        'error_submit' => 'Failed to submit application.',
+    ];
+}
+
 require_once '../config/db.php';
 
 if (!isset($_SESSION['student_id'])) {
@@ -26,14 +68,16 @@ $student_id = $_SESSION['student_id'];
 $selected_scheme_id = isset($_GET['scheme_id']) ? (int)$_GET['scheme_id'] : 0;
 $selected_scheme_name = '';
 if ($selected_scheme_id > 0) {
-    $scheme_stmt = $conn->prepare("SELECT scheme_name FROM schemes WHERE id = ? AND status='Active'");
-    $scheme_stmt->bind_param("i", $selected_scheme_id);
-    $scheme_stmt->execute();
-    $scheme_result = $scheme_stmt->get_result()->fetch_assoc();
-    if ($scheme_result) {
-        $selected_scheme_name = $scheme_result['scheme_name'];
+    $scheme_stmt = $conn->prepare("SELECT scheme_name FROM schemes WHERE id = ? AND `status`='Active'");
+    if ($scheme_stmt) {
+        $scheme_stmt->bind_param("i", $selected_scheme_id);
+        $scheme_stmt->execute();
+        $scheme_result = $scheme_stmt->get_result()->fetch_assoc();
+        if ($scheme_result) {
+            $selected_scheme_name = $scheme_result['scheme_name'];
+        }
+        $scheme_stmt->close();
     }
-    $scheme_stmt->close();
 }
 
 $success = "";
@@ -59,11 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (empty($scheme_id) || empty($family_income)) {
 
-        $error = "Please fill all fields.";
+        $error = $page_lang['error_fields'];
 
     } elseif (!ctype_digit($family_income) || $family_income[0] === '0') {
 
-        $error = "Income must be a valid number (no leading zeros).";
+        $error = $page_lang['error_income'];
 
     } else {
 
@@ -80,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($check->get_result()->num_rows > 0) {
 
-            $error = "You have already applied for this scholarship.";
+            $error = $page_lang['error_duplicate'];
 
         } else {
 
@@ -128,14 +172,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($insert->execute()) {
 
                 $_SESSION['success_message'] =
-                    "Application submitted successfully.";
+                    $page_lang['success'];
 
-                header("Location: profile.php");
+                header("Location: profile.php?lang=" . $lang_param);
                 exit();
 
             } else {
 
-                $error = "Failed to submit application.";
+                $error = $page_lang['error_submit'];
             }
         }
     }
@@ -144,22 +188,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <main class="max-w-4xl mx-auto px-4 py-10">
 
+    <?php if ($is_mm): ?>
+    <style>
+        input, select, textarea, button, label, h1, p, div, option {
+            font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
+    </style>
+    <?php endif; ?>
+
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
 
         <div class="mb-8">
 
             <h1 class="text-3xl font-bold text-slate-900">
-                Scholarship Application
+                <?= $page_lang['title'] ?>
             </h1>
 
             <?php if ($selected_scheme_name): ?>
                 <p class="text-teal-700 font-semibold mt-2 text-lg">
-                    Applying for: <?= htmlspecialchars($selected_scheme_name); ?>
+                    <?= $page_lang['applying_for']; ?>: <?= htmlspecialchars($selected_scheme_name); ?>
                 </p>
             <?php endif; ?>
 
             <p class="text-slate-500 mt-2">
-                Complete the form below to apply.
+                <?= $page_lang['subtitle'] ?>
             </p>
 
         </div>
@@ -175,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">
-                    Name
+                    <?= $page_lang['label_name'] ?>
                 </label>
 
                 <input
@@ -187,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">
-                    Roll Number
+                    <?= $page_lang['label_roll'] ?>
                 </label>
 
                 <input
@@ -199,7 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">
-                    Email
+                    <?= $page_lang['label_email'] ?>
                 </label>
 
                 <input
@@ -218,7 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div>
 
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
-                    Scholarship Scheme
+                    <?= $page_lang['label_scheme'] ?>
                 </label>
 
                 <?php if ($selected_scheme_name): ?>
@@ -233,14 +285,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         class="w-full border border-slate-200 rounded-xl px-4 py-3">
 
                         <option value="">
-                            Select Scholarship Scheme
+                            <?= $page_lang['select_scheme'] ?>
                         </option>
 
                         <?php
                         $schemes = $conn->query("
                             SELECT id, scheme_name
                             FROM schemes
-                            WHERE status='Active'
+                            WHERE `status`='Active'
                             ORDER BY scheme_name
                         ");
 
@@ -262,7 +314,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div>
 
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
-                    Family Monthly Income (MMK)
+                    <?= $page_lang['label_income'] ?>
                 </label>
 
                 <input
@@ -273,7 +325,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     value=""
                     required
                     oninput="this.value = this.value.replace(/^0+|[^0-9]/g, '')"
-                    placeholder="e.g. 3000000"
+                    placeholder="<?= $page_lang['placeholder_income'] ?>"
                     class="w-full border border-slate-200 rounded-xl px-4 py-3">
 
             </div>
@@ -283,7 +335,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 type="submit"
                 class="w-full bg-[#004D4A] hover:bg-[#003D3B] text-white py-3 rounded-xl font-bold transition">
 
-                Submit Application
+                <?= $page_lang['btn_submit'] ?>
 
             </button>
 

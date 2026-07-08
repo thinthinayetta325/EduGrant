@@ -156,14 +156,14 @@ $conn->close();
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
             
             <!-- Brand Logo -->
-            <a href="index.php?lang=<?php echo $lang_param; ?>" class="block hover:opacity-90 transition">
+            <a href="index.php?lang=<?php echo $lang_param; ?>" class="min-w-0 flex-shrink block hover:opacity-90 transition">
                 <div class="flex items-center gap-2.5">
                     <div class="bg-white/10 p-1.5 rounded-lg text-teal-300 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
                     </div>
-                    <div>
-                        <h1 class="text-white text-lg font-bold leading-tight">EduGrant</h1>
-                        <p class="text-teal-200 text-[11px] mt-0.5 opacity-90 tracking-wide"><?php echo $lang['brand_sub']; ?></p>
+                    <div class="min-w-0">
+                        <h1 class="text-white text-lg sm:text-xl font-bold leading-tight truncate">EduGrant</h1>
+                        <p class="text-teal-200 text-[11px] sm:text-xs mt-0.5 opacity-90 tracking-wide"><?php echo $lang['brand_sub']; ?></p>
                     </div>
                 </div>
             </a>
@@ -286,11 +286,13 @@ $conn->close();
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#006D69] focus:bg-white transition text-sm">
                 </div>
 
+                <?php if (empty($success_msg)): ?>
                 <!-- Warning Callout Box -->
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs font-medium text-amber-800 flex gap-3">
                     <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     <p class="leading-relaxed"><?php echo $b_lang['warning_text']; ?></p>
                 </div>
+                <?php endif; ?>
 
                 <!-- Action Button -->
                 <div class="pt-2">
@@ -311,12 +313,7 @@ $conn->close();
     </main>
 
     <!-- Footer Area Container -->
-    <footer class="bg-[#003D3B] text-teal-200/60 text-xs text-center py-6 border-t border-white/10 mt-12">
-        <div class="max-w-7xl mx-auto px-4">
-            &copy; 2026 EduGrant Portal. All rights reserved.
-        </div>
-    </footer>
-
+   <?php include_once("../includes/footer.php");?>
 </div>
 </body>
 </html>

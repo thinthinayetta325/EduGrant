@@ -288,10 +288,10 @@ $current_page = 'search';
 
     </div>
 
-    <footer class="bottom-bar">
+    <!-- <footer class="bottom-bar">
         <div>⚡ <strong>UCSMT Education Grant Portal</strong></div>
         <div>© <?php echo date('Y'); ?> Computer University (Meiktila)</div>
-    </footer>
+    </footer> -->
 </div>
 
 </body>

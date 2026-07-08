@@ -863,14 +863,14 @@ $current_page = 'dashboard';
 
     </div>
 
-    <footer class="bottom-bar">
+    <!-- <footer class="bottom-bar">
         <div>⚡ <strong>UCSMT Education Grant Portal</strong></div>
         <div>© <?php echo date('Y'); ?> Computer University (Meiktila)</div>
         <div class="bottom-links">
             <a href="mailto:info@ucsmt.edu.mm">Support</a>
             <a href="#">Privacy</a>
         </div>
-    </footer>
+    </footer> -->
 </div>
 
 </body>

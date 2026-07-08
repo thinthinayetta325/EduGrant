@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS schemes (
     deadline DATE,
     status ENUM('Active','Closed','Draft') DEFAULT 'Active',
     description TEXT,
-    eligibility TEXT
+    eligibility TEXT,
+    image VARCHAR(255) DEFAULT NULL
 );
 CREATE TABLE IF NOT EXISTS applications (
     id INT AUTO_INCREMENT PRIMARY KEY,
