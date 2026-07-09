@@ -5,17 +5,24 @@ $total_apps = $total_apps ?? 0;
 $pending_bank = $pending_bank ?? 0;
 $lang_param = $lang_param ?? 'en';
 $is_mm = $is_mm ?? false;
+$admin_image = $_SESSION['admin_image'] ?? null;
 ?>
 <div class="sidebar">
     <div class="sidebar-brand">
-        <div class="brand-icon">G</div>
+        <div class="brand-icon"><?php echo strtoupper(substr($admin_name ?? 'A', 0, 1)); ?></div>
         <div class="brand-text">
             <h2>GrantPortal</h2>
             <p>Admin Panel</p>
         </div>
     </div>
     <div class="admin-profile">
-        <div class="admin-avatar"><?php echo strtoupper(substr($admin_name ?? 'A', 0, 1)); ?></div>
+        <div class="admin-avatar" style="overflow:hidden;">
+            <?php if (!empty($admin_image) && file_exists('../uploads/profile_pics/' . $admin_image)): ?>
+                <img src="../uploads/profile_pics/<?php echo $admin_image; ?>" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">
+            <?php else: ?>
+                <?php echo strtoupper(substr($admin_name ?? 'A', 0, 1)); ?>
+            <?php endif; ?>
+        </div>
         <div class="admin-meta">
             <h4><?php echo htmlspecialchars($admin_name ?? 'Admin'); ?></h4>
             <p>System Administrator</p>

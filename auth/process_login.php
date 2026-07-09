@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Try admin table if not found
     if (!$user) {
-        $stmt = $conn->prepare("SELECT id, name, password FROM admin WHERE email = ? LIMIT 1");
+        $stmt = $conn->prepare("SELECT id, name, password, profile_image FROM admin WHERE email = ? LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($role === 'admin') {
                 $_SESSION['admin_id'] = $user['id'];
                 $_SESSION['admin_name'] = $user['name'];
+                $_SESSION['admin_image'] = $user['profile_image'] ?? null;
                 header("Location: ../admin/dashboard.php");
             } else {
                 $_SESSION['student_id'] = $user['id'];

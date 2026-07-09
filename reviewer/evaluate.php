@@ -112,9 +112,9 @@ else {
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px; transition: background-color 0.3s, color 0.3s; }
         body.light-mode { background-color: #f8fafc; color: #1e293b; }
         body:not(.light-mode) { background-color: #0f172a; color: #e2e8f0; }
-        .container { width: 50%; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 12px; transition: all 0.3s; }
-        body.light-mode .container { background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        body:not(.light-mode) .container { background: #1e293b; border: 1px solid rgba(255,255,255,0.08); }
+        .eval-box { width: 40%; max-width: 420px; margin: 0 auto; padding: 30px; border-radius: 12px; transition: all 0.3s; }
+        body.light-mode .eval-box { background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        body:not(.light-mode) .eval-box { background: #1e293b; border: 1px solid rgba(255,255,255,0.08); }
         .title { margin-top: 0; font-size: 16px; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
         body.light-mode .title { color: #003D3B; border-bottom: 2px solid #f1f5f9; }
         body:not(.light-mode) .title { color: #fff; border-bottom: 2px solid rgba(255,255,255,0.08); }
@@ -160,7 +160,7 @@ else {
 </head>
 <body>
 
-<div class="container">
+<div class="eval-box">
     <div class="title">
         <span>📋 Review & Recommend Application</span>
         <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">

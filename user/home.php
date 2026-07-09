@@ -64,7 +64,7 @@ if (isset($_SESSION['student_id'])) {
         @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
         .myanmar-font {
             font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
-            line-height:1.8;
+            line: height 1.8;
         }
         .myanmar-font section h1 {
             letter-spacing: 0.02em;

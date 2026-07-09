@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = $conn->real_escape_string($_POST['email']);
         $conn->query("UPDATE admin SET name='$name', email='$email' WHERE id=$admin_id");
         $_SESSION['admin_name'] = $name;
+        $admin_name = $name;
         $admin_data['name'] = $name;
         $admin_data['email'] = $email;
         $msg = 'Profile updated successfully.';
@@ -71,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     $conn->query("UPDATE admin SET profile_image = '$filename' WHERE id = $admin_id");
                     $admin_data['profile_image'] = $filename;
+                    $_SESSION['admin_image'] = $filename;
                     $msg = 'Profile and image updated successfully.';
                 } else {
                     $msg = 'Profile updated but image upload failed.';
@@ -95,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     $conn->query("UPDATE admin SET profile_image = '$filename' WHERE id = $admin_id");
                     $admin_data['profile_image'] = $filename;
+                    $_SESSION['admin_image'] = $filename;
                     $msg = 'Profile image updated successfully.';
                 } else {
                     $msg = 'Failed to upload image.';

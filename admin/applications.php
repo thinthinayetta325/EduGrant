@@ -102,13 +102,17 @@ $where = "WHERE 1=1";
 if ($status_filter) $where .= " AND a.status = '$status_filter'";
 if ($search) $where .= " AND (s.name LIKE '%$search%' OR a.application_no LIKE '%$search%')";
 
-$apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_name, r.name AS reviewer_name, ar.recommendation, ar.remarks
+$apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_name,
+    GROUP_CONCAT(DISTINCT r.name SEPARATOR ', ') AS reviewer_name,
+    GROUP_CONCAT(DISTINCT ar.recommendation SEPARATOR ', ') AS recommendation,
+    GROUP_CONCAT(DISTINCT ar.remarks SEPARATOR ' | ') AS remarks
     FROM applications a
     JOIN student s ON a.student_id = s.id
     JOIN schemes sc ON a.scheme_id = sc.id
     LEFT JOIN application_reviews ar ON a.id = ar.application_id
     LEFT JOIN reviewers r ON ar.reviewer_id = r.id
     $where
+    GROUP BY a.id
     ORDER BY a.id DESC");
 ?>
 <!DOCTYPE html>
