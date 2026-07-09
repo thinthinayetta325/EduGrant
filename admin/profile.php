@@ -284,6 +284,7 @@ $current_page = 'profile';
             .stats-row { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
+         <?php include_once 'admin-style.php'; ?>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 <?php include 'sidebar.php'; ?>

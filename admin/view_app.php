@@ -35,6 +35,7 @@ $sidebar_lang = $is_mm ? [
     'app_details' => 'Application Details',
     'back' => '← Back',
 ];
+// include "header.php";
 $app_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 $app = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, s.email AS student_email, s.phone, s.gender, s.address,
@@ -151,6 +152,7 @@ $current_page = 'applications';
         .bottom-bar { background: #fff; border-top: 1px solid var(--border); padding: 12px 28px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
         .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
     </style>
+         <?php include_once 'admin-style.php'; ?>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 

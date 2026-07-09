@@ -21,18 +21,18 @@ $sidebar_lang = $is_mm ? [
     'logout' => 'ထွက်မည်',
     'page_title' => 'ဘဏ်စစ်ဆေးခြင်း',
 ] : [
-    'dashboard' => 'Dashboard Overview',
-    'schemes' => 'Manage Schemes',
-    'reviewers' => 'Manage Reviewers',
-    'applications' => 'View Applications',
+    'dashboard' => 'Dashboard ',
+    'schemes' => ' Schemes',
+    'reviewers' => 'Reviewers',
+    'applications' => 'Applications',
     'bank_verify' => 'Bank Verification',
-    'recipients' => 'Recipients Matrix',
-    'disbursements' => 'Disbursements Log',
-    'reports' => 'Analytics Reports',
+    'recipients' => 'Recipients',
+    'disbursements' => 'Disbursements',
+    'reports' => 'Reports',
     'logout' => 'Logout',
     'page_title' => 'Bank Verification',
 ];
-
+// include "header.php";
 // Auto-migration: ensure is_verified column exists on bank_details
 $col_chk = $conn->query("SHOW COLUMNS FROM bank_details LIKE 'is_verified'");
 if ($col_chk && $col_chk->num_rows === 0) {
@@ -178,9 +178,33 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
         .sidebar-menu { list-style: none; padding: 15px 0; margin: 0; flex-grow: 1; display: flex; flex-direction: column; }
         .menu-item a { display: flex; align-items: center; gap: 8px; padding: 10px 20px; color: rgba(255,255,255,0.75); text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.2s ease; margin: 2px 8px; border-radius: 8px; }
         .menu-item.active a, .menu-item a:hover { background-color: #005a56; color: #fff; }
-        .menu-item.logout { margin-top: auto; }
-        .menu-item.logout a { color: #fca5a5; }
-        .menu-item.logout a:hover { background: rgba(252,165,165,0.1); }
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: center;
+        }
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: rgba(252,165,165,0.1);
+            border: 1px solid rgba(252,165,165,0.2);
+            border-radius: 10px;
+            color: #fca5a5;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+        .logout-btn:hover {
+            background: rgba(252,165,165,0.2);
+            border-color: rgba(252,165,165,0.4);
+            transform: translateY(-1px);
+        }
         .workspace { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .dashboard-body { flex-grow: 1; padding: 15px; overflow-y: auto; box-sizing: border-box; }
         .admin-card { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 15px; }
@@ -203,6 +227,7 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
         .bank-info p { margin: 0; font-size: 12px; color: #475569; }
         .bank-info .detail { color: #64748b; font-size: 11px; }
     </style>
+     <?php include_once 'admin-style.php'; ?>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 

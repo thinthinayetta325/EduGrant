@@ -21,18 +21,18 @@ $sidebar_lang = $is_mm ? [
     'logout' => 'ထွက်မည်',
     'page_title' => 'အစီရင်ခံစာများ',
 ] : [
-    'dashboard' => 'Dashboard Overview',
-    'schemes' => 'Manage Schemes',
-    'reviewers' => 'Manage Reviewers',
-    'applications' => 'View Applications',
+    'dashboard' => 'Dashboard',
+    'schemes' => 'Schemes',
+    'reviewers' => 'Reviewers',
+    'applications' => 'Applications',
     'bank_verify' => 'Bank Verification',
-    'recipients' => 'Recipients Matrix',
-    'disbursements' => 'Disbursements Log',
-    'reports' => 'Analytics Reports',
+    'recipients' => 'Recipients',
+    'disbursements' => 'Disbursements',
+    'reports' => 'Reports',
     'logout' => 'Logout',
-    'page_title' => 'Analytics Reports',
+    'page_title' => 'Reports',
 ];
-
+// include "header.php";
 $total_schemes = $conn->query("SELECT COUNT(*) FROM schemes")->fetch_row()[0] ?? 0;
 $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] ?? 0;
 $total_students = $conn->query("SELECT COUNT(*) FROM student")->fetch_row()[0] ?? 0;
@@ -106,6 +106,7 @@ $current_page = 'reports';
         .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 6px; font-size: 10px; color: #fff; font-weight: bold; }
         .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
     </style>
+         <?php include_once 'admin-style.php'; ?>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 

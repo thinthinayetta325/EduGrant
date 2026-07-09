@@ -40,8 +40,11 @@ $admin_image = $_SESSION['admin_image'] ?? null;
         <li class="menu-item <?php echo $current_page === 'disbursements' ? 'active' : ''; ?>"><a href="disbursements.php?lang=<?php echo $lang_param; ?>"><span class="icon">💰</span> <?php echo $sidebar_lang['disbursements'] ?? 'Disbursements'; ?></a></li>
         <li class="menu-label">Analytics</li>
         <li class="menu-item <?php echo $current_page === 'reports' ? 'active' : ''; ?>"><a href="reports.php?lang=<?php echo $lang_param; ?>"><span class="icon">📈</span> <?php echo $sidebar_lang['reports'] ?? 'Reports'; ?></a></li>
-        <li class="menu-label">Account</li>
-        <li class="menu-item <?php echo $current_page === 'profile' ? 'active' : ''; ?>"><a href="profile.php?lang=<?php echo $lang_param; ?>"><span class="icon">👤</span> <?php echo $sidebar_lang['my_profile'] ?? 'My Profile'; ?></a></li>
-        <li class="menu-item logout"><a href="../auth/logout.php"><span class="icon">🚪</span> <?php echo $sidebar_lang['logout'] ?? 'Logout'; ?></a></li>
     </ul>
+    <div class="sidebar-footer">
+        <a href="../auth/logout.php" class="logout-btn">
+            <span class="icon">🚪</span>
+            <?php echo $sidebar_lang['logout'] ?? 'Logout'; ?>
+        </a>
+    </div>
 </div>

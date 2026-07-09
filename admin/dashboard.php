@@ -19,7 +19,7 @@ $sidebar_lang = $is_mm ? [
     'recipients' => 'ဆုရရှိသူများ',
     'disbursements' => 'ငွေပေးချေမှုများ',
     'reports' => 'အစီရင်ခံစာများ',
-    'my_profile' => 'ကိုယ်ရေးအချက်အလက်',
+    // 'my_profile' => 'ကိုယ်ရေးအချက်အလက်',
     'logout' => 'ထွက်မည်',
     'dashboard_title' => 'အက်ဒ်မင် ဒက်ရှ်ဘုတ်',
     'dashboard_sub' => 'ပညာသင်ဆုစနစ်၏ အကျဉ်းချုပ်',
@@ -73,7 +73,7 @@ $sidebar_lang = $is_mm ? [
     'status' => 'Status',
     'all' => 'All',
 ];
-
+// include "header.php";
 $pending_bank = $conn->query("SELECT COUNT(*) FROM applications a LEFT JOIN bank_details b ON a.student_id = b.student_id WHERE a.status='Approved' AND b.id IS NULL")->fetch_row()[0] ?? 0;
 
 $pending_bank_list = $conn->query("SELECT a.id, a.application_no, s.name AS student_name, sc.scheme_name
@@ -247,9 +247,34 @@ $current_page = 'dashboard';
             font-size: 10px;
             font-weight: 600;
         }
-        .menu-item.logout { margin-top: auto; }
-        .menu-item.logout a { color: #fca5a5; }
-        .menu-item.logout a:hover { background: rgba(252,165,165,0.1); }
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: center;
+        }
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: rgba(252,165,165,0.1);
+            border: 1px solid rgba(252,165,165,0.2);
+            border-radius: 10px;
+            color: #fca5a5;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .logout-btn:hover {
+            background: rgba(252,165,165,0.2);
+            border-color: rgba(252,165,165,0.4);
+            transform: translateY(-1px);
+        }
+        .logout-btn .icon { font-size: 16px; width: 20px; text-align: center; }
 
         .workspace { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
 
@@ -593,6 +618,7 @@ $current_page = 'dashboard';
         .welcome-banner .btn-primary { background: #FFD700; color: #004D4A; }
         .welcome-banner .btn-primary:hover { background: #fff; color: #006D69; }
     </style>
+         <?php include_once 'admin-style.php'; ?>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 
