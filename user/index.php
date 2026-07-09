@@ -139,7 +139,7 @@ $images = [
                     <?php echo $page_lang['btn_apply']; ?>
                 </a>
                 <a href="/grant_portal/auth/register.php"
-                   class="bg-[#004D4A] border border-slate-300  text-white px-8 py-3 rounded-lg transition text-center">
+                   class="bg-[#fffff] border border-slate-300  text-white px-8 py-3 rounded-lg transition text-center">
                     <?php echo $page_lang['btn_view']; ?>
                 </a>
             </div>
