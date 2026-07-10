@@ -234,16 +234,17 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
 <?php include 'sidebar.php'; ?>
 
 <div class="workspace">
+    <?php $page_title = $sidebar_lang['page_title'] ?? 'Bank Verification'; include 'header.php'; ?>
     <div class="dashboard-body">
 
         <div class="admin-card">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
                 <h2 class="card-title" style="margin-bottom:0;">🏦 <?php echo $sidebar_lang['page_title']; ?></h2>
-                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                <!-- <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
                     <a href="?lang=en" style="text-decoration:none;color:<?php echo !$is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo !$is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo !$is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">ENG</a>
                     <span style="color:#cbd5e1;">|</span>
                     <a href="?lang=mm" style="text-decoration:none;color:<?php echo $is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo $is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo $is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">မြန်မာ</a>
-                </div>
+                </div> -->
             </div>
             <p class="card-subtitle"><?php echo $is_mm ? 'ဘဏ်အကောင့်အချက်အလက်စစ်ဆေးရန်' : 'Review and verify bank account details before disbursement'; ?></p>
 
@@ -317,16 +318,6 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
         </div>
 
     </div>
-
-    <!-- <footer class="bottom-bar">
-        <div>⚡ <strong>UCSMT Education Grant Portal Workspace</strong></div>
-        <div style="font-weight: 500;">စီမံခန့်ခွဲရေး ကွန်ပျူတာတက္ကသိုလ် (မိတ္ထီလာ)</div>
-        <div class="bottom-links">
-            <span>📞 +95 9 123 456 789</span>
-            <a href="mailto:info@ucsmt.edu.mm">📧 info@ucsmt.edu.mm</a>
-            <span style="margin-left:15px;">© 2026 Computer University</span>
-        </div>
-    </footer> -->
 </div>
 
 </body>

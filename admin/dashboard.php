@@ -113,6 +113,8 @@ $schemes_quick = $conn->query("SELECT scheme_name, amount FROM schemes WHERE sta
 $reviewers_quick = $conn->query("SELECT name, department FROM reviewers ORDER BY id DESC LIMIT 3");
 $recipients_quick = $conn->query("SELECT s.name AS student_name, sc.scheme_name FROM scholarship_recipients sr JOIN applications a ON sr.application_id = a.id JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id ORDER BY sr.id DESC LIMIT 3");
 $current_page = 'dashboard';
+$admin_image = $_SESSION['admin_image'] ?? null;
+$page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -160,6 +162,7 @@ $current_page = 'dashboard';
 
         .sidebar {
             width: 260px;
+            min-height: 100vh;
             background: var(--sidebar-bg);
             color: #fff;
             display: flex;
@@ -249,32 +252,36 @@ $current_page = 'dashboard';
         }
         .sidebar-footer {
             margin-top: auto;
-            padding: 16px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: center;
+            padding: 16px 0 14px;
+            border-top: 1px solid rgba(255,255,255,0.08);
         }
         .logout-btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            padding: 12px 24px;
-            background: rgba(252,165,165,0.1);
-            border: 1px solid rgba(252,165,165,0.2);
-            border-radius: 10px;
-            color: #fca5a5;
+            width: 100%;
+            padding: 13px 20px;
+            background: rgba(255,255,255,0.06);
+            border: none;
+            border-radius: 0;
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
             font-size: 13px;
-            font-weight: 600;
-            transition: var(--transition);
+            font-weight: 500;
+            transition: all 0.25s ease;
+        }
+        .logout-btn svg {
+            transition: transform 0.25s ease;
         }
         .logout-btn:hover {
-            background: rgba(252,165,165,0.2);
-            border-color: rgba(252,165,165,0.4);
-            transform: translateY(-1px);
+            background: rgba(239,68,68,0.15);
+            color: #f87171;
+            box-shadow: 0 4px 15px rgba(239,68,68,0.1);
         }
-        .logout-btn .icon { font-size: 16px; width: 20px; text-align: center; }
+        .logout-btn:hover svg {
+            transform: translateX(3px);
+        }
 
         .workspace { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
 
@@ -625,27 +632,7 @@ $current_page = 'dashboard';
 <?php include 'sidebar.php'; ?>
 
 <div class="workspace">
-    <div class="top-header">
-        <div>
-            <h1><?php echo $sidebar_lang['dashboard_title']; ?></h1>
-            <span class="sub"><?php echo date('l, F j, Y'); ?></span>
-        </div>
-        <div class="header-actions">
-            <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10">
-                <a href="?lang=en" class="px-2 py-1 text-[11px] sm:text-xs font-semibold rounded transition <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>" style="text-decoration:none;color:<?php echo !$is_mm ? '#fff' : 'rgba(255,255,255,0.6)'; ?>;padding:2px 8px;border-radius:4px;background:<?php echo !$is_mm ? 'rgba(255,255,255,0.2)' : 'transparent'; ?>">ENG</a>
-                <span style="color:rgba(255,255,255,0.3);padding:0 4px;">|</span>
-                <a href="?lang=mm" class="px-2 py-1 text-[11px] sm:text-xs font-medium rounded transition <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>" style="text-decoration:none;color:<?php echo $is_mm ? '#fff' : 'rgba(255,255,255,0.6)'; ?>;padding:2px 8px;border-radius:4px;background:<?php echo $is_mm ? 'rgba(255,255,255,0.2)' : 'transparent'; ?>">မြန်မာ</a>
-            </div>
-            <form class="header-search" method="GET" action="search.php">
-                <span>🔍</span>
-                <input type="text" name="q" placeholder="Search applications, students..." value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
-            </form>
-            <button class="notif-btn">
-                🔔
-                <span class="notif-dot"></span>
-            </button>
-        </div>
-    </div>
+    <?php include 'header.php'; ?>
 
     <div class="dashboard-body">
 
@@ -888,15 +875,6 @@ $current_page = 'dashboard';
         </div>
 
     </div>
-
-    <!-- <footer class="bottom-bar">
-        <div>⚡ <strong>UCSMT Education Grant Portal</strong></div>
-        <div>© <?php echo date('Y'); ?> Computer University (Meiktila)</div>
-        <div class="bottom-links">
-            <a href="mailto:info@ucsmt.edu.mm">Support</a>
-            <a href="#">Privacy</a>
-        </div>
-    </footer> -->
 </div>
 
 </body>

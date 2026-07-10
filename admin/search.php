@@ -149,16 +149,7 @@ $current_page = 'search';
 <?php include 'sidebar.php'; ?>
 
 <div class="workspace">
-    <div class="top-header">
-        <div>
-            <h1><?php echo $sidebar_lang['page_title']; ?></h1>
-            <span class="sub"><?php echo $q ? "Showing results for \"$q\"" : 'Enter a search term'; ?></span>
-        </div>
-        <form class="header-search" method="GET" action="search.php">
-            <span>🔍</span>
-            <input type="text" name="q" placeholder="Search..." value="<?php echo htmlspecialchars($q); ?>">
-        </form>
-    </div>
+    <?php $page_title = $sidebar_lang['page_title'] ?? 'Search Results'; include 'header.php'; ?>
 
     <div class="dashboard-body">
 

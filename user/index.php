@@ -59,7 +59,7 @@ if (isset($is_mm) && $is_mm) {
 } else {
     $page_lang = [
         'badge' => 'Investing In Your Future',
-        'hero_title' => 'Empowering Education,<br class="hidden md:inline"/>Building Better Futures',
+        'hero_title' => 'Empowering Education,Building Better Futures',
         'hero_desc' => 'Unlock exclusive access to government and institutional grants tailored for Myanmar\'s next generation of leaders.',
         'btn_apply' => 'Apply →',
         'btn_view' => 'View Scholarships',
@@ -126,7 +126,7 @@ $images = [
             <span class="inline-block text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
                 <?php echo $page_lang['badge']; ?>
             </span>
-            <h1 class="mt-4 text-4xl md:text-5xl font-bold leading-tight">
+            <h1 class="mt-4 text-5xl md:text-5xl font-bold leading-10">
                 <?php echo $page_lang['hero_title']; ?>
             </h1>
             <p class="mt-4 text-white max-w-xl text-lg">

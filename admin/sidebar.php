@@ -9,23 +9,12 @@ $admin_image = $_SESSION['admin_image'] ?? null;
 ?>
 <div class="sidebar">
     <div class="sidebar-brand">
-        <div class="brand-icon"><?php echo strtoupper(substr($admin_name ?? 'A', 0, 1)); ?></div>
+        <div class="brand-icon" style="background:transparent;padding:0;">
+            <svg class="w-8 h-8" style="color:#FFD700;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
+        </div>
         <div class="brand-text">
-            <h2>GrantPortal</h2>
+            <h2>EduGrant</h2>
             <p>Admin Panel</p>
-        </div>
-    </div>
-    <div class="admin-profile">
-        <div class="admin-avatar" style="overflow:hidden;">
-            <?php if (!empty($admin_image) && file_exists('../uploads/profile_pics/' . $admin_image)): ?>
-                <img src="../uploads/profile_pics/<?php echo $admin_image; ?>" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">
-            <?php else: ?>
-                <?php echo strtoupper(substr($admin_name ?? 'A', 0, 1)); ?>
-            <?php endif; ?>
-        </div>
-        <div class="admin-meta">
-            <h4><?php echo htmlspecialchars($admin_name ?? 'Admin'); ?></h4>
-            <p>System Administrator</p>
         </div>
     </div>
     <ul class="sidebar-menu">
@@ -43,8 +32,8 @@ $admin_image = $_SESSION['admin_image'] ?? null;
     </ul>
     <div class="sidebar-footer">
         <a href="../auth/logout.php" class="logout-btn">
-            <span class="icon">🚪</span>
-            <?php echo $sidebar_lang['logout'] ?? 'Logout'; ?>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span><?php echo $sidebar_lang['logout'] ?? 'Logout'; ?></span>
         </a>
     </div>
 </div>

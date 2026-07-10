@@ -290,16 +290,7 @@ $current_page = 'profile';
 <?php include 'sidebar.php'; ?>
 
 <div class="workspace">
-    <div class="top-header">
-        <div>
-            <h1><?php echo $sidebar_lang['page_title']; ?></h1>
-            <span class="sub"><?php echo $sidebar_lang['page_sub']; ?></span>
-        </div>
-        <div class="lang-switch">
-            <a href="?lang=en" class="<?php echo !$is_mm ? 'active' : ''; ?>">ENG</a>
-            <a href="?lang=mm" class="<?php echo $is_mm ? 'active' : ''; ?>">မြန်မာ</a>
-        </div>
-    </div>
+    <?php $page_title = $sidebar_lang['page_title'] ?? 'Admin Profile'; include 'header.php'; ?>
 
     <div class="dashboard-body">
         <div class="profile-alerts">

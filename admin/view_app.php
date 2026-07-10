@@ -159,25 +159,7 @@ $current_page = 'applications';
 <?php include 'sidebar.php'; ?>
 
 <div class="workspace">
-    <div class="top-header">
-        <div style="display:flex;align-items:center;">
-            <div>
-                <h1><?php echo $sidebar_lang['app_details']; ?></h1>
-                <span class="sub"><?php echo htmlspecialchars($app['application_no']); ?></span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-left:12px;">
-                <a href="?lang=en" style="text-decoration:none;color:<?php echo !$is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo !$is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo !$is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">ENG</a>
-                <span style="color:#cbd5e1;">|</span>
-                <a href="?lang=mm" style="text-decoration:none;color:<?php echo $is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo $is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo $is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">မြန်မာ</a>
-            </div>
-        </div>
-        <div style="display:flex;gap:8px;">
-            <a href="applications.php?lang=<?php echo $lang_param; ?>" class="btn-outline"><?php echo $sidebar_lang['back']; ?></a>
-            <?php if ($app['status'] !== 'Approved' && $app['status'] !== 'Rejected'): ?>
-                <a href="dashboard.php?lang=<?php echo $lang_param; ?>#decision" class="btn-gold">Make Decision</a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php $page_title = $sidebar_lang['app_details'] ?? 'Application Details'; include 'header.php'; ?>
 
     <div class="dashboard-body">
 

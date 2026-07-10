@@ -196,6 +196,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
 <?php include 'sidebar.php'; ?>
 
 <div class="workspace">
+    <?php $page_title = $sidebar_lang['page_title'] ?? 'Applications'; include 'header.php'; ?>
     <div class="dashboard-body">
 
         <div class="admin-card">
@@ -204,11 +205,11 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                     <h2 class="card-title">📁 <?php echo $sidebar_lang['page_title']; ?></h2>
                     <p class="card-subtitle"><?php echo $is_mm ? 'လျှောက်လွှာအားလုံးကြည့်ရန်' : 'Browse all submitted applications'; ?></p>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                <!-- <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
                     <a href="?lang=en" style="text-decoration:none;color:<?php echo !$is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo !$is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo !$is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">ENG</a>
                     <span style="color:#cbd5e1;">|</span>
                     <a href="?lang=mm" style="text-decoration:none;color:<?php echo $is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo $is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo $is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">မြန်မာ</a>
-                </div>
+                </div> -->
             </div>
 
             <div class="filter-bar">

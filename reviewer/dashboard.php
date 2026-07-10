@@ -12,6 +12,7 @@ require_once '../config/db.php';
 $reviewer_name = $_SESSION['reviewer_name'] ?? 'Reviewer';
 
 // Fetch profile image
+$is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
 $reviewer_img = $conn->query("SELECT profile_image FROM reviewers WHERE id = " . (int)$_SESSION['reviewer_id'])->fetch_assoc()['profile_image'] ?? null;
 
 // UPDATED QUERY: Removed the JOIN to reviewer_scheme so ALL applications appear.
@@ -40,62 +41,12 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
     <title>Reviewer Workspace | EduGrant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: { 50: '#1e293b', 100: '#0f172a', 200: '#162032', 300: '#0d1520' }
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
-    <style>
-        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
-        .theme-toggle { position: relative; width: 52px; height: 28px; border-radius: 14px; cursor: pointer; transition: background 0.3s; }
-        .theme-toggle .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform 0.3s, background 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .dark .theme-toggle { background: #1e293b; }
-        .theme-toggle { background: #006D69; }
-        .dark .theme-toggle .toggle-thumb { transform: translateX(24px); background: #0f172a; }
-    </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-slate-200">
+<body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 
-    <header class="bg-[#006D69] text-white px-4 sm:px-6 py-3 sm:py-4 shadow-md sticky top-0 z-50 flex flex-wrap items-center justify-between gap-2">
-        <a href="../index.php" class="min-w-0 flex-shrink block hover:opacity-90 transition">
-            <div class="flex items-center gap-2.5">
-                <div class="bg-white/10 p-1.5 rounded-lg text-teal-300 shrink-0">
-                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/>
-                    </svg>
-                </div>
-                <div class="min-w-0">
-                    <h1 class="text-white text-lg sm:text-xl font-bold leading-tight truncate">EduGrant</h1>
-                    <p class="text-teal-200 text-[11px] sm:text-xs mt-0.5 opacity-90 tracking-wide">Reviewer Workspace</p>
-                </div>
-            </div>
-        </a>
-        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-            <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
-                <div class="toggle-thumb">
-                    <svg class="w-3.5 h-3.5 text-amber-400 dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
-                    <svg class="w-3.5 h-3.5 text-blue-400 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
-                </div>
-            </div>
-            <a href="profile.php" class="flex items-center gap-2 text-[11px] sm:text-sm font-medium bg-white/10 dark:bg-white/5 hover:bg-white/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md border border-white/10 transition truncate max-w-[120px] sm:max-w-none">
-                <?php if (!empty($reviewer_img) && file_exists('../uploads/profile_pics/' . $reviewer_img)): ?>
-                    <img src="../uploads/profile_pics/<?php echo htmlspecialchars($reviewer_img); ?>" alt="" class="w-6 h-6 rounded-full object-cover border border-white/20">
-                <?php else: ?>
-                    <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold text-white"><?php echo strtoupper(substr($reviewer_name, 0, 1)); ?></span>
-                <?php endif; ?>
-                <span class="truncate hidden sm:inline"><?php echo htmlspecialchars($reviewer_name); ?></span>
-            </a>
-            <a href="../auth/logout.php" class="text-[11px] sm:text-sm bg-red-600/20 hover:bg-red-600/40 text-red-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md border border-red-500/30 transition whitespace-nowrap">
-                Logout
-            </a>
-        </div>
-    </header>
+    <?php $page_title = 'Reviewer Workspace'; include 'header.php'; ?>
 
     <!-- KPI Metric Cards -->
     <section class="max-w-7xl mx-auto px-4 pt-10 pb-6">

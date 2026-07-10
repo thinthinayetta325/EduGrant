@@ -138,6 +138,7 @@ $current_page = 'reviewers';
 <?php include 'sidebar.php'; ?>
 
 <div class="workspace">
+    <?php $page_title = $sidebar_lang['page_title'] ?? 'Reviewers'; include 'header.php'; ?>
     <div class="dashboard-body">
 
         <div class="admin-card">

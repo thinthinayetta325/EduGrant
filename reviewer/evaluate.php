@@ -12,6 +12,7 @@ if (!isset($_SESSION['reviewer_id'])) {
 }
 
 $reviewer_id = $_SESSION['reviewer_id'];
+$is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
 $application_id = $recommendation = $remarks = "";
 $error_message = "";
 
@@ -47,7 +48,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             // Commit database adjustments securely
             $conn->commit();
-            
+
+            // Notify admin when reviewer recommends
+            if ($recommendation === 'Recommended') {
+                $admin_notify = $conn->prepare("INSERT INTO notifications (student_id, admin_id, title, message, type) VALUES (0, 1, ?, ?, 'reviewer_recommend')");
+                if ($admin_notify) {
+                    $app_no_q = $conn->prepare("SELECT application_no, student_id FROM applications WHERE id = ?");
+                    $app_no_q->bind_param("i", $application_id);
+                    $app_no_q->execute();
+                    $app_info = $app_no_q->get_result()->fetch_assoc();
+                    $app_no_q->close();
+                    $reviewer_name_q = $conn->prepare("SELECT name FROM reviewers WHERE id = ?");
+                    $reviewer_name_q->bind_param("i", $reviewer_id);
+                    $reviewer_name_q->execute();
+                    $rname = $reviewer_name_q->get_result()->fetch_assoc()['name'] ?? 'A reviewer';
+                    $reviewer_name_q->close();
+                    $notify_title = "Application Recommended";
+                    $notify_msg = "$rname recommended application " . ($app_info['application_no'] ?? '#') . ". Pending admin approval.";
+                    $admin_notify->bind_param("ss", $notify_title, $notify_msg);
+                    $admin_notify->execute();
+                    $admin_notify->close();
+                }
+            }
+
             // Redirect cleanly back to dashboard with a success message flag
             header("Location: dashboard.php?success=1");
             exit();
@@ -101,74 +124,47 @@ else {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluate Application File</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px; transition: background-color 0.3s, color 0.3s; }
-        body.light-mode { background-color: #f8fafc; color: #1e293b; }
-        body:not(.light-mode) { background-color: #0f172a; color: #e2e8f0; }
-        .eval-box { width: 40%; max-width: 420px; margin: 0 auto; padding: 30px; border-radius: 12px; transition: all 0.3s; }
-        body.light-mode .eval-box { background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        body:not(.light-mode) .eval-box { background: #1e293b; border: 1px solid rgba(255,255,255,0.08); }
-        .title { margin-top: 0; font-size: 16px; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
-        body.light-mode .title { color: #003D3B; border-bottom: 2px solid #f1f5f9; }
-        body:not(.light-mode) .title { color: #fff; border-bottom: 2px solid rgba(255,255,255,0.08); }
-        .info-card { padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; }
-        body.light-mode .info-card { background: #f8fafc; border: 1px solid #e2e8f0; }
-        body:not(.light-mode) .info-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
-        .info-row { display: flex; justify-content: space-between; padding: 6px 0; }
-        body.light-mode .info-row { border-bottom: 1px dashed #e2e8f0; }
-        body:not(.light-mode) .info-row { border-bottom: 1px dashed rgba(255,255,255,0.08); }
+        .eval-box { width: 40%; max-width: 420px; margin: 0 auto; padding: 30px; border-radius: 12px; background: #fff; box-shadow: var(--shadow-lg); }
+        .title { margin-top: 0; font-size: 16px; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; color: var(--text-primary); border-bottom: 2px solid var(--border); }
+        .info-card { padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; background: #f8fafc; border: 1px solid var(--border); }
+        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); }
         .info-row:last-child { border-bottom: none; }
-        .label-text { font-weight: bold; }
-        body.light-mode .label-text { color: #64748b; }
-        body:not(.light-mode) .label-text { color: rgba(255,255,255,0.5); }
-        .value-text { font-weight: 500; }
-        body.light-mode .value-text { color: #0f172a; }
-        body:not(.light-mode) .value-text { color: #fff; }
-        .error-alert { padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; }
-        body.light-mode .error-alert { background: #fef2f2; border: 1px solid #fee2e2; color: #b91c1c; }
-        body:not(.light-mode) .error-alert { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
-        .form-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
-        body.light-mode .form-label { color: #64748b; }
-        body:not(.light-mode) .form-label { color: rgba(255,255,255,0.5); }
-        .textarea-input { width: 100%; height: 120px; padding: 12px; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: vertical; margin-bottom: 20px; outline: none; transition: all 0.25s; }
-        body.light-mode .textarea-input { border: 1px solid #cbd5e1; background: #fff; color: #1e293b; }
-        body:not(.light-mode) .textarea-input { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; }
+        .label-text { font-weight: bold; color: var(--text-secondary); }
+        .value-text { font-weight: 500; color: var(--text-primary); }
+        .error-alert { padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; background: #fef2f2; border: 1px solid #fee2e2; color: #b91c1c; }
+        .form-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; color: var(--text-secondary); }
+        .textarea-input { width: 100%; height: 120px; padding: 12px; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: vertical; margin-bottom: 20px; outline: none; transition: all 0.25s; border: 1px solid #cbd5e1; background: #fff; color: var(--text-primary); }
         .textarea-input:focus { border-color: #006D69; box-shadow: 0 0 0 3px rgba(0,109,105,0.15); }
         .actions { display: flex; gap: 10px; }
         .btn-submit { flex: 2; padding: 12px; background: #006D69; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.25s; }
         .btn-submit:hover { background: #005a56; transform: translateY(-1px); }
-        .btn-cancel { flex: 1; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-sizing: border-box; transition: all 0.25s; }
-        body.light-mode .btn-cancel { background: #e2e8f0; color: #475569; }
-        body:not(.light-mode) .btn-cancel { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
-        body.light-mode .btn-cancel:hover { background: #cbd5e1; }
-        body:not(.light-mode) .btn-cancel:hover { background: rgba(255,255,255,0.1); }
-
-        .theme-toggle { position: relative; width: 44px; height: 24px; border-radius: 12px; cursor: pointer; transition: background 0.3s; }
-        .theme-toggle .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; transition: transform 0.3s, background 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        body.light-mode .theme-toggle { background: #006D69; }
-        body:not(.light-mode) .theme-toggle { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); }
-        body.light-mode .theme-toggle .toggle-thumb { transform: translateX(20px); background: #fff; }
-        body:not(.light-mode) .theme-toggle .toggle-thumb { background: #0f172a; }
+        .btn-cancel { flex: 1; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-sizing: border-box; transition: all 0.25s; background: #e2e8f0; color: #475569; }
+        .btn-cancel:hover { background: #cbd5e1; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; margin: 16px 24px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-secondary); text-decoration: none; background: #fff; border: 1px solid var(--border); transition: var(--transition); }
+        .back-link:hover { background: var(--body-bg); color: var(--text-primary); }
+        .eval-content { padding: 0 24px; }
+        @media (max-width: 768px) {
+            .eval-box { width: 100%; margin: 0 16px; padding: 20px; }
+            .actions { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
 
+<?php $page_title = 'Evaluate Application'; include 'header.php'; ?>
+
+<div class="eval-content">
+<a href="dashboard.php" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+    Back to Dashboard
+</a>
+
 <div class="eval-box">
     <div class="title">
         <span>📋 Review & Recommend Application</span>
-        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
-            <div class="toggle-thumb">
-                <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
-                <svg class="w-3 h-3 text-blue-400 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
-            </div>
-        </div>
     </div>
     
     <?php if (!empty($error_message)): ?>
@@ -195,23 +191,10 @@ else {
 
         <div class="actions">
             <button type="submit" class="btn-submit">Submit Official Assessment Review</button>
-            <a href="dashboards.php" class="btn-cancel">Cancel</a>
+            <a href="dashboard.php" class="btn-cancel">Cancel</a>
         </div>
     </form>
 </div>
+</div>
 
-    <script>
-        // Theme toggle
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-        }
-
-        // Load saved theme (default dark)
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
-        }
-    </script>
-</body>
-</html>
 <?php $conn->close(); ?>

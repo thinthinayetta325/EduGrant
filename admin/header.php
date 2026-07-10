@@ -13,12 +13,23 @@ $admin_image = $_SESSION['admin_image'] ?? null;
 $pending_bank = $pending_bank ?? 0;
 $unread_count = $unread_count ?? 0;
 
-// Fetch pending bank count if not set
+// Fetch unread admin notification count
+if (isset($_SESSION['admin_id']) && isset($conn)) {
+    $admin_id = $_SESSION['admin_id'];
+    $notif_query = $conn->prepare("SELECT COUNT(*) AS unread FROM notifications WHERE admin_id = ? AND is_read = 0");
+    if ($notif_query) {
+        $notif_query->bind_param("i", $admin_id);
+        $notif_query->execute();
+        $notif_result = $notif_query->get_result()->fetch_assoc();
+        $unread_count = $notif_result['unread'] ?? 0;
+        $notif_query->close();
+    }
+}
+
 if (!isset($pending_bank_count)) {
     $pending_bank_count = $pending_bank;
 }
 
-// Get admin profile image from database
 if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     $check_conn = isset($conn) ? $conn : null;
     if ($check_conn) {
@@ -33,320 +44,6 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #0f172a;
-            --primary-light: #1e293b;
-            --sidebar-bg: #006D69;
-            --sidebar-hover: #005a56;
-            --accent: #FFD700;
-            --accent-hover: #e6c200;
-            --accent-light: rgba(255,215,0,0.12);
-            --card-bg: #ffffff;
-            --body-bg: #f0f7f5;
-            --border: #e0eae8;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.04);
-            --radius: 12px;
-            --radius-sm: 8px;
-            --transition: 0.2s ease;
-        }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--body-bg);
-            color: var(--text-primary);
-        }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
-
-        /* Top Header Styles */
-        .top-header {
-            background: #fff;
-            padding: 14px 28px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-        }
-        .top-header h1 {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-            color: var(--text-primary);
-        }
-        .top-header .sub {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-
-        /* Header Actions */
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        /* Language Switch */
-        .language-switch {
-            display: flex;
-            align-items: center;
-            background: linear-gradient(135deg, #006D69 0%, #004D4A 100%);
-            border-radius: 8px;
-            padding: 3px;
-            gap: 2px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 2px 4px rgba(0,109,105,0.2);
-        }
-        .language-switch a {
-            padding: 6px 12px;
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.6);
-            text-decoration: none;
-            border-radius: 6px;
-            transition: var(--transition);
-            letter-spacing: 0.3px;
-        }
-        .language-switch a:hover {
-            color: rgba(255,255,255,0.9);
-            background: rgba(255,255,255,0.1);
-        }
-        .language-switch a.active-lang {
-            color: #006D69;
-            background: #FFD700;
-            font-weight: 700;
-            box-shadow: 0 2px 6px rgba(255,215,0,0.3);
-        }
-        .language-switch span {
-            color: rgba(255,255,255,0.2);
-            font-size: 12px;
-        }
-
-        /* Search Box */
-        .header-search {
-            display: flex;
-            align-items: center;
-            background: var(--body-bg);
-            border-radius: var(--radius-sm);
-            padding: 0 14px;
-            gap: 8px;
-            border: 1px solid transparent;
-            transition: var(--transition);
-            width: 240px;
-        }
-        .header-search:focus-within {
-            border-color: var(--sidebar-bg);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(0,109,105,0.1);
-            width: 280px;
-        }
-        .header-search span {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-        .header-search input {
-            border: none;
-            background: none;
-            padding: 10px 0;
-            font-size: 13px;
-            outline: none;
-            width: 100%;
-            font-family: inherit;
-            color: var(--text-primary);
-        }
-        .header-search input::placeholder {
-            color: var(--text-muted);
-        }
-
-        /* Notification Button */
-        .notif-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            background: #fff;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: var(--transition);
-            text-decoration: none;
-            color: var(--text-primary);
-        }
-        .notif-btn:hover {
-            background: var(--body-bg);
-            border-color: var(--sidebar-bg);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-        .notif-dot {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        .notif-count {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            min-width: 18px;
-            height: 18px;
-            background: #ef4444;
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 5px;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 4px rgba(239,68,68,0.3);
-        }
-
-        /* Profile Dropdown */
-        .profile-dropdown {
-            position: relative;
-        }
-        .profile-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 12px 6px 6px;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .profile-link:hover {
-            background: #fff;
-            border-color: var(--sidebar-bg);
-            box-shadow: var(--shadow);
-        }
-        .profile-image {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #006D69 0%, #004D4A 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFD700;
-            font-weight: 700;
-            font-size: 14px;
-            overflow: hidden;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .profile-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .profile-info {
-            text-align: left;
-        }
-        .profile-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            line-height: 1.2;
-        }
-        .profile-role {
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-
-        /* Profile Dropdown Menu */
-        .profile-dropdown-menu {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-8px);
-            transition: var(--transition);
-            z-index: 1000;
-            overflow: hidden;
-        }
-        .profile-dropdown:hover .profile-dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        .profile-dropdown-menu a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            font-size: 13px;
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .profile-dropdown-menu a:hover {
-            background: var(--body-bg);
-        }
-        .profile-dropdown-menu .menu-icon {
-            width: 20px;
-            text-align: center;
-            color: var(--text-secondary);
-        }
-        .profile-dropdown-menu hr {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 4px 0;
-        }
-        .profile-dropdown-menu a.logout-link {
-            color: #dc2626;
-        }
-        .profile-dropdown-menu a.logout-link:hover {
-            background: #fef2f2;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
-</head>
-<body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
-
 <div class="top-header">
     <div>
         <h1><?php echo htmlspecialchars($page_title); ?></h1>
@@ -354,7 +51,6 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     </div>
 
     <div class="header-actions">
-        <!-- Language Switch -->
         <div class="language-switch">
             <a href="?lang=en&<?php echo http_build_query(array_diff_key($_GET, ['lang' => ''])); ?>"
                class="<?php echo !$is_mm ? 'active-lang' : ''; ?>">
@@ -367,7 +63,6 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
             </a>
         </div>
 
-        <!-- Search Box -->
         <form class="header-search" action="search.php" method="GET">
             <span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -382,21 +77,16 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
             <?php endif; ?>
         </form>
 
-        <!-- Notification -->
         <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="notif-btn" title="Notifications">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <?php if ($pending_bank_count > 0): ?>
-                <span class="notif-count"><?php echo $pending_bank_count > 99 ? '99+' : $pending_bank_count; ?></span>
-            <?php endif; ?>
             <?php if ($unread_count > 0): ?>
-                <span class="notif-dot"></span>
+                <span class="notif-count"><?php echo $unread_count > 99 ? '99+' : $unread_count; ?></span>
             <?php endif; ?>
         </a>
 
-        <!-- Profile Dropdown -->
         <div class="profile-dropdown">
             <a href="profile.php?lang=<?php echo $lang_param; ?>" class="profile-link">
                 <div class="profile-image">
