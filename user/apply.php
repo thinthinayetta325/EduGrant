@@ -94,6 +94,7 @@ $stmt->bind_param("i", $student_id);
 $stmt->execute();
 
 $student = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
 /* Apply Form Submit */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -125,9 +126,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($check->get_result()->num_rows > 0) {
 
             $error = $page_lang['error_duplicate'];
+            $check->close();
 
         } else {
 
+            $check->close();
             /* Generate Application Number */
             $application_no =
                 "APP-" .
@@ -173,23 +176,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 // Notify reviewers assigned to this scheme
                 $app_id = $insert->insert_id;
+                $insert->close();
+                $student_name = $student['name'] ?? 'A student';
                 $reviewers = $conn->prepare("SELECT reviewer_id FROM reviewer_scheme WHERE scheme_id = ?");
                 if ($reviewers) {
                     $reviewers->bind_param("i", $scheme_id);
                     $reviewers->execute();
                     $rev_result = $reviewers->get_result();
-                    $student_name = $student['name'] ?? 'A student';
+                    $reviewer_ids = [];
                     while ($rev = $rev_result->fetch_assoc()) {
-                        $notify = $conn->prepare("INSERT INTO notifications (reviewer_id, student_id, title, message, type) VALUES (?, ?, ?, ?, 'new_application')");
-                        if ($notify) {
-                            $title = "New Application Submitted";
-                            $msg = "$student_name submitted a new application (#$application_no) for review.";
-                            $notify->bind_param("iiss", $rev['reviewer_id'], $student_id, $title, $msg);
-                            $notify->execute();
-                            $notify->close();
-                        }
+                        $reviewer_ids[] = $rev['reviewer_id'];
                     }
                     $reviewers->close();
+                }
+
+                // Fallback: if no reviewers assigned to scheme, notify all reviewers
+                if (empty($reviewer_ids)) {
+                    $all_rev = $conn->query("SELECT id FROM reviewers");
+                    if ($all_rev) {
+                        while ($r = $all_rev->fetch_assoc()) {
+                            $reviewer_ids[] = $r['id'];
+                        }
+                    }
+                }
+
+                foreach ($reviewer_ids as $rid) {
+                    $notify = $conn->prepare("INSERT INTO notifications (reviewer_id, title, message, type) VALUES (?, ?, ?, 'new_application')");
+                    if ($notify) {
+                        $title = "New Application Submitted";
+                        $msg = "$student_name submitted a new application (#$application_no) for review.";
+                        $notify->bind_param("iss", $rid, $title, $msg);
+                        $notify->execute();
+                        $notify->close();
+                    }
                 }
 
                 $_SESSION['success_message'] =

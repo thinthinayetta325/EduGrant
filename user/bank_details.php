@@ -45,48 +45,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update_query->bind_param("sssi", $bank_name, $account_number, $account_holder, $student_id);
             if ($update_query->execute()) {
                 $success_msg = $is_mm ? "ဘဏ်အချက်အလက်များကို အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။" : "Bank details updated successfully!";
+                $update_query->close();
                 // Notify admin
-                $admin_notify = $conn->prepare("INSERT INTO notifications (student_id, admin_id, title, message, type) VALUES (?, 1, ?, ?, 'bank_details')");
+                $student_name_q = $conn->prepare("SELECT name FROM student WHERE id = ?");
+                $student_name_q->bind_param("i", $student_id);
+                $student_name_q->execute();
+                $sname = $student_name_q->get_result()->fetch_assoc()['name'] ?? 'A student';
+                $student_name_q->close();
+                $admin_notify = $conn->prepare("INSERT INTO notifications (admin_id, title, message, type) VALUES (1, ?, ?, 'bank_details')");
                 if ($admin_notify) {
                     $notify_title = "Bank Details Updated";
-                    $student_name_q = $conn->prepare("SELECT name FROM student WHERE id = ?");
-                    $student_name_q->bind_param("i", $student_id);
-                    $student_name_q->execute();
-                    $sname = $student_name_q->get_result()->fetch_assoc()['name'] ?? 'A student';
-                    $student_name_q->close();
                     $notify_msg = "$sname has updated their bank details.";
-                    $admin_notify->bind_param("iss", $student_id, $notify_title, $notify_msg);
+                    $admin_notify->bind_param("ss", $notify_title, $notify_msg);
                     $admin_notify->execute();
                     $admin_notify->close();
                 }
             } else {
                 $error_msg = $is_mm ? "အချက်အလက်ပြင်ဆင်ခြင်း မအောင်မြင်ပါ။" : "Failed to update record.";
+                $update_query->close();
             }
-            $update_query->close();
         } else {
             // Insert brand new record
             $insert_query = $conn->prepare("INSERT INTO bank_details (student_id, bank_name, account_number, account_holder) VALUES (?, ?, ?, ?)");
             $insert_query->bind_param("isss", $student_id, $bank_name, $account_number, $account_holder);
             if ($insert_query->execute()) {
                 $success_msg = $is_mm ? "ဘဏ်အချက်အလက်များကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။" : "Bank details saved successfully!";
+                $insert_query->close();
                 // Notify admin
-                $admin_notify = $conn->prepare("INSERT INTO notifications (student_id, admin_id, title, message, type) VALUES (?, 1, ?, ?, 'bank_details')");
+                $student_name_q = $conn->prepare("SELECT name FROM student WHERE id = ?");
+                $student_name_q->bind_param("i", $student_id);
+                $student_name_q->execute();
+                $sname = $student_name_q->get_result()->fetch_assoc()['name'] ?? 'A student';
+                $student_name_q->close();
+                $admin_notify = $conn->prepare("INSERT INTO notifications (admin_id, title, message, type) VALUES (1, ?, ?, 'bank_details')");
                 if ($admin_notify) {
                     $notify_title = "New Bank Details";
-                    $student_name_q = $conn->prepare("SELECT name FROM student WHERE id = ?");
-                    $student_name_q->bind_param("i", $student_id);
-                    $student_name_q->execute();
-                    $sname = $student_name_q->get_result()->fetch_assoc()['name'] ?? 'A student';
-                    $student_name_q->close();
                     $notify_msg = "$sname has submitted bank details for verification.";
-                    $admin_notify->bind_param("iss", $student_id, $notify_title, $notify_msg);
+                    $admin_notify->bind_param("ss", $notify_title, $notify_msg);
                     $admin_notify->execute();
                     $admin_notify->close();
                 }
             } else {
                 $error_msg = $is_mm ? "အချက်အလက်သိမ်းဆည်းခြင်း မအောင်မြင်ပါ။" : "Failed to save record.";
+                $insert_query->close();
             }
-            $insert_query->close();
         }
         $check_query->close();
     } else {
