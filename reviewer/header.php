@@ -10,6 +10,18 @@ $page_title = $page_title ?? 'Reviewer Workspace';
 $reviewer_name = $_SESSION['reviewer_name'] ?? 'Reviewer';
 $reviewer_id = $_SESSION['reviewer_id'] ?? 0;
 $reviewer_img = null;
+$unread_count = 0;
+
+// Fetch unread notification count for reviewer
+if ($reviewer_id && isset($conn)) {
+    $notif_q = $conn->prepare("SELECT COUNT(*) AS unread FROM notifications WHERE reviewer_id = ? AND is_read = 0");
+    if ($notif_q) {
+        $notif_q->bind_param("i", $reviewer_id);
+        $notif_q->execute();
+        $unread_count = $notif_q->get_result()->fetch_assoc()['unread'] ?? 0;
+        $notif_q->close();
+    }
+}
 
 if ($reviewer_id && isset($conn)) {
     $pic_query = $conn->prepare("SELECT profile_image FROM reviewers WHERE id = ?");
@@ -150,6 +162,42 @@ if ($reviewer_id && isset($conn)) {
     .profile-dropdown-menu a.logout-link { color: #dc2626; }
     .profile-dropdown-menu a.logout-link:hover { background: #fef2f2; }
 
+    /* Notification Bell */
+    .notif-btn {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    .notif-btn:hover { background: #fff; border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
+    .notif-count {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(239,68,68,0.3);
+        line-height: 1;
+    }
+    .notif-count.zero { display: none; }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -188,6 +236,14 @@ if ($reviewer_id && isset($conn)) {
                 မြန်မာ
             </a>
         </div>
+
+        <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="notif-btn" title="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="notif-count <?php echo $unread_count === 0 ? 'zero' : ''; ?>"><?php echo $unread_count > 99 ? '99+' : $unread_count; ?></span>
+        </a>
 
         <div class="profile-dropdown">
             <a href="profile.php?lang=<?php echo $lang_param; ?>" class="profile-link">

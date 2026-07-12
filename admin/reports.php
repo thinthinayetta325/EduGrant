@@ -119,13 +119,9 @@ $current_page = 'reports';
         <div class="admin-card">
             <div style="display:flex;align-items:center;gap:8px;">
                 <h2 class="card-title" style="margin:0;">📊 <?php echo $sidebar_lang['page_title']; ?></h2>
-                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-                    <a href="?lang=en" style="text-decoration:none;color:<?php echo !$is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo !$is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo !$is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">ENG</a>
-                    <span style="color:#cbd5e1;">|</span>
-                    <a href="?lang=mm" style="text-decoration:none;color:<?php echo $is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo $is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo $is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">မြန်မာ</a>
-                </div>
+               
             </div>
-            <p class="card-subtitle">အစီရင်ခံစာများနှင့်စာရင်းအင်းများ</p>
+            <!-- <p class="card-subtitle">အစီရင်ခံစာများနှင့်စာရင်းအင်းများ</p> -->
 
             <div class="stats-grid">
                 <div class="stat-box blue"><div class="num"><?php echo $total_schemes; ?></div><div class="lbl">Total Schemes</div></div>
@@ -217,11 +213,11 @@ $current_page = 'reports';
             </div>
         </div>
 
-        <div class="admin-card" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <!-- <div class="admin-card" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
             <a href="reports.php?export=apps" class="btn-blue-sm">📄 Export Applications Report</a>
             <a href="reports.php?export=disbursement" class="btn-green-sm">💵 Export Disbursement Report</a>
             <a href="reports.php?export=recipients" class="btn-blue-sm">🏅 Export Recipient Ledger</a>
-        </div>
+        </div> -->
 
     </div>
 

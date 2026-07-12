@@ -636,13 +636,13 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
 
     <div class="dashboard-body">
 
-        <div class="welcome-banner">
+        <!-- <div class="welcome-banner">
             <div>
                 <h2>Welcome back, <?php echo htmlspecialchars(explode(' ', $admin_name)[0]); ?> 👋</h2>
                 <p>Here's what's happening with your scholarship programs today.</p>
             </div>
             <a href="reports.php" class="btn-primary">📊 View Reports</a>
-        </div>
+        </div> -->
 
         <div class="stats-grid">
             <div class="stat-card">

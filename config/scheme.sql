@@ -100,15 +100,16 @@ CREATE TABLE IF NOT EXISTS payment_records (
 );
 CREATE TABLE IF NOT EXISTS notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id INT NOT NULL,
+    student_id INT DEFAULT NULL,
+    admin_id INT DEFAULT NULL,
+    reviewer_id INT DEFAULT NULL,
     title VARCHAR(100),
     message TEXT,
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     type VARCHAR(50),
-
-    FOREIGN KEY (student_id)
-    REFERENCES student(id)
+    INDEX (admin_id),
+    INDEX (reviewer_id)
 );
 CREATE TABLE IF NOT EXISTS reviewers (
     id INT AUTO_INCREMENT PRIMARY KEY,

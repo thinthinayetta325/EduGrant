@@ -171,6 +171,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             if ($insert->execute()) {
 
+                // Notify reviewers assigned to this scheme
+                $app_id = $insert->insert_id;
+                $reviewers = $conn->prepare("SELECT reviewer_id FROM reviewer_scheme WHERE scheme_id = ?");
+                if ($reviewers) {
+                    $reviewers->bind_param("i", $scheme_id);
+                    $reviewers->execute();
+                    $rev_result = $reviewers->get_result();
+                    $student_name = $student['name'] ?? 'A student';
+                    while ($rev = $rev_result->fetch_assoc()) {
+                        $notify = $conn->prepare("INSERT INTO notifications (reviewer_id, student_id, title, message, type) VALUES (?, ?, ?, ?, 'new_application')");
+                        if ($notify) {
+                            $title = "New Application Submitted";
+                            $msg = "$student_name submitted a new application (#$application_no) for review.";
+                            $notify->bind_param("iiss", $rev['reviewer_id'], $student_id, $title, $msg);
+                            $notify->execute();
+                            $notify->close();
+                        }
+                    }
+                    $reviewers->close();
+                }
+
                 $_SESSION['success_message'] =
                     $page_lang['success'];
 

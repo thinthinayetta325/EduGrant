@@ -145,13 +145,9 @@ $current_page = 'reviewers';
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div>
                     <h2 class="card-title">👥 <?php echo $sidebar_lang['page_title']; ?></h2>
-                    <p class="card-subtitle"><?php echo $is_mm ? 'စိစစ်ရေးမှူးများစီမံခန့်ခွဲရန်' : 'Manage Reviewers'; ?></p>
+                    <!-- <p class="card-subtitle"><?php echo $is_mm ? 'စိစစ်ရေးမှူးများစီမံခန့်ခွဲရန်' : 'Manage Reviewers'; ?></p> -->
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-                    <a href="?lang=en" style="text-decoration:none;color:<?php echo !$is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo !$is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo !$is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">ENG</a>
-                    <span style="color:#cbd5e1;">|</span>
-                    <a href="?lang=mm" style="text-decoration:none;color:<?php echo $is_mm ? '#006D69' : '#94a3b8'; ?>;font-weight:<?php echo $is_mm ? '700' : '400'; ?>;font-size:12px;padding:2px 8px;border-radius:4px;background:<?php echo $is_mm ? 'rgba(0,109,105,0.1)' : 'transparent'; ?>">မြန်မာ</a>
-                </div>
+               
                 <button class="btn-green-sm" onclick="openModal('addModal')">+ Add Reviewer</button>
             </div>
 

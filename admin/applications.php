@@ -28,7 +28,7 @@ $sidebar_lang = $is_mm ? [
     'bank_verify' => 'Bank Verification',
     'recipients' => 'Recipients ',
     'disbursements' => 'Disbursements',
-    'reports' => 'Analytics Reports',
+    'reports' => 'Reports',
     'logout' => 'Logout',
     'page_title' => ' Applications',
 ];

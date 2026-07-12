@@ -46,6 +46,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_app->execute();
             $stmt_app->close();
             
+            // Mark reviewer notifications as read for this application
+            $mark_read = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE reviewer_id = ? AND type = 'new_application' AND is_read = 0");
+            if ($mark_read) {
+                $mark_read->bind_param("i", $reviewer_id);
+                $mark_read->execute();
+                $mark_read->close();
+            }
+
             // Commit database adjustments securely
             $conn->commit();
 
