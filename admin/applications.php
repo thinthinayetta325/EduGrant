@@ -117,6 +117,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
 ?>
 <!DOCTYPE html>
 <html lang="en">
+<script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -188,6 +189,48 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
         .status-link.active { background: #053b29; color: #fff; }
         .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
         .badge-count { margin-left: auto; background: rgba(255,255,255,0.1); padding: 1px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+
+        /* Dark Mode */
+        html.dark-mode body { background: #0f172a; color: #e2e8f0; }
+        html.dark-mode .sidebar { background: #1e293b; }
+        html.dark-mode .sidebar-brand { border-bottom-color: rgba(255,255,255,0.06); }
+        html.dark-mode .menu-item a { color: rgba(255,255,255,0.55); }
+        html.dark-mode .menu-item a:hover, html.dark-mode .menu-item.active a { background: #334155; color: #fff; }
+        html.dark-mode .menu-item.active a { background: rgba(255,215,0,0.08); color: #FFD700; }
+        html.dark-mode .sidebar-footer { border-top-color: rgba(255,255,255,0.08); }
+        html.dark-mode .top-header { background: rgba(30,41,59,0.8); border-bottom-color: #334155; }
+        html.dark-mode .top-header h1 { color: #f1f5f9; }
+        html.dark-mode .admin-card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .card-title { color: #f1f5f9; }
+        html.dark-mode .card-subtitle { color: #94a3b8; }
+        html.dark-mode table { color: #e2e8f0; }
+        html.dark-mode thead { background: #1e293b; }
+        html.dark-mode thead th { color: #94a3b8; border-bottom-color: #334155; }
+        html.dark-mode tbody td { border-bottom-color: #334155; color: #e2e8f0; }
+        html.dark-mode tbody tr:hover td { background: rgba(255,255,255,0.03); }
+        html.dark-mode .status-link { color: #94a3b8; background: #1e293b; border-color: #334155; }
+        html.dark-mode .status-link.active { background: #10b981; color: #fff; border-color: #10b981; }
+        html.dark-mode .status-link:hover:not(.active) { background: #334155; }
+        html.dark-mode .badge-submitted { background: rgba(37,99,235,0.15); color: #60a5fa; }
+        html.dark-mode .badge-review { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        html.dark-mode .badge-recommended { background: rgba(22,163,74,0.15); color: #4ade80; }
+        html.dark-mode .badge-approved { background: rgba(22,163,74,0.15); color: #4ade80; }
+        html.dark-mode .badge-rejected { background: rgba(220,38,38,0.15); color: #f87171; }
+        html.dark-mode .form-input, html.dark-mode .form-select {
+            background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9;
+        }
+        html.dark-mode .btn-blue-sm { opacity: 0.9; }
+        html.dark-mode .action-link { color: #5eead4; }
+        html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
+        html.dark-mode .bottom-links a { color: #94a3b8; }
+        html.dark-mode .language-switch { background: linear-gradient(135deg, #334155, #1e293b); border-color: #475569; }
+        html.dark-mode .profile-link { background: #334155; border-color: #475569; }
+        html.dark-mode .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
+        html.dark-mode .profile-dropdown-menu a:hover { background: #334155; }
+        html.dark-mode .profile-dropdown-menu hr { border-top-color: #334155; }
+        html.dark-mode .notif-btn { background: #334155; border-color: #475569; }
+        html.dark-mode .btn-outline { border-color: #475569; color: #94a3b8; }
+        html.dark-mode .btn-outline:hover { background: #334155; }
     </style>
      <?php include_once 'admin-style.php'; ?>
 </head>

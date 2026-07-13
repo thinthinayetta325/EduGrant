@@ -118,14 +118,16 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
             position: relative; z-index: 1;
             padding: 0;
             height: calc(100vh - 61px);
-            overflow-y: auto;
+            overflow: hidden;
             display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
         }
 
         /* Compact profile header */
         .profile-header {
-            max-width: 600px; margin: 0 auto; padding: 16px 24px 12px;
+            max-width: 600px; width: 100%; margin: 0 auto; padding: 16px 24px 12px;
             display: flex; align-items: center; gap: 14px;
+            flex-shrink: 0;
         }
         .profile-header .avatar-ring {
             width: 56px; height: 56px; border-radius: 50%;
@@ -171,9 +173,9 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
 
         /* Content grid */
         .content-grid {
-            max-width: 600px; margin: 0 auto; padding: 0 24px 16px;
+            max-width: 600px; width: 100%; margin: 0 auto; padding: 0 24px 16px;
             display: flex; flex-direction: column; gap: 16px;
-            flex: 1;
+            flex-shrink: 1; min-height: 0;
         }
 
         .card {
@@ -255,7 +257,8 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
 
         /* Alert */
         .alert {
-            max-width: 600px; margin: 10px auto 10px; padding: 0 24px;
+            max-width: 600px; width: 100%; margin: 10px auto 10px; padding: 0 24px;
+            flex-shrink: 0;
         }
         .alert > span, .alert {
             padding: 10px 16px; border-radius: 10px;
@@ -273,10 +276,11 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
 
         /* Back link */
         .back-link {
-            max-width: 600px; margin: 16px auto 0; padding: 0 24px;
-            display: inline-flex; align-items: center; gap: 6px;
+            max-width: 600px; width: 100%; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
             font-size: 12px; color: #64748b;
             text-decoration: none; transition: color 0.2s;
+            flex-shrink: 0;
         }
         .back-link:hover { color: #006D69; }
         .back-link svg { width: 16px; height: 16px; }
@@ -304,33 +308,6 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
                 <?php echo htmlspecialchars($msg); ?>
             </div>
         <?php endif; ?>
-
-        <!-- Compact Profile Header -->
-        <div class="profile-header">
-            <div class="avatar-ring" onclick="document.getElementById('avatarInput').click()">
-                <div class="avatar-inner">
-                    <?php if (!empty($reviewer_data['profile_image']) && file_exists('../uploads/profile_pics/' . $reviewer_data['profile_image'])): ?>
-                        <img src="../uploads/profile_pics/<?php echo htmlspecialchars($reviewer_data['profile_image']); ?>" alt="">
-                    <?php else: ?>
-                        <span class="avatar-letter"><?php echo strtoupper(substr($reviewer_data['name'], 0, 1)); ?></span>
-                    <?php endif; ?>
-                </div>
-                <div class="avatar-edit-overlay">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/>
-                    </svg>
-                </div>
-                <form method="POST" enctype="multipart/form-data" style="display:none;">
-                    <input type="hidden" name="action" value="upload_image">
-                    <input type="file" name="profile_image" id="avatarInput" accept="image/jpeg,image/png,image/gif,image/webp" onchange="this.form.submit()">
-                </form>
-            </div>
-            <div class="profile-header-text">
-                <h2 class="profile-header-name"><?php echo htmlspecialchars($reviewer_data['name']); ?></h2>
-                <p class="profile-header-role">Active Reviewer &middot; #<?php echo $reviewer_data['id']; ?></p>
-            </div>
-        </div>
 
         <!-- Cards -->
         <div class="content-grid">

@@ -84,6 +84,7 @@ $unread_q->close();
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
+<script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -103,6 +104,32 @@ $unread_q->close();
         .notif-row:hover { background: #f8fafc; }
         .notif-unread { background: #f0fdf4; }
         .notif-unread:hover { background: #dcfce7; }
+
+        /* Dark Mode */
+        html.dark-mode body { background: #0f172a; color: #e2e8f0; }
+        html.dark-mode .sidebar { background: #1e293b; }
+        html.dark-mode .sidebar-brand { border-bottom-color: rgba(255,255,255,0.06); }
+        html.dark-mode .menu-item a { color: rgba(255,255,255,0.55); }
+        html.dark-mode .menu-item a:hover { background: #334155; color: #fff; }
+        html.dark-mode .menu-item.active a { background: rgba(255,215,0,0.08); color: #FFD700; }
+        html.dark-mode .sidebar-footer { border-top-color: rgba(255,255,255,0.08); }
+        html.dark-mode .card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .card-header { border-bottom-color: #334155; }
+        html.dark-mode .card-header h3, html.dark-mode .card-header .title { color: #f1f5f9; }
+        html.dark-mode .notif-card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .notif-card:hover { background: #253349; }
+        html.dark-mode .notif-card.unread { background: rgba(16,185,129,0.08); border-left-color: #10b981; }
+        html.dark-mode .notif-card.unread:hover { background: rgba(16,185,129,0.12); }
+        html.dark-mode .notif-icon { background: #334155; }
+        html.dark-mode .notif-title { color: #f1f5f9; }
+        html.dark-mode .notif-message { color: #94a3b8; }
+        html.dark-mode .notif-meta { color: #64748b; }
+        html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
+        html.dark-mode .bottom-links a { color: #94a3b8; }
+        html.dark-mode .notif-row { border-bottom-color: #334155; }
+        html.dark-mode .notif-row:hover { background: #1a2744; }
+        html.dark-mode .notif-unread { background: rgba(16,185,129,0.08); }
+        html.dark-mode .notif-unread:hover { background: rgba(16,185,129,0.12); }
     </style>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">

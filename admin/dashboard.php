@@ -118,6 +118,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+<script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -624,6 +625,38 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .welcome-banner p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
         .welcome-banner .btn-primary { background: #FFD700; color: #004D4A; }
         .welcome-banner .btn-primary:hover { background: #fff; color: #006D69; }
+
+        /* Dark Mode */
+        html.dark-mode .sidebar { background: #1e293b; }
+        html.dark-mode .sidebar-brand { border-bottom-color: rgba(255,255,255,0.06); }
+        html.dark-mode .admin-profile { border-bottom-color: rgba(255,255,255,0.06); }
+        html.dark-mode .sidebar-footer { border-top-color: rgba(255,255,255,0.08); }
+        html.dark-mode .top-header { background: rgba(30,41,59,0.8); border-bottom-color: #334155; }
+        html.dark-mode .top-header h1 { color: #f1f5f9; }
+        html.dark-mode .card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .card-header h3 { color: #f1f5f9; }
+        html.dark-mode .card-header .card-action { color: #5eead4; }
+        html.dark-mode .stat-card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .welcome-banner { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        html.dark-mode .admin-table td { border-bottom-color: #334155; color: #e2e8f0; }
+        html.dark-mode .admin-table tr:hover td { background: rgba(255,255,255,0.03); }
+        html.dark-mode .admin-table th { color: #94a3b8; border-bottom-color: #334155; }
+        html.dark-mode .flex-list-item { border-bottom-color: #334155; }
+        html.dark-mode .flex-list-item .name { color: #e2e8f0; }
+        html.dark-mode .chart-track { background: #334155; }
+        html.dark-mode .quick-item { background: #1e293b; color: #e2e8f0; border-color: #334155; }
+        html.dark-mode .quick-item:hover { background: #334155; border-color: #FFD700; }
+        html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
+        html.dark-mode .bottom-links a { color: #94a3b8; }
+        html.dark-mode .notif-btn { background: #334155; }
+        html.dark-mode .notif-btn:hover { background: #475569; }
+        html.dark-mode .btn-outline { border-color: #475569; color: #94a3b8; }
+        html.dark-mode .btn-outline:hover { background: #334155; }
+        html.dark-mode .badge-recommended, html.dark-mode .badge-approved { background: rgba(22,163,74,0.15); color: #4ade80; }
+        html.dark-mode .badge-pending, html.dark-mode .badge-review { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        html.dark-mode .badge-submitted { background: rgba(37,99,235,0.15); color: #60a5fa; }
+        html.dark-mode .badge-rejected { background: rgba(220,38,38,0.15); color: #f87171; }
+        html.dark-mode .recipient-avatars span { border-color: #1e293b; }
     </style>
          <?php include_once 'admin-style.php'; ?>
 </head>

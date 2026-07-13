@@ -81,6 +81,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $msg = 'Profile updated but invalid image type. Allowed: jpg, jpeg, png, gif, webp.';
             }
         }
+
+        if (!empty($_POST['current_password']) && !empty($_POST['new_password'])) {
+            $current = $_POST['current_password'];
+            $new = $_POST['new_password'];
+            $confirm = $_POST['confirm_password'];
+            if (password_verify($current, $admin_data['password'])) {
+                if ($new === $confirm) {
+                    if (strlen($new) >= 6) {
+                        $hash = password_hash($new, PASSWORD_DEFAULT);
+                        $conn->query("UPDATE admin SET password='$hash' WHERE id=$admin_id");
+                        $msg = 'Profile and password updated successfully.';
+                    } else {
+                        $msg = 'Profile updated. New password must be at least 6 characters.';
+                    }
+                } else {
+                    $msg = 'Profile updated. New passwords do not match.';
+                }
+            } else {
+                $msg = 'Profile updated. Current password is incorrect.';
+            }
+        }
     } elseif (isset($_POST['action']) && $_POST['action'] === 'upload_image') {
         if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
             $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
@@ -108,21 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $msg = 'No file selected or upload error.';
         }
-    } elseif (isset($_POST['action']) && $_POST['action'] === 'change_password') {
-        $current = $_POST['current_password'];
-        $new = $_POST['new_password'];
-        $confirm = $_POST['confirm_password'];
-        if (password_verify($current, $admin_data['password'])) {
-            if ($new === $confirm) {
-                $hash = password_hash($new, PASSWORD_DEFAULT);
-                $conn->query("UPDATE admin SET password='$hash' WHERE id=$admin_id");
-                $msg = 'Password changed successfully.';
-            } else {
-                $msg = 'New passwords do not match.';
-            }
-        } else {
-            $msg = 'Current password is incorrect.';
-        }
     }
 }
 
@@ -132,6 +138,7 @@ $current_page = 'profile';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+<script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -193,7 +200,7 @@ $current_page = 'profile';
         .lang-switch a { text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; transition: var(--transition); color: var(--text-muted); }
         .lang-switch a.active { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
-        .dashboard-body { flex-grow: 1; padding: 24px 32px; overflow-y: auto; }
+        .dashboard-body { flex-grow: 1; padding: 24px 32px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
         .profile-alerts { margin-bottom: 20px; }
         .msg { padding: 14px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease; }
@@ -283,13 +290,61 @@ $current_page = 'profile';
             .profile-left { width: 100%; }
             .stats-row { grid-template-columns: repeat(2, 1fr); }
         }
+
+        /* Dark Mode */
+        html.dark-mode { --card-bg: #1e293b; --body-bg: #0f172a; --border: #334155; --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b; }
+        html.dark-mode body { background: #0f172a; color: #e2e8f0; }
+        html.dark-mode .sidebar { background: #1e293b; }
+        html.dark-mode .sidebar-brand { border-bottom-color: rgba(255,255,255,0.06); }
+        html.dark-mode .menu-item a { color: rgba(255,255,255,0.55); }
+        html.dark-mode .menu-item a:hover, html.dark-mode .menu-item.active a { background: #334155; color: #fff; }
+        html.dark-mode .menu-item.active a { background: rgba(255,215,0,0.08); color: #FFD700; }
+        html.dark-mode .sidebar-footer { border-top-color: rgba(255,255,255,0.08); }
+        html.dark-mode .top-header { background: rgba(30,41,59,0.8); border-bottom-color: #334155; }
+        html.dark-mode .top-header h1 { color: #f1f5f9; }
+        html.dark-mode .card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .card-header { border-bottom-color: #334155; }
+        html.dark-mode .card-header h3 { color: #f1f5f9; }
+        html.dark-mode .profile-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-color: #334155; }
+        html.dark-mode .avatar-wrapper { border-color: #1e293b; }
+        html.dark-mode .avatar-badge { border-color: #1e293b; }
+        html.dark-mode .stat-item { background: rgba(255,255,255,0.03); border-color: #334155; }
+        html.dark-mode .stat-number { color: #5eead4; }
+        html.dark-mode .stat-label { color: #94a3b8; }
+        html.dark-mode .msg-success { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.2); }
+        html.dark-mode .msg-error { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.2); }
+        html.dark-mode input[type="text"], html.dark-mode input[type="email"], html.dark-mode input[type="password"], html.dark-mode input[type="file"], html.dark-mode select, html.dark-mode textarea {
+            background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9;
+        }
+        html.dark-mode ::placeholder { color: #64748b; }
+        html.dark-mode label { color: #94a3b8; }
+        html.dark-mode .file-upload { background: #1e293b; border-color: #475569; }
+        html.dark-mode .badge-approved { background: rgba(22,163,74,0.15); color: #4ade80; }
+        html.dark-mode .badge-rejected { background: rgba(220,38,38,0.15); color: #f87171; }
+        html.dark-mode .badge-pending { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        html.dark-mode .badge-submitted { background: rgba(37,99,235,0.15); color: #60a5fa; }
+        html.dark-mode .modal-overlay { background: rgba(15,23,42,0.7); }
+        html.dark-mode .modal { background: #1e293b; border-color: #334155; }
+        html.dark-mode .modal-header { border-bottom-color: #334155; }
+        html.dark-mode .modal-header h3 { color: #f1f5f9; }
+        html.dark-mode .close-btn { color: #94a3b8; }
+        html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
+        html.dark-mode .bottom-links a { color: #94a3b8; }
+        html.dark-mode .language-switch { background: linear-gradient(135deg, #334155, #1e293b); border-color: #475569; }
+        html.dark-mode .profile-link { background: #334155; border-color: #475569; }
+        html.dark-mode .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
+        html.dark-mode .profile-dropdown-menu a:hover { background: #334155; }
+        html.dark-mode .profile-dropdown-menu hr { border-top-color: #334155; }
+        html.dark-mode .notif-btn { background: #334155; border-color: #475569; }
+        html.dark-mode .btn-outline { border-color: #475569; color: #94a3b8; }
+        html.dark-mode .btn-outline:hover { background: #334155; }
     </style>
          <?php include_once 'admin-style.php'; ?>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 <?php include 'sidebar.php'; ?>
 
-<div class="workspace">
+<div class="workspace overflow-hidden">
     <?php $page_title = $sidebar_lang['page_title'] ?? 'Admin Profile'; include 'header.php'; ?>
 
     <div class="dashboard-body">
@@ -299,132 +354,63 @@ $current_page = 'profile';
                     <span><?php echo strpos($msg, 'success') !== false ? '✓' : '✕'; ?></span>
                     <?php echo $msg; ?>
                 </div>
-            <?php endif; ?>
+            <?php endif; ?>i
         </div>
 
-        <div class="profile-grid">
-            <div class="profile-left">
-                <div class="card">
-                    <div class="profile-hero">
-                        <div class="profile-avatar" onclick="document.getElementById('avatarInput').click()">
+        <div style="max-width:700px;">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Edit Profile & Security</h3>
+                        <p class="card-subtitle">Update your personal information and password</p>
+                    </div>
+                </div>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="update_profile">
+
+                    <div class="form-group">
+                        <label>Profile Photo</label>
+                        <div class="file-upload">
                             <?php if (!empty($admin_data['profile_image']) && file_exists('../uploads/profile_pics/' . $admin_data['profile_image'])): ?>
-                                <img src="../uploads/profile_pics/<?php echo $admin_data['profile_image']; ?>" alt="">
+                                <img src="../uploads/profile_pics/<?php echo $admin_data['profile_image']; ?>" alt="" style="width:44px;height:44px;border-radius:12px;object-fit:cover;border:2px solid var(--border);flex-shrink:0;">
                             <?php else: ?>
-                                <?php echo strtoupper(substr($admin_data['name'], 0, 1)); ?>
+                                <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#006D69,#003D3B);display:flex;align-items:center;justify-content:center;color:#FFD700;font-weight:700;font-size:18px;flex-shrink:0;"><?php echo strtoupper(substr($admin_data['name'], 0, 1)); ?></div>
                             <?php endif; ?>
-                            <div class="avatar-badge">✓</div>
-                            <div class="avatar-overlay">📷</div>
-                            <form method="POST" enctype="multipart/form-data" style="display:none;">
-                                <input type="hidden" name="action" value="upload_image">
-                                <input type="file" name="profile_image" id="avatarInput" accept="image/jpeg,image/png,image/gif,image/webp" onchange="this.form.submit()">
-                            </form>
-                        </div>
-                        <div class="profile-info">
-                            <h2><?php echo htmlspecialchars($admin_data['name']); ?></h2>
-                            <div class="role">
-                                <span>System Administrator</span>
-                                <span class="role-badge">Active</span>
-                            </div>
-                            <div class="profile-meta">
-                                <span>📧 <?php echo htmlspecialchars($admin_data['email']); ?></span>
-                                <span>🆔 #<?php echo $admin_data['id']; ?></span>
-                                <span>⚡ <?php echo $total_actions; ?> approvals</span>
-                            </div>
+                            <input type="file" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp">
                         </div>
                     </div>
-                </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h3>Account Details</h3>
-                            <p class="card-subtitle">Your personal information</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="name" class="form-input" value="<?php echo htmlspecialchars($admin_data['name']); ?>" required>
                         </div>
-                        <button class="btn btn-gold btn-sm" onclick="document.getElementById('editModal').style.display='flex'">✏️ Edit</button>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" name="email" class="form-input" value="<?php echo htmlspecialchars($admin_data['email']); ?>" required>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Full Name</span>
-                        <span class="info-value"><?php echo htmlspecialchars($admin_data['name']); ?></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Email Address</span>
-                        <span class="info-value"><?php echo htmlspecialchars($admin_data['email']); ?></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Role</span>
-                        <span class="info-value">System Administrator</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Admin ID</span>
-                        <span class="info-value">#<?php echo $admin_data['id']; ?></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Account Status</span>
-                        <span class="info-value"><span class="badge badge-approved">Active</span></span>
-                    </div>
-                </div>
-            </div>
 
-            <div class="profile-right">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>🔒 Change Password</h3>
+                    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
+
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" name="current_password" class="form-input" placeholder="Leave blank to keep current password">
                     </div>
-                    <form method="POST">
-                        <input type="hidden" name="action" value="change_password">
-                        <div class="form-group">
-                            <label>Current Password</label>
-                            <input type="password" name="current_password" class="form-input" required>
-                        </div>
-                        <div class="form-group">
-                            <label>New Password</label>
-                            <input type="password" name="new_password" class="form-input" id="newPass" required oninput="checkStrength(this.value)">
-                            <div class="password-strength"><div class="fill" id="strengthFill"></div></div>
-                        </div>
-                        <div class="form-group">
-                            <label>Confirm New Password</label>
-                            <input type="password" name="confirm_password" class="form-input" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Update Password</button>
-                    </form>
-                </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" name="new_password" class="form-input" placeholder="Enter new password" oninput="checkStrength(this.value)">
+                        <div class="password-strength"><div class="fill" id="strengthFill"></div></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="confirm_password" class="form-input" placeholder="Confirm new password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">Save All Changes</button>
+                </form>
             </div>
         </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="editModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h3>✏️ Edit Profile</h3>
-            <button class="modal-close" onclick="document.getElementById('editModal').style.display='none'">&times;</button>
-        </div>
-        <form method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="action" value="update_profile">
-            <div class="form-group">
-                <label>Profile Photo</label>
-                <div class="file-upload">
-                    <?php if (!empty($admin_data['profile_image']) && file_exists('../uploads/profile_pics/' . $admin_data['profile_image'])): ?>
-                        <img src="../uploads/profile_pics/<?php echo $admin_data['profile_image']; ?>" alt="" style="width:44px;height:44px;border-radius:12px;object-fit:cover;border:2px solid var(--border);flex-shrink:0;">
-                    <?php else: ?>
-                        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#006D69,#003D3B);display:flex;align-items:center;justify-content:center;color:#FFD700;font-weight:700;font-size:18px;flex-shrink:0;"><?php echo strtoupper(substr($admin_data['name'], 0, 1)); ?></div>
-                    <?php endif; ?>
-                    <input type="file" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="name" class="form-input" value="<?php echo htmlspecialchars($admin_data['name']); ?>" required>
-            </div>
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" name="email" class="form-input" value="<?php echo htmlspecialchars($admin_data['email']); ?>" required>
-            </div>
-            <div style="display:flex;gap:12px;margin-top:24px;">
-                <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
-                <button type="button" class="btn btn-outline" onclick="document.getElementById('editModal').style.display='none'" style="flex:1;">Cancel</button>
-            </div>
-        </form>
     </div>
 </div>
 
@@ -442,9 +428,6 @@ function checkStrength(val) {
     else if (score < 75) fill.style.background = '#10b981';
     else fill.style.background = '#059669';
 }
-document.getElementById('editModal').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-});
 </script>
 </body>
 </html>

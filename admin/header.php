@@ -44,6 +44,7 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     }
 }
 ?>
+<script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
 <div class="top-header">
     <div>
         <h1><?php echo htmlspecialchars($page_title); ?></h1>
@@ -63,19 +64,10 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
             </a>
         </div>
 
-        <!-- <form class="header-search" action="search.php" method="GET">
-            <span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-            </span>
-            <input type="text" name="q" placeholder="Search applications, students..."
-                   value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
-            <?php if ($lang_param): ?>
-                <input type="hidden" name="lang" value="<?php echo $lang_param; ?>">
-            <?php endif; ?>
-        </form> -->
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
 
         <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="notif-btn" title="Notifications">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -140,3 +132,68 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
         </div>
     </div>
 </div>
+<style>
+    .theme-toggle {
+        display: flex; align-items: center; justify-content: center;
+        width: 38px; height: 38px; border-radius: 10px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid var(--border); color: var(--text-secondary);
+        cursor: pointer; transition: 0.2s ease;
+    }
+    .theme-toggle:hover { background: #fff; border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
+    .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
+    html.dark-mode .theme-toggle .icon-sun { display: block; }
+    html:not(.dark-mode) .theme-toggle .icon-moon { display: block; }
+
+    html.dark-mode {
+        --card-bg: #1e293b;
+        --body-bg: #0f172a;
+        --border: #334155;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3);
+        --shadow-lg: 0 10px 25px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.2);
+        color-scheme: dark;
+    }
+    html.dark-mode body { background: var(--body-bg); color: var(--text-primary); }
+    html.dark-mode .top-header { background: rgba(30,41,59,0.8); border-bottom-color: #334155; }
+    html.dark-mode .profile-link { background: #334155; border-color: #475569; }
+    html.dark-mode .profile-link:hover { background: #475569; }
+    html.dark-mode .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
+    html.dark-mode .profile-dropdown-menu a:hover { background: #334155; }
+    html.dark-mode .profile-dropdown-menu hr { border-top-color: #334155; }
+    html.dark-mode .notif-btn { background: #334155; border-color: #475569; }
+    html.dark-mode .notif-btn:hover { background: #475569; border-color: #006D69; }
+    html.dark-mode .language-switch { background: linear-gradient(135deg, #334155, #1e293b); border-color: #475569; }
+    html.dark-mode .theme-toggle { background: #334155; border-color: #475569; }
+    html.dark-mode .theme-toggle:hover { background: #475569; border-color: #006D69; }
+    html.dark-mode .sidebar { background: #1e293b; }
+    html.dark-mode .menu-item a { color: rgba(255,255,255,0.55); }
+    html.dark-mode .menu-item a:hover { background: #334155; color: #fff; }
+    html.dark-mode .menu-item.active a { background: rgba(255,215,0,0.08); color: #FFD700; }
+    html.dark-mode .card { background: #1e293b; border-color: #334155; }
+    html.dark-mode .form-input { background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9; }
+    html.dark-mode .form-input:focus { background: rgba(255,255,255,0.07); }
+    html.dark-mode .btn-outline { border-color: #475569; color: #94a3b8; }
+    html.dark-mode .msg-success { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.2); }
+    html.dark-mode .msg-error { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.2); }
+    html.dark-mode table { color: #e2e8f0; }
+    html.dark-mode thead { background: #1e293b; }
+    html.dark-mode tbody tr { border-color: #334155; }
+    html.dark-mode tbody tr:hover { background: rgba(255,255,255,0.03); }
+    html.dark-mode .notif-row { border-color: #334155; }
+    html.dark-mode .notif-row:hover { background: rgba(255,255,255,0.03); }
+    html.dark-mode .notif-unread { background: rgba(16,185,129,0.08); }
+    html.dark-mode input[type="text"], html.dark-mode input[type="email"], html.dark-mode input[type="password"], html.dark-mode select, html.dark-mode textarea {
+        background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9;
+    }
+    html.dark-mode ::placeholder { color: #64748b; }
+    html.dark-mode .file-upload { background: #1e293b; border-color: #475569; }
+</style>
+<script>
+function toggleTheme() {
+    document.documentElement.classList.toggle('dark-mode');
+    localStorage.setItem('admin_theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+</script>

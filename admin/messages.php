@@ -83,6 +83,7 @@ $messages = $conn->query("SELECT * FROM contact_messages ORDER BY created_at DES
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
+<script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -108,6 +109,28 @@ $messages = $conn->query("SELECT * FROM contact_messages ORDER BY created_at DES
         .btn-mark-read:hover { background: #005753; }
         .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+        /* Dark Mode */
+        html.dark-mode body { background: #0f172a; color: #e2e8f0; }
+        html.dark-mode .sidebar { background: #1e293b; }
+        html.dark-mode .sidebar-brand { border-bottom-color: rgba(255,255,255,0.06); }
+        html.dark-mode .menu-item a { color: rgba(255,255,255,0.55); }
+        html.dark-mode .menu-item a:hover { background: #334155; color: #fff; }
+        html.dark-mode .menu-item.active a { background: rgba(255,215,0,0.08); color: #FFD700; }
+        html.dark-mode .sidebar-footer { border-top-color: rgba(255,255,255,0.08); }
+        html.dark-mode .card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .card-header { border-bottom-color: #334155; }
+        html.dark-mode .card-header h3, html.dark-mode .card-header .title { color: #f1f5f9; }
+        html.dark-mode .message-card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .message-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        html.dark-mode .message-card.unread { border-left-color: #10b981; background: rgba(16,185,129,0.06); }
+        html.dark-mode .message-header { border-bottom-color: #334155; }
+        html.dark-mode .message-sender { color: #f1f5f9; }
+        html.dark-mode .message-subject { color: #94a3b8; }
+        html.dark-mode .message-date { color: #64748b; }
+        html.dark-mode .message-body { border-top-color: #334155; color: #cbd5e1; }
+        html.dark-mode .message-meta { color: #64748b; }
+        html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
+        html.dark-mode .bottom-links a { color: #94a3b8; }
     </style>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
