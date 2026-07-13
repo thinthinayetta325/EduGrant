@@ -68,12 +68,15 @@ if ($is_logged_in) {
     include '../config/db.php';
     $student_id = $_SESSION['student_id'];
     
-    // Get name
-    $stmt = $conn->prepare("SELECT name FROM student WHERE id = ?");
+    // Get name and email
+    $stmt = $conn->prepare("SELECT name, email FROM student WHERE id = ?");
     $stmt->bind_param("i", $student_id);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
-    if ($res) { $student_data['name'] = $res['name']; }
+    if ($res) {
+        $student_data['name'] = $res['name'];
+        $student_data['email'] = $res['email'];
+    }
     $stmt->close();
 
     // Get unread notification counts
@@ -84,6 +87,46 @@ if ($is_logged_in) {
         $unread_count = $count_query->get_result()->fetch_assoc()['unread'] ?? 0;
         $count_query->close();
     }
+
+    // Handle contact form submission
+    $form_success = '';
+    $form_error = '';
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
+        $c_full_name = trim($_POST['full_name'] ?? '');
+        $c_email = trim($_POST['email'] ?? '');
+        $c_subject = trim($_POST['subject'] ?? '');
+        $c_message = trim($_POST['message'] ?? '');
+
+        if ($c_full_name !== '' && $c_email !== '' && $c_subject !== '' && $c_message !== '') {
+            $insert_msg = $conn->prepare("INSERT INTO contact_messages (student_id, full_name, email, subject, message) VALUES (?, ?, ?, ?, ?)");
+            if ($insert_msg) {
+                $insert_msg->bind_param("issss", $student_id, $c_full_name, $c_email, $c_subject, $c_message);
+                if ($insert_msg->execute()) {
+                    $insert_msg->close();
+
+                    // Create notification for admin (admin_id = 1)
+                    $admin_id = 1;
+                    $notif_title = 'New Contact Message';
+                    $notif_msg = htmlspecialchars($c_full_name) . ' sent a message: ' . htmlspecialchars($c_subject);
+                    $insert_notif = $conn->prepare("INSERT INTO notifications (admin_id, title, message, type, is_read) VALUES (?, ?, ?, 'contact_message', 0)");
+                    if ($insert_notif) {
+                        $insert_notif->bind_param("iss", $admin_id, $notif_title, $notif_msg);
+                        $insert_notif->execute();
+                        $insert_notif->close();
+                    }
+
+                    $form_success = $is_mm ? 'သင့်စာတစ်�ပို့ပြီးပါပြီ။' : 'Your message has been sent successfully!';
+                } else {
+                    $form_error = $is_mm ? 'စာပို့ရာတွင် အမှားရှိနေပါသည်။' : 'Failed to send message. Please try again.';
+                }
+            } else {
+                $form_error = $is_mm ? 'စာပို့ရာတွင် အမှားရှိနေပါသည်။' : 'Failed to send message. Please try again.';
+            }
+        } else {
+            $form_error = $is_mm ? 'ကျေးဇူးပြု၍ အချက်အလက်အားလုံးကို ဖြည့်ပါ။' : 'Please fill in all fields.';
+        }
+    }
+
     $conn->close();
 }
 ?>
@@ -135,7 +178,7 @@ if ($is_logged_in) {
                 <a href="../user/index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active(['index.php','home.php']) ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_home']; ?></a>
                 <a href="../user/scholarships.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('scholarships.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_scholarships']; ?></a>
                 <a href="../user/status.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('status.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_status']; ?></a>
-                <a href="../common/contact.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
+                <a href="../user/contact.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
             </nav>
 
             <!-- Language Switcher and Status Actions -->
@@ -245,30 +288,37 @@ if ($is_logged_in) {
                     <?php echo $c_lang['form_title']; ?>
                 </h3>
 
-                <form action="#" method="POST" class="space-y-5">
+                <?php if ($form_success): ?>
+                    <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl font-medium"><?php echo $form_success; ?></div>
+                <?php endif; ?>
+                <?php if ($form_error): ?>
+                    <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium"><?php echo $form_error; ?></div>
+                <?php endif; ?>
+
+                <form action="?lang=<?php echo $lang_param; ?>" method="POST" class="space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $c_lang['label_name']; ?></label>
-                            <input type="text" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                            <input type="text" name="full_name" value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $c_lang['label_email']; ?></label>
-                            <input type="email" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                            <input type="email" name="email" value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $c_lang['label_subject']; ?></label>
-                        <input type="text" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                        <input type="text" name="subject" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $c_lang['label_message']; ?></label>
-                        <textarea rows="5" required placeholder="<?php echo $c_lang['placeholder_message']; ?>" class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none resize-none"></textarea>
+                        <textarea name="message" rows="5" required placeholder="<?php echo $c_lang['placeholder_message']; ?>" class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none resize-none"></textarea>
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" class="w-full sm:w-auto bg-[#006D69] hover:bg-[#005753] text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg transition transform active:scale-[0.99]">
+                        <button type="submit" name="contact_submit" class="w-full sm:w-auto bg-[#006D69] hover:bg-[#005753] text-white font-bold text-sm px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg transition transform active:scale-[0.99]">
                             <?php echo $c_lang['btn_send']; ?>
                         </button>
                     </div>

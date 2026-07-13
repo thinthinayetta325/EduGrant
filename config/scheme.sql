@@ -130,6 +130,17 @@ CREATE TABLE IF NOT EXISTS reviewer_scheme (
     FOREIGN KEY (reviewer_id)
     REFERENCES reviewers(id)
 );
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT DEFAULT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    subject VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE SET NULL
+);
 CREATE TABLE IF NOT EXISTS application_reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     application_id INT NOT NULL,

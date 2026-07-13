@@ -6,6 +6,15 @@ $pending_bank = $pending_bank ?? 0;
 $lang_param = $lang_param ?? 'en';
 $is_mm = $is_mm ?? false;
 $admin_image = $_SESSION['admin_image'] ?? null;
+
+// Query unread contact messages count directly
+$unread_messages = 0;
+if (isset($conn) && $conn instanceof mysqli) {
+    $msg_result = $conn->query("SELECT COUNT(*) AS cnt FROM contact_messages WHERE is_read = 0");
+    if ($msg_result) {
+        $unread_messages = $msg_result->fetch_assoc()['cnt'] ?? 0;
+    }
+}
 ?>
 <div class="sidebar">
     <div class="sidebar-brand">
@@ -29,6 +38,8 @@ $admin_image = $_SESSION['admin_image'] ?? null;
         <li class="menu-item <?php echo $current_page === 'disbursements' ? 'active' : ''; ?>"><a href="disbursements.php?lang=<?php echo $lang_param; ?>"><span class="icon">💰</span> <?php echo $sidebar_lang['disbursements'] ?? 'Disbursements'; ?></a></li>
         <li class="menu-label">Analytics</li>
         <li class="menu-item <?php echo $current_page === 'reports' ? 'active' : ''; ?>"><a href="reports.php?lang=<?php echo $lang_param; ?>"><span class="icon">📈</span> <?php echo $sidebar_lang['reports'] ?? 'Reports'; ?></a></li>
+        <li class="menu-label">Communication</li>
+        <li class="menu-item <?php echo $current_page === 'messages' ? 'active' : ''; ?>"><a href="messages.php?lang=<?php echo $lang_param; ?>"><span class="icon">✉️</span> <?php echo $sidebar_lang['messages'] ?? 'Messages'; ?><?php if ($unread_messages > 0): ?><span class="badge-count"><?php echo $unread_messages; ?></span><?php endif; ?></a></li>
     </ul>
     <div class="sidebar-footer">
         <a href="../auth/logout.php" class="logout-btn">

@@ -18,6 +18,11 @@ $sidebar_lang = (isset($_GET['lang']) && $_GET['lang'] === 'mm') ? [
     'approval' => 'အတည်ပြုခြင်း',
     'rejection' => 'ပယ်ဖျက်ခြင်း',
     'disbursement' => 'ငွေထုတ်ပေးခြင်း',
+    'contact_message' => 'ဆက်သွယ်ရေးစာတို',
+    'new_application' => 'လျှောက်လွှာအသစ်',
+    'application_status' => 'လျှောက်လွှာအခြေအနေ',
+    'read' => 'ဖတ်ပြီး',
+    'unread' => 'မဖတ်ရသေး',
 ] : [
     'page_title' => 'Notifications',
     'mark_read' => 'Mark as Read',
@@ -28,13 +33,31 @@ $sidebar_lang = (isset($_GET['lang']) && $_GET['lang'] === 'mm') ? [
     'approval' => 'Approval',
     'rejection' => 'Rejection',
     'disbursement' => 'Disbursement',
+    'contact_message' => 'Contact Message',
+    'new_application' => 'New Application',
+    'application_status' => 'Application Status',
+    'read' => 'Read',
+    'unread' => 'Unread',
 ];
 $current_page = 'notifications';
 $lang_param = (isset($_GET['lang']) && $_GET['lang'] === 'mm') ? 'mm' : 'en';
 $is_mm = ($lang_param === 'mm');
 
+// Mark single notification as read
+if (isset($_GET['action']) && $_GET['action'] === 'mark_read' && isset($_GET['id'])) {
+    $notif_id = intval($_GET['id']);
+    $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND admin_id = ?");
+    if ($stmt) {
+        $stmt->bind_param("ii", $notif_id, $admin_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+    header("Location: notifications.php?lang=" . $lang_param);
+    exit();
+}
+
 // Mark all as read
-if (isset($_GET['action']) && $_GET['action'] === 'mark_read') {
+if (isset($_GET['action']) && $_GET['action'] === 'mark_read_all') {
     $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE admin_id = ? AND is_read = 0");
     if ($stmt) {
         $stmt->bind_param("i", $admin_id);
@@ -68,6 +91,19 @@ $unread_q->close();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <?php include_once 'admin-style.php'; ?>
+    <style>
+        .notif-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+        .notif-row:hover { background: #f8fafc; }
+        .notif-unread { background: #f0fdf4; }
+        .notif-unread:hover { background: #dcfce7; }
+    </style>
 </head>
 <body class="<?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 
@@ -80,16 +116,20 @@ $unread_q->close();
         <div class="card" style="max-width:800px;">
             <div class="card-header">
                 <div>
-                    <h3>🔔 <?php echo $sidebar_lang['page_title']; ?> <?php if ($unread_count > 0): ?><span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;margin-left:6px;"><?php echo $unread_count; ?> new</span><?php endif; ?></h3>
+                <?php if ($unread_count > 0): ?>
+                    <h3>🔔 <?php echo $sidebar_lang['page_title']; ?> <span class="notif-count-badge" style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;margin-left:6px;"><?php echo $unread_count; ?></span></h3>
+                <?php else: ?>
+                    <h3>🔔 <?php echo $sidebar_lang['page_title']; ?></h3>
+                <?php endif; ?>
                 </div>
                 <?php if ($unread_count > 0): ?>
-                    <a href="notifications.php?action=mark_read&lang=<?php echo $lang_param; ?>" class="btn-primary" style="font-size:11px;padding:7px 14px;">✓ <?php echo $sidebar_lang['mark_all_read']; ?></a>
+                    <a href="notifications.php?action=mark_read_all&lang=<?php echo $lang_param; ?>" class="btn-primary mark-all-btn" style="font-size:11px;padding:7px 14px;">✓ <?php echo $sidebar_lang['mark_all_read']; ?></a>
                 <?php endif; ?>
             </div>
 
             <?php if ($all_notifications->num_rows > 0): ?>
                 <?php while ($n = $all_notifications->fetch_assoc()): ?>
-                    <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #f1f5f9;<?php echo !$n['is_read'] ? 'background:#f0fdf4;' : ''; ?>">
+                    <div class="notif-row <?php echo !$n['is_read'] ? 'notif-unread' : ''; ?>" onclick="markNotifRead(this, <?php echo $n['id']; ?>)" style="cursor:pointer;">
                         <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:<?php
                             echo match($n['type'] ?? '') {
                                 'bank_details' => '#dbeafe',
@@ -97,6 +137,9 @@ $unread_q->close();
                                 'approval' => '#dcfce7',
                                 'rejection' => '#fee2e2',
                                 'disbursement' => '#e0e7ff',
+                                'contact_message' => '#fef9c3',
+                                'new_application' => '#dbeafe',
+                                'application_status' => '#e0e7ff',
                                 default => '#f1f5f9',
                             };
                         ?>;">
@@ -107,15 +150,20 @@ $unread_q->close();
                                 'approval' => '✅',
                                 'rejection' => '❌',
                                 'disbursement' => '💰',
+                                'contact_message' => '✉️',
+                                'new_application' => '📄',
+                                'application_status' => '📋',
                                 default => '🔔',
                             };
                             ?>
                         </div>
                         <div style="flex-grow:1;">
-                            <div style="display:flex;align-items:center;gap:6px;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                 <strong style="font-size:13px;"><?php echo htmlspecialchars($n['title']); ?></strong>
                                 <?php if (!$n['is_read']): ?>
-                                    <span style="width:7px;height:7px;background:#22c55e;border-radius:50;display:inline-block;"></span>
+                                    <span class="notif-badge" style="background:#22c55e;color:#fff;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;"><?php echo $sidebar_lang['unread']; ?></span>
+                                <?php else: ?>
+                                    <span class="notif-badge" style="background:#e2e8f0;color:#64748b;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;"><?php echo $sidebar_lang['read']; ?></span>
                                 <?php endif; ?>
                             </div>
                             <p style="font-size:12px;color:#64748b;margin-top:3px;"><?php echo htmlspecialchars($n['message']); ?></p>
@@ -134,5 +182,31 @@ $unread_q->close();
 </div>
 
 </body>
+<script>
+function markNotifRead(el, id) {
+    if (el.classList.contains('notif-unread')) {
+        fetch('notifications.php?action=mark_read&id=' + id + '&lang=<?php echo $lang_param; ?>', { method: 'GET' })
+            .then(() => {
+                el.classList.remove('notif-unread');
+                const badge = el.querySelector('.notif-badge');
+                if (badge) {
+                    badge.style.background = '#e2e8f0';
+                    badge.style.color = '#64748b';
+                    badge.textContent = '<?php echo $sidebar_lang["read"]; ?>';
+                }
+                const newBadge = document.querySelector('.notif-count-badge');
+                if (newBadge) {
+                    let n = parseInt(newBadge.textContent) - 1;
+                    if (n <= 0) {
+                        newBadge.remove();
+                        document.querySelector('.mark-all-btn')?.remove();
+                    } else {
+                        newBadge.textContent = n;
+                    }
+                }
+            });
+    }
+}
+</script>
 </html>
 <?php $conn->close(); ?>
