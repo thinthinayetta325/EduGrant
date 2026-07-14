@@ -68,31 +68,29 @@ if ($reviewer_id && isset($conn)) {
 
     /* Top Header */
     .top-header {
-        background: #fff;
+        background: #006D69;
         padding: 14px 28px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1px solid var(--border);
         flex-shrink: 0;
         position: sticky;
         top: 0;
         z-index: 50;
     }
-    .top-header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: var(--text-primary); }
-    .top-header .sub { font-size: 12px; color: var(--text-secondary); font-weight: 400; }
+    .top-header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: #fff; }
+    .top-header .sub { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 400; }
     .header-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
 
     /* Language Switch */
     .language-switch {
         display: flex;
         align-items: center;
-        background: linear-gradient(135deg, #006D69 0%, #004D4A 100%);
+        background: #003D3B;
         border-radius: 8px;
         padding: 3px;
         gap: 2px;
         border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 2px 4px rgba(0,109,105,0.2);
     }
     .language-switch a {
         padding: 6px 12px;
@@ -109,7 +107,6 @@ if ($reviewer_id && isset($conn)) {
         color: #006D69;
         background: #FFD700;
         font-weight: 700;
-        box-shadow: 0 2px 6px rgba(255,215,0,0.3);
     }
     .language-switch span { color: rgba(255,255,255,0.2); font-size: 12px; }
 
@@ -118,27 +115,26 @@ if ($reviewer_id && isset($conn)) {
     .profile-link {
         display: flex; align-items: center; gap: 10px;
         padding: 6px 12px 6px 6px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border: 1px solid var(--border);
+        background: #003D3B;
+        border: 1px solid rgba(255,255,255,0.15);
         border-radius: 40px;
         text-decoration: none;
         transition: var(--transition);
     }
-    .profile-link:hover { background: #fff; border-color: var(--sidebar-bg); box-shadow: var(--shadow); }
+    .profile-link:hover { background: #004D4A; border-color: rgba(255,255,255,0.25); }
     .profile-image {
         width: 36px; height: 36px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #006D69 0%, #004D4A 100%);
+        background: #006D69;
         display: flex; align-items: center; justify-content: center;
-        color: #FFD700; font-weight: 700; font-size: 14px;
-        overflow: hidden; border: 2px solid #fff;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        color: #fff; font-weight: 700; font-size: 14px;
+        overflow: hidden; border: 2px solid rgba(255,255,255,0.2);
         flex-shrink: 0;
     }
     .profile-image img { width: 100%; height: 100%; object-fit: cover; }
     .profile-info { text-align: left; }
-    .profile-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
-    .profile-role { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
+    .profile-name { font-size: 13px; font-weight: 600; color: #fff; line-height: 1.2; }
+    .profile-role { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 400; }
 
     .profile-dropdown-menu {
         position: absolute; top: calc(100% + 8px); right: 0;
@@ -172,13 +168,13 @@ if ($reviewer_id && isset($conn)) {
         width: 38px;
         height: 38px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border: 1px solid var(--border);
-        color: var(--text-secondary);
+        background: #003D3B;
+        border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.7);
         text-decoration: none;
         transition: var(--transition);
     }
-    .notif-btn:hover { background: #fff; border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
+    .notif-btn:hover { background: #004D4A; color: #fff; }
     .notif-count {
         position: absolute;
         top: -5px;
@@ -209,11 +205,12 @@ if ($reviewer_id && isset($conn)) {
     .theme-toggle {
         display: flex; align-items: center; justify-content: center;
         width: 38px; height: 38px; border-radius: 10px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border: 1px solid var(--border); color: var(--text-secondary);
+        background: #003D3B;
+        border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.7);
         cursor: pointer; transition: var(--transition);
     }
-    .theme-toggle:hover { background: #fff; border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
+    .theme-toggle:hover { background: #004D4A; color: #fff; }
     .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
     html.dark-mode .theme-toggle .icon-sun { display: block; }
     html:not(.dark-mode) .theme-toggle .icon-moon { display: block; }
@@ -231,7 +228,7 @@ if ($reviewer_id && isset($conn)) {
         color-scheme: dark;
     }
     html.dark-mode body { background: var(--body-bg); color: var(--text-primary); }
-    html.dark-mode .top-header { background: #1e293b; border-bottom-color: #334155; }
+    html.dark-mode .top-header { background: #1e293b; }
     html.dark-mode .profile-link { background: #334155; border-color: #475569; }
     html.dark-mode .profile-link:hover { background: #475569; }
     html.dark-mode .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
@@ -239,7 +236,7 @@ if ($reviewer_id && isset($conn)) {
     html.dark-mode .profile-dropdown-menu hr { border-top-color: #334155; }
     html.dark-mode .notif-btn { background: #334155; border-color: #475569; }
     html.dark-mode .notif-btn:hover { background: #475569; border-color: #006D69; }
-    html.dark-mode .language-switch { background: linear-gradient(135deg, #334155, #1e293b); border-color: #475569; }
+    html.dark-mode .language-switch { background: #334155; border-color: #475569; }
     html.dark-mode .theme-toggle { background: #334155; border-color: #475569; }
     html.dark-mode .theme-toggle:hover { background: #475569; border-color: #006D69; }
     html.dark-mode .card { background: #1e293b; border-color: #334155; }
@@ -264,9 +261,18 @@ if ($reviewer_id && isset($conn)) {
 </style>
 
 <div class="top-header">
-    <div>
-        <h1><?php echo htmlspecialchars($page_title); ?></h1>
-        <span class="sub"><?php echo date("l, F j, Y"); ?></span>
+    <div style="display:flex;align-items:center;gap:14px;">
+        <a href="dashboard.php?lang=<?php echo $lang_param; ?>" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+            <svg width="32" height="32" style="color:#FFD700;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
+            <div>
+                <div style="font-size:16px;font-weight:700;color:#fff;line-height:1.2;">EduGrant</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:400;">Reviewer</div>
+            </div>
+        </a>
+        <div>
+            <h1><?php echo htmlspecialchars($page_title); ?></h1>
+            <span class="sub"><?php echo date("l, F j, Y"); ?></span>
+        </div>
     </div>
 
     <div class="header-actions">

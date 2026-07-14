@@ -59,7 +59,7 @@ if (isset($is_mm) && $is_mm) {
 } else {
     $page_lang = [
         'badge' => 'Investing In Your Future',
-        'hero_title' => 'Empowering Education,Building Better Futures',
+        'hero_title' => 'Empowering Education,<br class="hidden md:inline"/> Building Better Futures',
         'hero_desc' => 'Unlock exclusive access to government and institutional grants tailored for Myanmar\'s next generation of leaders.',
         'btn_apply' => 'Apply →',
         'btn_view' => 'View Scholarships',
@@ -98,9 +98,26 @@ if (isset($is_mm) && $is_mm) {
     ];
 }
 ?>
+<!-- myanmartaungyi -->
+<style>
+    @font-face {
+        font-family: 'MyanmarTaungyi';
+        src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
 
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+    }
+</style>
 <section class="relative w-full overflow-hidden">
-<?php
+    <?php
 $images = [
     "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80",
     "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80",
@@ -108,59 +125,60 @@ $images = [
 ];
 ?>
 
-<div class="absolute inset-0 z-0">
-    <?php foreach($images as $i => $img): ?>
-        <div class="hero-slide absolute inset-0 transition-opacity duration-1000"
-             style="background-image:url('<?php echo $img; ?>');
+    <div class="absolute inset-0 z-0">
+        <?php foreach($images as $i => $img): ?>
+        <div class="hero-slide absolute inset-0 transition-opacity duration-1000" style="background-image:url('<?php echo $img; ?>');
                     background-size:cover;
                     background-position:center;
                     filter: blur(2px);
                     opacity: <?php echo $i == 0 ? '1' : '0'; ?>;">
         </div>
-    <?php endforeach; ?>
-</div>
+        <?php endforeach; ?>
+    </div>
 
-<div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-12 py-20">
-    <div class="grid lg:grid-cols-2 gap-12 items-center">
-        <div class="text-slate-900">
-            <span class="inline-block text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
-                <?php echo $page_lang['badge']; ?>
-            </span>
-            <h1 class="mt-4 text-5xl md:text-5xl font-bold leading-10">
-                <?php echo $page_lang['hero_title']; ?>
-            </h1>
-            <p class="mt-4 text-white max-w-xl text-lg">
-                <?php echo $page_lang['hero_desc']; ?>
-            </p>
-            <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                <!-- Redirects unauthenticated guest users to Register -->
-                <a href="/grant_portal/auth/register.php"
-                   class="bg-[#004D4A] hover:bg-[#003D3B] text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition text-center">
-                    <?php echo $page_lang['btn_apply']; ?>
-                </a>
-                <a href="/grant_portal/auth/register.php"
-                   class="bg-[#fffff] border border-slate-300  text-white px-8 py-3 rounded-lg transition text-center">
-                    <?php echo $page_lang['btn_view']; ?>
-                </a>
+    <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-12 py-20">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="text-slate-900">
+                <span
+                    class="inline-block text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
+                    <?php echo $page_lang['badge']; ?>
+                </span>
+                <h1 class="mt-4 text-4xl sm:text-5xl md:text-5xl font-bold" style="line-height:1.4;">
+                    <?php echo $page_lang['hero_title']; ?>
+                </h1>
+                <p class="mt-4 text-white max-w-xl text-lg">
+                    <?php echo $page_lang['hero_desc']; ?>
+                </p>
+                <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                    <!-- Redirects unauthenticated guest users to Register -->
+                    <a href="/grant_portal/auth/register.php"
+                        class="bg-[#004D4A] hover:bg-[#003D3B] text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition text-center">
+                        <?php echo $page_lang['btn_apply']; ?>
+                    </a>
+                    <a href="/grant_portal/auth/register.php"
+                        class="bg-[#fffff] border border-slate-300  text-white px-8 py-3 rounded-lg transition text-center">
+                        <?php echo $page_lang['btn_view']; ?>
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <div class="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
-                <img id="heroImage" src="<?php echo $images[0]; ?>" class="w-full h-72 md:h-96 object-cover transition-all duration-700">
-                <div class="p-5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center">🏅</div>
-                        <div>
-                            <h3 class="font-semibold text-slate-800"><?php echo $page_lang['grant_title']; ?></h3>
-                            <p class="text-slate-500 text-sm"><?php echo $page_lang['grant_status']; ?></p>
+            <div>
+                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
+                    <img id="heroImage" src="<?php echo $images[0]; ?>"
+                        class="w-full h-72 md:h-96 object-cover transition-all duration-700">
+                    <div class="p-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center">🏅</div>
+                            <div>
+                                <h3 class="font-semibold text-slate-800"><?php echo $page_lang['grant_title']; ?></h3>
+                                <p class="text-slate-500 text-sm"><?php echo $page_lang['grant_status']; ?></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </section>
 
 <!-- scholarships section -->
@@ -169,7 +187,7 @@ $images = [
         <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['explore_title']; ?></h3>
         <p class="text-slate-500 mt-2"><?php echo $page_lang['explore_desc']; ?></p>
     </div>
-    
+
     <div class="grid md:grid-cols-2 gap-6">
         <?php
         $schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY scheme_name");
@@ -178,24 +196,30 @@ $images = [
             $has_file = !empty($scheme['image']) && file_exists($upload_path . $scheme['image']);
             $img_src = $has_file ? ($upload_path . htmlspecialchars($scheme['image'])) : ('https://picsum.photos/seed/' . $scheme['id'] . '/600/400');
         ?>
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex overflow-hidden hover:shadow-xl transition-all">
+        <div
+            class="bg-white rounded-2xl border border-slate-100 shadow-sm flex overflow-hidden hover:shadow-xl transition-all">
             <div class="w-2/5 relative bg-slate-200">
-                <img src="<?php echo $img_src; ?>" alt="<?php echo htmlspecialchars($scheme['scheme_name']); ?>" 
-                     class="absolute inset-0 w-full h-full object-cover">
+                <img src="<?php echo $img_src; ?>" alt="<?php echo htmlspecialchars($scheme['scheme_name']); ?>"
+                    class="absolute inset-0 w-full h-full object-cover">
             </div>
-            
+
             <div class="flex-1 p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-start">
-                        <h4 class="font-bold text-lg text-slate-900"><?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
-                        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">Active</span>
+                        <h4 class="font-bold text-lg text-slate-900">
+                            <?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
+                        <span
+                            class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">Active</span>
                     </div>
-                    <p class="text-sm text-slate-500 mt-3 line-clamp-2"><?php echo htmlspecialchars($scheme['description'] ?? ''); ?></p>
+                    <p class="text-sm text-slate-500 mt-3 line-clamp-2">
+                        <?php echo htmlspecialchars($scheme['description'] ?? ''); ?></p>
                 </div>
-                
+
                 <div class="mt-6 pt-4 border-t flex items-center justify-between">
-                    <span class="text-xs font-bold text-teal-700"><?php echo $is_mm ? 'ထောက်ပံ့မှု -၁၅၀,၀၀၀ ကျပ်' : 'Funding: 150,000 MMK'; ?></span>
-                    <a href="../auth/login.php" class="bg-[#004D4A] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#003D3B] transition">
+                    <span
+                        class="text-xs font-bold text-teal-700"><?php echo $is_mm ? 'ထောက်ပံ့မှု -၁၅၀,၀၀၀ ကျပ်' : 'Funding: 150,000 MMK'; ?></span>
+                    <a href="../auth/login.php"
+                        class="bg-[#004D4A] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#003D3B] transition">
                         <?php echo $is_mm ? 'လော့ဂ်အင်ဝင်ပြီး လျှောက်ထားရန်' : 'Login to Apply'; ?>
                     </a>
                 </div>
@@ -238,14 +262,16 @@ $images = [
     </div>
     <div class="grid md:grid-cols-2 gap-8">
         <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
-            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200" class="w-full h-64 object-cover">
+            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200"
+                class="w-full h-64 object-cover">
             <div class="p-6">
                 <h4 class="font-bold text-xl text-slate-800"><?php echo $page_lang['story_1_title']; ?></h4>
                 <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_1_desc']; ?></p>
             </div>
         </div>
         <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
-            <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=1200" class="w-full h-64 object-cover">
+            <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=1200"
+                class="w-full h-64 object-cover">
             <div class="p-6">
                 <h4 class="font-bold text-xl text-slate-800"><?php echo $page_lang['story_2_title']; ?></h4>
                 <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_2_desc']; ?></p>
@@ -257,21 +283,22 @@ $images = [
 <!-- stay informed -->
 <section class="px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto w-full">
     <!-- Changed max-w-4xl to max-w-6xl for a beautifully balanced wide-width display card layout -->
-    <div class="bg-[#006D69] rounded-3xl p-8 sm:p-12 text-center shadow-lg max-w-6xl mx-auto mb-16 border border-white/5">
+    <div
+        class="bg-[#006D69] rounded-3xl p-8 sm:p-12 text-center shadow-lg max-w-6xl mx-auto mb-16 border border-white/5">
         <h3 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             <?php echo $page_lang['sub_title']; ?>
         </h3>
         <p class="text-teal-100 text-sm sm:text-base mt-4 max-w-2xl mx-auto opacity-90 leading-relaxed">
             <?php echo $page_lang['sub_desc']; ?>
         </p>
-        
+
         <!-- Input field wrapper form area -->
         <div class="mt-8 flex flex-col sm:flex-row gap-3.5 max-w-xl mx-auto w-full">
-            <input type="email" 
-                   placeholder="<?php echo $page_lang['sub_placeholder']; ?>" 
-                   class="w-full px-5 py-4 rounded-xl border-0 outline-none text-slate-800 bg-white/95 focus:bg-white text-sm shadow-inner focus:ring-2 focus:ring-teal-300 transition duration-150">
-            
-            <button class="bg-white text-[#004D4A] hover:bg-teal-50 px-8 py-4 rounded-xl font-bold text-sm tracking-wide shadow-md transition transform active:scale-[0.99] shrink-0">
+            <input type="email" placeholder="<?php echo $page_lang['sub_placeholder']; ?>"
+                class="w-full px-5 py-4 rounded-xl border-0 outline-none text-slate-800 bg-white/95 focus:bg-white text-sm shadow-inner focus:ring-2 focus:ring-teal-300 transition duration-150">
+
+            <button
+                class="bg-white text-[#004D4A] hover:bg-teal-50 px-8 py-4 rounded-xl font-bold text-sm tracking-wide shadow-md transition transform active:scale-[0.99] shrink-0">
                 <?php echo $page_lang['sub_btn']; ?>
             </button>
         </div>
@@ -323,7 +350,9 @@ const observer = new IntersectionObserver((entries) => {
         counters.forEach(counter => startCounter(counter));
         isAnimated = true;
     }
-}, { threshold: 0.5 });
+}, {
+    threshold: 0.5
+});
 
 observer.observe(impactSection);
 </script>

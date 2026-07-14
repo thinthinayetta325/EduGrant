@@ -23,6 +23,8 @@ $sidebar_lang = (isset($_GET['lang']) && $_GET['lang'] === 'mm') ? [
     'application_status' => 'လျှောက်လွှာအခြေအနေ',
     'read' => 'ဖတ်ပြီး',
     'unread' => 'မဖတ်ရသေး',
+    'delete' => 'ဖျက်မည်',
+    'delete_all' => 'အားလုံးဖျက်မည်',
 ] : [
     'page_title' => 'Notifications',
     'mark_read' => 'Mark as Read',
@@ -38,6 +40,8 @@ $sidebar_lang = (isset($_GET['lang']) && $_GET['lang'] === 'mm') ? [
     'application_status' => 'Application Status',
     'read' => 'Read',
     'unread' => 'Unread',
+    'delete' => 'Delete',
+    'delete_all' => 'Delete All',
 ];
 $current_page = 'notifications';
 $lang_param = (isset($_GET['lang']) && $_GET['lang'] === 'mm') ? 'mm' : 'en';
@@ -59,6 +63,31 @@ if (isset($_GET['action']) && $_GET['action'] === 'mark_read' && isset($_GET['id
 // Mark all as read
 if (isset($_GET['action']) && $_GET['action'] === 'mark_read_all') {
     $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE admin_id = ? AND is_read = 0");
+    if ($stmt) {
+        $stmt->bind_param("i", $admin_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+    header("Location: notifications.php?lang=" . $lang_param);
+    exit();
+}
+
+// Delete single notification
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $notif_id = intval($_GET['id']);
+    $stmt = $conn->prepare("DELETE FROM notifications WHERE id = ? AND admin_id = ?");
+    if ($stmt) {
+        $stmt->bind_param("ii", $notif_id, $admin_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+    header("Location: notifications.php?lang=" . $lang_param);
+    exit();
+}
+
+// Delete all notifications
+if (isset($_GET['action']) && $_GET['action'] === 'delete_all') {
+    $stmt = $conn->prepare("DELETE FROM notifications WHERE admin_id = ?");
     if ($stmt) {
         $stmt->bind_param("i", $admin_id);
         $stmt->execute();
@@ -104,6 +133,7 @@ $unread_q->close();
         .notif-row:hover { background: #f8fafc; }
         .notif-unread { background: #f0fdf4; }
         .notif-unread:hover { background: #dcfce7; }
+        .notif-actions { display: flex; gap: 0; flex-shrink: 0; align-items: center; margin-left: -12px; }
 
         /* Dark Mode */
         html.dark-mode body { background: #0f172a; color: #e2e8f0; }
@@ -149,9 +179,14 @@ $unread_q->close();
                     <h3>🔔 <?php echo $sidebar_lang['page_title']; ?></h3>
                 <?php endif; ?>
                 </div>
-                <?php if ($unread_count > 0): ?>
-                    <a href="notifications.php?action=mark_read_all&lang=<?php echo $lang_param; ?>" class="btn-primary mark-all-btn" style="font-size:11px;padding:7px 14px;">✓ <?php echo $sidebar_lang['mark_all_read']; ?></a>
-                <?php endif; ?>
+                <div style="display:flex;gap:8px;">
+                    <?php if ($unread_count > 0): ?>
+                        <a href="notifications.php?action=mark_read_all&lang=<?php echo $lang_param; ?>" class="btn-primary mark-all-btn" style="font-size:11px;padding:7px 14px;">✓ <?php echo $sidebar_lang['mark_all_read']; ?></a>
+                    <?php endif; ?>
+                    <?php if ($all_notifications->num_rows > 0): ?>
+                        <a href="notifications.php?action=delete_all&lang=<?php echo $lang_param; ?>" class="btn-primary" style="font-size:11px;padding:7px 14px;background:#ef4444;" onclick="return confirm('<?php echo $is_mm ? 'အားလုံးကို ဖျက်မည်လား။' : 'Delete all notifications?'; ?>')">🗑 <?php echo $sidebar_lang['delete_all']; ?></a>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <?php if ($all_notifications->num_rows > 0): ?>
@@ -196,6 +231,16 @@ $unread_q->close();
                             <p style="font-size:12px;color:#64748b;margin-top:3px;"><?php echo htmlspecialchars($n['message']); ?></p>
                             <span style="font-size:11px;color:#94a3b8;"><?php echo date('M d, Y g:i A', strtotime($n['created_at'])); ?></span>
                         </div>
+                        <div class="notif-actions" style="margin-left:-8px;">
+                            <?php if (!$n['is_read']): ?>
+                            <button onclick="event.stopPropagation(); markNotifRead(this.closest('.notif-row'), <?php echo $n['id']; ?>)" title="<?php echo $sidebar_lang['mark_read']; ?>" style="width:30px;height:30px;border-radius:8px;border:none;background:#dcfce7;color:#16a34a;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:0.2s;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </button>
+                            <?php endif; ?>
+                            <button onclick="event.stopPropagation(); deleteNotif(this, <?php echo $n['id']; ?>)" title="<?php echo $sidebar_lang['delete']; ?>" style="width:30px;height:30px;border-radius:8px;border:none;background:#fee2e2;color:#ef4444;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:0.2s;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>
@@ -221,18 +266,65 @@ function markNotifRead(el, id) {
                     badge.style.color = '#64748b';
                     badge.textContent = '<?php echo $sidebar_lang["read"]; ?>';
                 }
-                const newBadge = document.querySelector('.notif-count-badge');
-                if (newBadge) {
-                    let n = parseInt(newBadge.textContent) - 1;
+                // Update page count badge
+                const pageBadge = document.querySelector('.notif-count-badge');
+                if (pageBadge) {
+                    let n = parseInt(pageBadge.textContent) - 1;
                     if (n <= 0) {
-                        newBadge.remove();
+                        pageBadge.remove();
                         document.querySelector('.mark-all-btn')?.remove();
                     } else {
-                        newBadge.textContent = n;
+                        pageBadge.textContent = n;
+                    }
+                }
+                // Update header bell badge
+                const headerBadge = document.querySelector('.notif-count');
+                if (headerBadge) {
+                    let h = parseInt(headerBadge.textContent) - 1;
+                    if (h <= 0) {
+                        headerBadge.remove();
+                    } else {
+                        headerBadge.textContent = h > 99 ? '99+' : h;
                     }
                 }
             });
     }
+}
+function deleteNotif(btn, id) {
+    if (!confirm('<?php echo $is_mm ? 'ဖျက်မည်လား။' : 'Delete this notification?'; ?>')) return;
+    fetch('notifications.php?action=delete&id=' + id + '&lang=<?php echo $lang_param; ?>', { method: 'GET' })
+        .then(() => {
+            const row = btn.closest('.notif-row');
+            const wasUnread = row.classList.contains('notif-unread');
+            row.style.transition = 'opacity 0.3s, max-height 0.3s';
+            row.style.opacity = '0';
+            row.style.maxHeight = '0';
+            row.style.overflow = 'hidden';
+            row.style.padding = '0';
+            row.style.border = 'none';
+            setTimeout(() => row.remove(), 300);
+            if (wasUnread) {
+                const pageBadge = document.querySelector('.notif-count-badge');
+                if (pageBadge) {
+                    let n = parseInt(pageBadge.textContent) - 1;
+                    if (n <= 0) {
+                        pageBadge.remove();
+                        document.querySelector('.mark-all-btn')?.remove();
+                    } else {
+                        pageBadge.textContent = n;
+                    }
+                }
+                const headerBadge = document.querySelector('.notif-count');
+                if (headerBadge) {
+                    let h = parseInt(headerBadge.textContent) - 1;
+                    if (h <= 0) {
+                        headerBadge.remove();
+                    } else {
+                        headerBadge.textContent = h > 99 ? '99+' : h;
+                    }
+                }
+            }
+        });
 }
 </script>
 </html>

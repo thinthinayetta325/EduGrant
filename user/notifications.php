@@ -49,7 +49,16 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
+        @font-face {
+            font-family: 'MyanmarTaungyi';
+            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
         .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>

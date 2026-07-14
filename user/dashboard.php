@@ -36,6 +36,15 @@ $stmt->close();
     <meta charset="UTF-8">
     <title>Student Dashboard - Grant Portal</title>
     <style>
+        @font-face {
+            font-family: 'MyanmarTaungyi';
+            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
         body { font-family: sans-serif; margin: 0; background-color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
         
         /* Sidebar Navigation UI from image_98f107.jpg */

@@ -1,7 +1,6 @@
 <?php 
 include_once('../includes/header.php');
 
-// Connect to DB (not done in header)
 $conn = new mysqli("localhost", "root", "", "grant_portal");
 if ($conn->connect_error) die("DB connection failed");
 
@@ -283,5 +282,5 @@ if ($app_no !== '') {
 
 <?php 
 $conn->close();
-include_once('../includes/footer.php'); 
+include_once('../includes/footer.php');
 ?>

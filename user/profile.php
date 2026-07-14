@@ -44,7 +44,17 @@ if ($is_mm) {
         'edit_save' => 'သိမ်းမည်',
         'edit_cancel' => 'မလုပ်တော့ပါ',
         'edit_success' => 'ပရိုဖိုင် အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။',
-        'edit_error' => 'ပရိုဖိုင် ပြင်ဆင်ရာတွင် အမှားရှိနေပါသည်။ ထပ်မံကြိုးစားပါ။'
+        'edit_error' => 'ပရိုဖိုင် ပြင်ဆင်ရာတွင် အမှားရှိနေပါသည်။ ထပ်မံကြိုးစားပါ။',
+        'change_pw' => 'စကားဝှက် ပြောင်းရန်',
+        'pw_current' => 'လက်ရှိ စကားဝှက်',
+        'pw_new' => 'အသစ် စကားဝှက်',
+        'pw_confirm' => 'စကားဝှက် အတည်ပြုရန်',
+        'pw_update' => 'စကားဝှက် အပ်ဒိတ်လုပ်ရန်',
+        'pw_success' => 'စကားဝှက် အောင်မြင်စွာ ပြောင်းလဲပြီးပါပြီ။',
+        'pw_error_current' => 'လက်ရှိ စကားဝှက် မှားနေပါသည်။',
+        'pw_error_match' => 'အသစ် စကားဝှက် နှစ်ခု မတူညီပါ။',
+        'pw_error_length' => 'စကားဝှက်သည် အနည်းဆုံး အက္ခရာ ၆ လုံး ရှိရပါမည်။',
+        'pw_error' => 'စကားဝှက် ပြောင်းလဲရာတွင် အမှားရှိနေပါသည်။'
     ];
     $lang = [
         'brand_sub' => 'မြန်မာ',
@@ -80,7 +90,17 @@ if ($is_mm) {
         'edit_save' => 'Save Changes',
         'edit_cancel' => 'Cancel',
         'edit_success' => 'Profile updated successfully.',
-        'edit_error' => 'An error occurred while updating your profile. Please try again.'
+        'edit_error' => 'An error occurred while updating your profile. Please try again.',
+        'change_pw' => 'Change Password',
+        'pw_current' => 'Current Password',
+        'pw_new' => 'New Password',
+        'pw_confirm' => 'Confirm New Password',
+        'pw_update' => 'Update Password',
+        'pw_success' => 'Password changed successfully.',
+        'pw_error_current' => 'Current password is incorrect.',
+        'pw_error_match' => 'New passwords do not match.',
+        'pw_error_length' => 'Password must be at least 6 characters.',
+        'pw_error' => 'An error occurred while changing password.'
     ];
     $lang = [
         'brand_sub' => 'Myanmar',
@@ -124,23 +144,72 @@ if ($col_check && $col_check->num_rows === 0) {
 
 // 6. Handle profile update form submission
 $update_success = false;
-$update_error = false;
+$update_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_profile') {
     $new_name = trim($_POST['name'] ?? '');
+    $new_email = trim($_POST['email'] ?? '');
     $new_phone = trim($_POST['phone'] ?? '');
-    if ($new_name !== '' && $new_phone !== '') {
-        $update_stmt = $conn->prepare("UPDATE student SET name = ?, phone = ? WHERE id = ?");
-        $update_stmt->bind_param("ssi", $new_name, $new_phone, $student_id);
-        if ($update_stmt->execute()) {
-            $update_success = true;
-            $student_data['name'] = $new_name;
-            $student_data['phone'] = $new_phone;
-        } else {
-            $update_error = true;
-        }
-        $update_stmt->close();
+    $current_pw = $_POST['current_password'] ?? '';
+    $new_pw = $_POST['new_password'] ?? '';
+    $confirm_pw = $_POST['confirm_password'] ?? '';
+
+    if ($new_name === '' || $new_email === '' || $new_phone === '') {
+        $update_error = $is_mm ? 'အကွက်အားလုံးကို ဖြည့်ပါ။' : 'Please fill in all required fields.';
+    } elseif (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+        $update_error = $is_mm ? 'အီးမေးလ် မှားနေပါသည်။' : 'Invalid email address.';
     } else {
-        $update_error = true;
+        // Check if email is taken by another student
+        $email_check = $conn->prepare("SELECT id FROM student WHERE email = ? AND id != ?");
+        $email_check->bind_param("si", $new_email, $student_id);
+        $email_check->execute();
+        if ($email_check->get_result()->num_rows > 0) {
+            $update_error = $is_mm ? 'ဤအီးမေးလ်ကို အခြားသူ အသုံးပြုနေပါသည်။' : 'This email is already in use by another account.';
+            $email_check->close();
+        } else {
+            $email_check->close();
+            // Handle password change if provided
+            $pw_changed = false;
+            if ($current_pw !== '' || $new_pw !== '' || $confirm_pw !== '') {
+                if ($new_pw === '' || $confirm_pw === '') {
+                    $update_error = $is_mm ? 'စကားဝှက်အသစ်နှင့် အတည်ပြုချက်ကို ဖြည့်ပါ။' : 'Please fill in new password and confirmation.';
+                } elseif (strlen($new_pw) < 6) {
+                    $update_error = $is_mm ? 'စကားဝှက်သည် အနည်းဆုံး အက္ခရာ ၆ လုံး ရှိရပါမည်။' : 'Password must be at least 6 characters.';
+                } elseif ($new_pw !== $confirm_pw) {
+                    $update_error = $is_mm ? 'စကားဝှက် နှစ်ခု မတူညီပါ။' : 'New passwords do not match.';
+                } else {
+                    $pw_check = $conn->prepare("SELECT password FROM student WHERE id = ?");
+                    $pw_check->bind_param("i", $student_id);
+                    $pw_check->execute();
+                    $pw_row = $pw_check->get_result()->fetch_assoc();
+                    $pw_check->close();
+                    if ($pw_row && (password_verify($current_pw, $pw_row['password']) || $current_pw === $pw_row['password'])) {
+                        $pw_changed = true;
+                    } else {
+                        $update_error = $is_mm ? 'လက်ရှိ စကားဝှက် မှားနေပါသည်။' : 'Current password is incorrect.';
+                    }
+                }
+            }
+
+            if ($update_error === '') {
+                if ($pw_changed) {
+                    $new_hash = password_hash($new_pw, PASSWORD_DEFAULT);
+                    $update_stmt = $conn->prepare("UPDATE student SET name = ?, email = ?, phone = ?, password = ? WHERE id = ?");
+                    $update_stmt->bind_param("ssssi", $new_name, $new_email, $new_phone, $new_hash, $student_id);
+                } else {
+                    $update_stmt = $conn->prepare("UPDATE student SET name = ?, email = ?, phone = ? WHERE id = ?");
+                    $update_stmt->bind_param("sssi", $new_name, $new_email, $new_phone, $student_id);
+                }
+                if ($update_stmt->execute()) {
+                    $update_success = true;
+                    $student_data['name'] = $new_name;
+                    $student_data['email'] = $new_email;
+                    $student_data['phone'] = $new_phone;
+                } else {
+                    $update_error = $is_mm ? 'ပရိုဖိုင် ပြင်ဆင်ရာတွင် အမှားရှိနေပါသည်။' : 'An error occurred while updating your profile.';
+                }
+                $update_stmt->close();
+            }
+        }
     }
 }
 
@@ -224,6 +293,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'MyanmarTaungyi';
+            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
         body { font-family: 'Inter', sans-serif; }
         <?php if ($is_mm): ?>
         body, body * { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
@@ -514,14 +592,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <h3 class="text-xl font-bold text-slate-900 mb-6"><?php echo $p_lang['edit_title']; ?></h3>
         <form method="POST" action="">
             <input type="hidden" name="action" value="update_profile">
-            <div class="space-y-5">
+            <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5"><?php echo $p_lang['edit_name']; ?></label>
                     <input type="text" name="name" value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>" required class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
                 </div>
                 <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5"><?php echo $p_lang['label_email']; ?></label>
+                    <input type="email" name="email" value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>" required class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                </div>
+                <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5"><?php echo $p_lang['edit_phone']; ?></label>
                     <input type="text" name="phone" value="<?php echo htmlspecialchars($student_data['phone'] ?? ''); ?>" required class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                </div>
+                <div class="pt-2 border-t border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3"><?php echo $p_lang['change_pw']; ?> <span class="normal-case tracking-normal">(<?php echo $is_mm ? 'ရွေးချယ်စရာ' : 'optional'; ?>)</span></p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5"><?php echo $p_lang['pw_current']; ?></label>
+                            <input type="password" name="current_password" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none" placeholder="<?php echo $is_mm ? 'စကားဝှက် ပြောင်းလိုပါကသာ ဖြည့်ပါ' : 'Only fill if changing password'; ?>">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5"><?php echo $p_lang['pw_new']; ?></label>
+                            <input type="password" name="new_password" minlength="6" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5"><?php echo $p_lang['pw_confirm']; ?></label>
+                            <input type="password" name="confirm_password" minlength="6" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                        </div>
+                    </div>
                 </div>
                 <div class="flex items-center gap-3 pt-2">
                     <button type="submit" class="flex-1 bg-[#006D69] hover:bg-[#004F4B] text-white font-semibold text-sm px-4 py-3 rounded-xl transition shadow-sm"><?php echo $p_lang['edit_save']; ?></button>
@@ -539,10 +638,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <?php echo $p_lang['edit_success']; ?>
 </div>
 <script>setTimeout(() => document.getElementById('successToast')?.remove(), 3000);</script>
-<?php elseif ($update_error): ?>
+<?php elseif ($update_error !== ''): ?>
 <div id="errorToast" class="fixed bottom-6 right-6 z-[110] bg-red-600 text-white px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-3 text-sm font-semibold">
     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    <?php echo $p_lang['edit_error']; ?>
+    <?php echo htmlspecialchars($update_error); ?>
 </div>
 <script>setTimeout(() => document.getElementById('errorToast')?.remove(), 3000);</script>
 <?php endif; ?>
@@ -563,6 +662,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 <!-- Footer Component Frame -->
 <?php include_once("../includes/footer.php");?>
+
+<script>
+<?php if ($update_error !== ''): ?>
+document.getElementById('editModal').classList.remove('hidden');
+<?php endif; ?>
+</script>
 
 </div>
 </body>

@@ -230,6 +230,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <?php if ($is_mm): ?>
     <style>
+        @font-face {
+            font-family: 'MyanmarTaungyi';
+            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
         input, select, textarea, button, label, h1, p, div, option {
             font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
         }

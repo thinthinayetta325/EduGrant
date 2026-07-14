@@ -45,6 +45,15 @@ if (!$app) {
     <title>Application Details | EduGrant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @font-face {
+            font-family: 'MyanmarTaungyi';
+            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>

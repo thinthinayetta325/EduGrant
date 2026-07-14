@@ -37,8 +37,19 @@ $schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY sc
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scholarships | EduGrant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600;800&display=swap');
-    .myanmar-font { font-family: 'Padauk', sans-serif !important; }</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+        @font-face {
+            font-family: 'MyanmarTaungyi';
+            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        .myanmar-font { font-family: 'Padauk', sans-serif !important; }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 <?php echo $is_mm ? 'myanmar-font' : 'font-sans'; ?>">
 <!-- schemes -->

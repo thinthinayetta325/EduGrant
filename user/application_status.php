@@ -36,6 +36,17 @@ if (!empty($app_no)) {
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Application Status</title>
+    <style>
+        @font-face {
+            font-family: 'MyanmarTaungyi';
+            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen p-8">
     <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200">

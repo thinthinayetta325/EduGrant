@@ -39,7 +39,17 @@ if (!$scheme) {
 /* LANGUAGE */
 $lang = $_GET['lang'] ?? 'en';
 ?>
-
+<style>
+    @font-face {
+        font-family: 'MyanmarTaungyi';
+        src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+    }
+</style>
 <main class="max-w-6xl mx-auto px-4 py-10">
 
     <!-- HERO -->
