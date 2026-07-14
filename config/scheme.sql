@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS schemes (
     status ENUM('Active','Closed','Draft') DEFAULT 'Active',
     description TEXT,
     eligibility TEXT,
-    image VARCHAR(255) DEFAULT NULL
+    image VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
 );
 CREATE TABLE IF NOT EXISTS applications (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -46,7 +48,9 @@ CREATE TABLE IF NOT EXISTS applications (
     receipt_file	varchar(255),
     FOREIGN KEY (student_id) REFERENCES student(id),
     FOREIGN KEY (scheme_id) REFERENCES schemes(id),
-    FOREIGN KEY (approved_by) REFERENCES admin(id)
+    FOREIGN KEY (approved_by) REFERENCES admin(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
 );
 CREATE TABLE IF NOT EXISTS scholarship_recipients (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -54,7 +58,9 @@ CREATE TABLE IF NOT EXISTS scholarship_recipients (
     start_year YEAR,
 
     FOREIGN KEY (application_id)
-    REFERENCES applications(id)
+    REFERENCES applications(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
 );
 CREATE TABLE IF NOT EXISTS bank_details (
     id INT AUTO_INCREMENT PRIMARY KEY,

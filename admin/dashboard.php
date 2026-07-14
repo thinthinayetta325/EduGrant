@@ -87,7 +87,7 @@ $pending_bank_list = $conn->query("SELECT a.id, a.application_no, s.name AS stud
 $total_schemes = $conn->query("SELECT COUNT(*) FROM schemes")->fetch_row()[0] ?? 0;
 $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] ?? 0;
 $pending_apps = $conn->query("SELECT COUNT(*) FROM applications WHERE status = 'Submitted' OR status = 'Under Review'")->fetch_row()[0] ?? 0;
-$approved_apps = $conn->query("SELECT COUNT(*) FROM applications WHERE status = 'Recommended' OR status = 'Approved'")->fetch_row()[0] ?? 0;
+$approved_apps = $conn->query("SELECT COUNT(*) FROM applications WHERE status = 'Approved'")->fetch_row()[0] ?? 0;
 $total_disbursed = $conn->query("SELECT COALESCE(SUM(amount),0) FROM payment_records")->fetch_row()[0] ?? 25000000;
 $total_students = $conn->query("SELECT COUNT(*) FROM student")->fetch_row()[0] ?? 0;
 

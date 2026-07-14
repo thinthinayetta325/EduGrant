@@ -22,11 +22,6 @@ if ($count_query) {
     $count_query->close();
 }
 
-// Mark all unread as read
-$update_stmt = $conn->prepare("UPDATE notifications SET is_read = TRUE WHERE student_id = ? AND is_read = FALSE");
-$update_stmt->bind_param("i", $student_id);
-$update_stmt->execute();
-
 // Fetch notifications
 $query = "SELECT * FROM notifications WHERE student_id = ? ORDER BY created_at DESC";
 $stmt = $conn->prepare($query);
@@ -98,7 +93,7 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
         <div class="space-y-3">
             <?php if ($notifications && $notifications->num_rows > 0): ?>
                 <?php while ($n = $notifications->fetch_assoc()): ?>
-                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+                    <a href="mark_read.php?id=<?php echo $n['id']; ?>&lang=<?php echo $lang_param; ?>" class="block bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition <?php echo !$n['is_read'] ? 'border-l-4 border-l-teal-500' : ''; ?>">
                         <div class="flex items-start gap-4">
                             <div class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0 text-lg">
                                 <?php
@@ -118,7 +113,7 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
                                 <span class="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 mt-2"></span>
                             <?php endif; ?>
                         </div>
-                    </div>
+                    </a>
                 <?php endwhile; ?>
             <?php else: ?>
                 <div class="bg-white border border-dashed border-slate-200 rounded-xl p-12 text-center">

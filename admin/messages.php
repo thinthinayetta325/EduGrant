@@ -120,15 +120,16 @@ $messages = $conn->query("SELECT * FROM contact_messages ORDER BY created_at DES
         html.dark-mode .card { background: #1e293b; border-color: #334155; }
         html.dark-mode .card-header { border-bottom-color: #334155; }
         html.dark-mode .card-header h3, html.dark-mode .card-header .title { color: #f1f5f9; }
-        html.dark-mode .message-card { background: #1e293b; border-color: #334155; }
-        html.dark-mode .message-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        html.dark-mode .message-card.unread { border-left-color: #10b981; background: rgba(16,185,129,0.06); }
-        html.dark-mode .message-header { border-bottom-color: #334155; }
-        html.dark-mode .message-sender { color: #f1f5f9; }
-        html.dark-mode .message-subject { color: #94a3b8; }
-        html.dark-mode .message-date { color: #64748b; }
-        html.dark-mode .message-body { border-top-color: #334155; color: #cbd5e1; }
-        html.dark-mode .message-meta { color: #64748b; }
+        html.dark-mode .msg-card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .msg-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        html.dark-mode .msg-card.unread { border-left-color: #10b981; background: rgba(16,185,129,0.06); }
+        html.dark-mode .msg-header { border-bottom-color: #334155; }
+        html.dark-mode .msg-header:hover { background: rgba(255,255,255,0.03); }
+        html.dark-mode .msg-sender { color: #f1f5f9; }
+        html.dark-mode .msg-subject { color: #94a3b8; }
+        html.dark-mode .msg-date { color: #64748b; }
+        html.dark-mode .msg-body { border-top-color: #334155; color: #cbd5e1; }
+        html.dark-mode .msg-meta { color: #64748b; }
         html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
         html.dark-mode .bottom-links a { color: #94a3b8; }
     </style>

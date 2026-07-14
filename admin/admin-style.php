@@ -417,10 +417,13 @@
             flex-grow: 1;
             padding: 24px 28px;
             overflow-y: auto;
+            overflow-x: auto;
             display: flex;
             flex-direction: column;
             gap: 22px;
         }
+        .dashboard-body table { min-width: 600px; }
+        .dashboard-body .card { overflow-x: auto; }
 
         .stats-grid {
             display: grid;
@@ -896,4 +899,128 @@
         html.dark-mode .notif-row:hover { background: rgba(255,255,255,0.03); }
         html.dark-mode .notif-unread { background: rgba(16,185,129,0.08); }
         html.dark-mode .notif-unread:hover { background: rgba(16,185,129,0.12); }
+
+        /* ============ RESPONSIVE ============ */
+
+        /* Sidebar mobile: off-canvas overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 90;
+            backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        .hamburger-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 38px; height: 38px;
+            border-radius: 8px;
+            background: var(--body-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .hamburger-btn:hover { background: var(--border); }
+
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .grid-4col { grid-template-columns: repeat(2, 1fr); }
+            .grid-3col { grid-template-columns: repeat(2, 1fr); }
+            .grid-2col { grid-template-columns: 1fr; }
+            .welcome-banner { flex-direction: column; text-align: center; gap: 16px; }
+            .header-search { width: 180px; }
+            .header-search:focus-within { width: 220px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed !important;
+                top: 0 !important;
+                left: -280px !important;
+                width: 260px !important;
+                height: 100vh !important;
+                z-index: 100 !important;
+                transition: left 0.3s ease !important;
+                overflow-y: auto !important;
+            }
+            .sidebar.open { left: 0 !important; }
+
+            .hamburger-btn { display: flex; }
+
+            .workspace { width: 100%; }
+
+            .top-header {
+                padding: 10px 16px;
+                gap: 8px;
+            }
+            .top-header h1 { font-size: 14px; }
+            .top-header .sub { font-size: 10px; }
+
+            .header-actions { gap: 8px; }
+            .header-search { display: none; }
+            .language-switch a { padding: 4px 8px; font-size: 10px; }
+            .profile-info { display: none; }
+            .profile-link { padding: 4px; }
+            .profile-link svg { display: none; }
+
+            .dashboard-body {
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-card { padding: 14px; }
+            .stat-card .stat-value { font-size: 20px; }
+
+            .grid-2col,
+            .grid-3col,
+            .grid-4col { grid-template-columns: 1fr; }
+
+            .quick-grid { grid-template-columns: 1fr; }
+
+            .bottom-bar {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+                padding: 10px 16px;
+            }
+
+            .welcome-banner {
+                padding: 20px;
+                flex-direction: column;
+                text-align: center;
+            }
+            .welcome-banner h2 { font-size: 16px; }
+
+            .card { padding: 16px; }
+            .card-header { flex-wrap: wrap; gap: 8px; }
+
+            .modal-box {
+                width: 95vw !important;
+                max-width: 95vw !important;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .stat-card { padding: 12px; }
+            .stat-card .stat-value { font-size: 18px; }
+            .stat-card .stat-label { font-size: 10px; }
+
+            .dashboard-body { padding: 12px; }
+
+            .btn-primary, .btn-outline { padding: 7px 12px; font-size: 11px; }
+
+            .header-actions { gap: 6px; }
+            .theme-toggle { width: 34px; height: 34px; }
+            .notif-btn { width: 34px; height: 34px; }
+        }
     </style>

@@ -45,10 +45,16 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
 }
 ?>
 <script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div class="top-header">
-    <div>
-        <h1><?php echo htmlspecialchars($page_title); ?></h1>
-        <span class="sub"><?php echo date("l, F j, Y"); ?></span>
+    <div class="header-left">
+        <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div>
+            <h1><?php echo htmlspecialchars($page_title); ?></h1>
+            <span class="sub"><?php echo date("l, F j, Y"); ?></span>
+        </div>
     </div>
 
     <div class="header-actions">
@@ -133,6 +139,34 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     </div>
 </div>
 <style>
+    .hamburger-btn {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: var(--body-bg);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition);
+        flex-shrink: 0;
+    }
+    .hamburger-btn:hover { background: var(--border); }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 90;
+        backdrop-filter: blur(2px);
+        transition: opacity 0.3s ease;
+    }
+    .sidebar-overlay.active { display: block; }
+
     .theme-toggle {
         display: flex; align-items: center; justify-content: center;
         width: 38px; height: 38px; border-radius: 10px;
@@ -195,5 +229,12 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
 function toggleTheme() {
     document.documentElement.classList.toggle('dark-mode');
     localStorage.setItem('admin_theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+function toggleSidebar() {
+    var sidebar = document.querySelector('.sidebar');
+    var overlay = document.querySelector('.sidebar-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 }
 </script>

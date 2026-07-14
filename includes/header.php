@@ -73,6 +73,7 @@ if ($is_mm) {
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
+<script>if(localStorage.getItem('user_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -93,7 +94,74 @@ if ($is_mm) {
         body.mm-font * {
             font-family: 'Noto Sans Myanmar', sans-serif !important;
         }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 8px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8); cursor: pointer; transition: 0.2s ease;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
+        html.dark-mode .theme-toggle .icon-sun { display: block; }
+        html:not(.dark-mode) .theme-toggle .icon-moon { display: block; }
+
+        /* Dark Mode Overrides */
+        html.dark-mode body,
+        html.dark-mode .min-h-screen { background: #0f172a; color: #e2e8f0; }
+
+        html.dark-mode section.bg-slate-100 { background: #1e293b !important; }
+
+        html.dark-mode .bg-white { background: #1e293b !important; }
+        html.dark-mode .bg-slate-50 { background: #0f172a !important; }
+        html.dark-mode .bg-slate-100 { background: #1e293b !important; }
+        html.dark-mode .bg-slate-200 { background: #334155 !important; }
+
+        html.dark-mode .text-slate-900 { color: #f1f5f9 !important; }
+        html.dark-mode .text-slate-800 { color: #e2e8f0 !important; }
+        html.dark-mode .text-slate-700 { color: #cbd5e1 !important; }
+        html.dark-mode .text-slate-600 { color: #94a3b8 !important; }
+        html.dark-mode .text-slate-500 { color: #94a3b8 !important; }
+        html.dark-mode .text-slate-100 { color: #94a3b8 !important; }
+
+        html.dark-mode .border-slate-100 { border-color: #334155 !important; }
+        html.dark-mode .border-slate-300 { border-color: #475569 !important; }
+
+        html.dark-mode .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; }
+        html.dark-mode .shadow-md { box-shadow: 0 4px 6px rgba(0,0,0,0.4) !important; }
+        html.dark-mode .shadow-2xl { box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; }
+
+        html.dark-mode input[type="email"],
+        html.dark-mode input[type="text"],
+        html.dark-mode input[type="password"],
+        html.dark-mode select,
+        html.dark-mode textarea {
+            background: rgba(255,255,255,0.05) !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark-mode ::placeholder { color: #64748b; }
+
+        html.dark-mode a { color: inherit; }
+        html.dark-mode .text-teal-100 { color: #99f6e4 !important; }
+        html.dark-mode .text-teal-200 { color: #99f6e4 !important; }
+        html.dark-mode .text-teal-300 { color: #99f6e4 !important; }
+        html.dark-mode .text-emerald-700 { color: #6ee7b7 !important; }
+        html.dark-mode .bg-emerald-50 { background: rgba(16,185,129,0.15) !important; }
+        html.dark-mode .text-yellow-400 { color: #facc15 !important; }
+
+        html.dark-mode .line-clamp-2 { -webkit-line-clamp: 2; }
+
+        html.dark-mode footer { background: #0c1a1a !important; }
+        html.dark-mode footer .border-t { border-color: #1e293b !important; }
     </style>
+    <script>
+    function toggleTheme() {
+        document.documentElement.classList.toggle('dark-mode');
+        localStorage.setItem('user_theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+    </script>
 </head>
 <body class="bg-slate-50 text-slate-800 <?php echo $is_mm ? 'myanmar-font' : ''; ?>">
 
@@ -137,6 +205,11 @@ if ($is_mm) {
                     <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
                     <a href="?lang=mm" class="px-2 py-1 text-[11px] sm:text-xs font-medium rounded transition <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">မြန်မာ</a>
                 </div>
+
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                </button>
 
                 <?php if ($is_logged_in): ?>
                     <div class="flex items-center gap-3">
