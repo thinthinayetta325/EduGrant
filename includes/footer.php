@@ -24,10 +24,10 @@ if ($is_mm) {
 }
 ?>
     <footer class="bg-[#006D69] text-slate-300 px-4 sm:px-6 py-12 mt-20 border-t border-teal-950" style="<?php echo $is_mm ? "font-family: 'Padauk', 'Pyidaungsu', sans-serif;" : ''; ?>">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-sm">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-sm ">
             <div>
                 <h3 class="text-white text-lg font-bold mb-3">EduGrant Myanmar</h3>
-                <p class="text-slate-100 leading-relaxed hover:text-white transition"><?php echo $f_lang['desc']; ?></p>
+                <p class=" hover:text-white transition"><?php echo $f_lang['desc']; ?></p>
             </div>
             <div>
                 <h4 class="text-white font-bold tracking-wider uppercase text-xs mb-4"><?php echo $f_lang['quick']; ?></h4>

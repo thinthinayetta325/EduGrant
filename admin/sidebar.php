@@ -33,7 +33,7 @@ if (isset($conn) && $conn instanceof mysqli) {
         <li class="menu-item <?php echo $current_page === 'reviewers' ? 'active' : ''; ?>"><a href="reviewers.php?lang=<?php echo $lang_param; ?>"><span class="icon">👥</span> <?php echo $sidebar_lang['reviewers'] ?? 'Reviewers'; ?></a></li>
         <li class="menu-item <?php echo $current_page === 'applications' ? 'active' : ''; ?>"><a href="applications.php?lang=<?php echo $lang_param; ?>"><span class="icon">📁</span> <?php echo $sidebar_lang['applications'] ?? 'Applications'; ?><?php if ($total_apps > 0): ?><span class="badge-count"><?php echo $total_apps; ?></span><?php endif; ?></a></li>
         <li class="menu-label">Finance</li>
-        <li class="menu-item <?php echo $current_page === 'bank_verify' ? 'active' : ''; ?>"><a href="bank_verify.php?lang=<?php echo $lang_param; ?>"><span class="icon">🏦</span> <?php echo $sidebar_lang['bank_verify'] ?? 'Bank Verification'; ?><?php if ($pending_bank > 0): ?><span class="badge-count"><?php echo $pending_bank; ?></span><?php endif; ?></a></li>
+        <li class="menu-item <?php echo $current_page === 'bank_verify' ? 'active' : ''; ?>"><a href="bank_verify.php?lang=<?php echo $lang_param; ?>"><span class="icon">🏦</span> <?php echo $sidebar_lang['bank_verify'] ?? 'Bank Verifications'; ?><?php if ($pending_bank > 0): ?><span class="badge-count"><?php echo $pending_bank; ?></span><?php endif; ?></a></li>
         <li class="menu-item <?php echo $current_page === 'recipients' ? 'active' : ''; ?>"><a href="recipients.php?lang=<?php echo $lang_param; ?>"><span class="icon">🏅</span> <?php echo $sidebar_lang['recipients'] ?? 'Recipients'; ?></a></li>
         <li class="menu-item <?php echo $current_page === 'disbursements' ? 'active' : ''; ?>"><a href="disbursements.php?lang=<?php echo $lang_param; ?>"><span class="icon">💰</span> <?php echo $sidebar_lang['disbursements'] ?? 'Disbursements'; ?></a></li>
         <li class="menu-label">Analytics</li>
@@ -41,7 +41,7 @@ if (isset($conn) && $conn instanceof mysqli) {
         <li class="menu-label">Communication</li>
         <li class="menu-item <?php echo $current_page === 'messages' ? 'active' : ''; ?>"><a href="messages.php?lang=<?php echo $lang_param; ?>"><span class="icon">✉️</span> <?php echo $sidebar_lang['messages'] ?? 'Messages'; ?><?php if ($unread_messages > 0): ?><span class="badge-count"><?php echo $unread_messages; ?></span><?php endif; ?></a></li>
     </ul>
-    <div class="sidebar-footer">
+    <div class="sidebar-footer border-spacing-4 rounded-xl">
         <a href="../auth/logout.php" class="logout-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             <span><?php echo $sidebar_lang['logout'] ?? 'Logout'; ?></span>

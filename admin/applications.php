@@ -14,10 +14,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'ပညာသင်ဆုအစီအစဉ်များ',
     'reviewers' => 'စိစစ်ရေးမှူးများ',
     'applications' => 'လျှောက်လွှာများ',
-    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်း',
+    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်းများ',
     'recipients' => 'ဆုရရှိသူများ',
     'disbursements' => 'ငွေပေးချေမှုများ',
     'reports' => 'အစီရင်ခံစာများ',
+    'messages' => 'စာတိုပေးစာများ',
     'logout' => 'ထွက်မည်',
     'page_title' => 'လျှောက်လွှာများကြည့်ရှုရန်',
 ] : [
@@ -25,10 +26,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => ' Schemes',
     'reviewers' => ' Reviewers',
     'applications' => ' Applications',
-    'bank_verify' => 'Bank Verification',
+    'bank_verify' => 'Bank Verifications',
     'recipients' => 'Recipients ',
     'disbursements' => 'Disbursements',
     'reports' => 'Reports',
+    'messages' => 'Messages',
     'logout' => 'Logout',
     'page_title' => ' Applications',
 ];
@@ -180,7 +182,9 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
         .badge-approved { background-color: #10b981; color: #fff; }
         .badge-rejected { background-color: #fee2e2; color: #b91c1c; }
         .form-input, .form-select { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; }
-        .btn-blue-sm { background-color: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .btn-blue-sm { background-color: #2563eb; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .btn-red-sm { background-color: #dc2626; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .inline-form { display: inline; }
         .action-link { color: #2563eb; text-decoration: none; font-weight: bold; font-size: 12px; }
         .bottom-bar { background-color: #003D3B; color: #94a3b8; font-size: 11px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
         .bottom-links a { color: #fff; text-decoration: none; margin-left: 15px; }
@@ -220,6 +224,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
             background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9;
         }
         html.dark-mode .btn-blue-sm { opacity: 0.9; }
+        html.dark-mode .btn-red-sm { opacity: 0.9; }
         html.dark-mode .action-link { color: #5eead4; }
         html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
         html.dark-mode .bottom-links a { color: #94a3b8; }
@@ -303,8 +308,8 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                                 <td><?php echo htmlspecialchars($row['reviewer_name'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($row['recommendation'] ?? '-'); ?></td>
                                 <td style="display:flex;gap:6px;align-items:center;">
-                                    <a href="view_app.php?id=<?php echo $row['id']; ?>&amp;lang=<?php echo $lang_param; ?>" class="action-link">View</a>
-                                    <a href="?delete=<?php echo $row['id']; ?>&amp;lang=<?php echo $lang_param; ?>" class="action-link" style="color:#dc2626;" onclick="return confirm('<?php echo $is_mm ? 'ဤလျှောက်လွှာကိုဖျက်ရန်သေချာပါသလား။' : 'Are you sure you want to delete this application?'; ?>')">Delete</a>
+                                    <a href="view_app.php?id=<?php echo $row['id']; ?>&amp;lang=<?php echo $lang_param; ?>" class="btn-blue-sm" style="padding:4px 10px; font-size:10px; text-decoration:none;">🔍 View</a>
+                                    <a href="?delete=<?php echo $row['id']; ?>&amp;lang=<?php echo $lang_param; ?>" class="btn-red-sm" style="padding:4px 10px; font-size:10px; text-decoration:none;" onclick="return confirm('<?php echo $is_mm ? 'ဤလျှောက်လွှာကိုဖျက်ရန်သေချာပါသလား။' : 'Are you sure you want to delete this application?'; ?>')">🗑️ Delete</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

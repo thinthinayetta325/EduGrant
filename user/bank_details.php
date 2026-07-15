@@ -125,7 +125,7 @@ if ($is_mm) {
         'placeholder_number' => 'ဘဏ်အကောင့်နံပါတ် အမှန်ကို ရိုက်ထည့်ပါ',
         'nav_logout' => 'ထွက်မည်',
         'warning_text' => 'သတိပြုရန် - ဖြည့်စွက်ထားသော ဘဏ်အချက်အလက်များ လွဲမှားပါက ဆုကြေးငွေလွှဲပြောင်းခြင်း လုပ်ငန်းစဉ် နှောင့်နှေးနိုင်ပါသည်။',
-        'back_profile' => 'ကိုယ်ရေးအချက်အလက်သို့ ပြန်သွားရန်'
+        'back_profile' => 'Dashboard သို့ ပြန်သွားရန်'
     ];
     $lang = [
         'brand_sub' => 'မြန်မာ',
@@ -228,17 +228,6 @@ $conn->close();
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="profile.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-2 bg-[#003D3B] text-white pl-1.5 pr-3.5 py-1 rounded-full border border-teal-400 transition shadow-sm">
-                        <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center border border-white/20">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
-                        </div>
-                        <span class="text-xs sm:text-sm font-semibold tracking-wide">
-                            <?php echo htmlspecialchars($student_info['name'] ?? 'Student'); ?>
-                        </span>
-                    </a>
-                    
                     <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-bold px-3 py-2 rounded-md transition border border-red-500/20">
                         <?php echo $b_lang['nav_logout']; ?>
                     </a>

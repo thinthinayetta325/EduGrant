@@ -15,11 +15,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'ပညာသင်ဆုအစီအစဉ်များ',
     'reviewers' => 'စိစစ်ရေးမှူးများ',
     'applications' => 'လျှောက်လွှာများ',
-    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်း',
+    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်းများ',
     'recipients' => 'ဆုရရှိသူများ',
     'disbursements' => 'ငွေပေးချေမှုများ',
     'reports' => 'အစီရင်ခံစာများ',
-    // 'my_profile' => 'ကိုယ်ရေးအချက်အလက်',
+    'message' => 'စာတိုများ',
     'logout' => 'ထွက်မည်',
     'dashboard_title' => 'အက်ဒ်မင် ဒက်ရှ်ဘုတ်',
     'dashboard_sub' => 'ပညာသင်ဆုစနစ်၏ အကျဉ်းချုပ်',
@@ -46,11 +46,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'Schemes',
     'reviewers' => 'Reviewers',
     'applications' => 'Applications',
-    'bank_verify' => 'Bank Verification',
+    'bank_verify' => 'Bank Verifications',
     'recipients' => 'Recipients',
     'disbursements' => 'Disbursements',
     'reports' => 'Reports',
-    'my_profile' => 'My Profile',
+    'message' => 'Messages',
     'logout' => 'Logout',
     'dashboard_title' => 'Admin Dashboard',
     'dashboard_sub' => 'Overview of the Scholarship System',
@@ -650,7 +650,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         html.dark-mode .bottom-links a { color: #94a3b8; }
         html.dark-mode .notif-btn { background: #334155; }
         html.dark-mode .notif-btn:hover { background: #475569; }
-        html.dark-mode .btn-outline { border-color: #475569; color: #94a3b8; }
+        html.dark-mode .btn-outline { border-color: #475569; color: #4ade80; }
         html.dark-mode .btn-outline:hover { background: #334155; }
         html.dark-mode .badge-recommended, html.dark-mode .badge-approved { background: rgba(22,163,74,0.15); color: #4ade80; }
         html.dark-mode .badge-pending, html.dark-mode .badge-review { background: rgba(245,158,11,0.15); color: #fbbf24; }
@@ -823,7 +823,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
                                 <div class="name"><?php echo htmlspecialchars($r['name']); ?></div>
                                 <div class="meta"><?php echo htmlspecialchars($r['department'] ?? 'General'); ?></div>
                             </div>
-                            <span style="background:#f1f5f9;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;">Reviewer</span>
+                            <span style="background:#4ade80;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;">Reviewer</span>
                         </div>
                     <?php endwhile; ?>
                 <?php else: ?>
@@ -857,36 +857,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
             </div>
         </div>
 
-        <?php if ($pending_bank > 0): ?>
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <h3>🏦 Pending Bank Details</h3>
-                    <p class="card-subtitle"><?php echo $pending_bank; ?> approved student(s) haven't submitted bank details yet</p>
-                </div>
-                <a href="bank_verify.php" class="card-action">Verify Bank →</a>
-            </div>
-            <table class="admin-table">
-                <thead>
-                    <tr><th>App No</th><th>Student</th><th>Scheme</th><th></th></tr>
-                </thead>
-                <tbody>
-                    <?php if ($pending_bank_list && $pending_bank_list->num_rows > 0): ?>
-                        <?php while ($pb = $pending_bank_list->fetch_assoc()): ?>
-                            <tr>
-                                <td><strong><?php echo htmlspecialchars($pb['application_no']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($pb['student_name']); ?></td>
-                                <td><?php echo htmlspecialchars($pb['scheme_name']); ?></td>
-                                <td><a href="view_app.php?id=<?php echo $pb['id']; ?>" class="action-link">View</a></td>
-                            </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <tr><td colspan="4" style="padding:16px;text-align:center;color:var(--text-muted);">All approved students have submitted bank details.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php endif; ?>
+    
 
         <div class="grid-4col">
             <a href="bank_verify.php" class="quick-item">

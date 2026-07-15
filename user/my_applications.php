@@ -111,7 +111,8 @@ if ($count_query) {
 <div class="min-h-screen flex flex-col justify-between">
 
     <!-- Authenticated Navbar -->
-    <header class="bg-[#006D69] px-4 sm:px-6 py-4 shadow-md sticky top-0 z-50">
+     <?php include_once("../includes/header.php");?>
+    <!-- <header class="bg-[#006D69] px-4 sm:px-6 py-4 shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
 
             <a href="index.php?lang=<?= $lang_param; ?>" class="min-w-0 flex-shrink block hover:opacity-90 transition">
@@ -152,23 +153,13 @@ if ($count_query) {
                             </span>
                         <?php endif; ?>
                     </a>
-                    <a href="profile.php?lang=<?= $lang_param; ?>" class="flex items-center gap-2 bg-[#004D4A] hover:bg-[#003D3B] text-white pl-1.5 pr-3.5 py-1 rounded-full border border-teal-500/30 transition shadow-sm">
-                        <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border border-white/20">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
-                        </div>
-                        <span class="text-xs sm:text-sm font-semibold ml-2">
-                            <?= htmlspecialchars($_SESSION['fullname'] ?? 'User'); ?>
-                        </span>
-                    </a>
                     <a href="../auth/logout.php?lang=<?= $lang_param; ?>" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs sm:text-sm font-bold px-3 py-2 rounded-md transition border border-red-500/20">
                         <?= $nav['nav_logout']; ?>
                     </a>
                 </div>
             </div>
         </div>
-    </header>
+    </header> -->
 
 <main class="max-w-7xl mx-auto px-4 py-10">
 
@@ -262,7 +253,21 @@ if ($count_query) {
                         </td>
 
                         <td class="px-6 py-4">
-                            <?= htmlspecialchars($row['status']) ?>
+                            <?php
+                            $status = htmlspecialchars($row['status']);
+                            $statusLower = strtolower($row['status']);
+                            if ($statusLower === 'approved'):
+                                echo '<span class="inline-flex items-center bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-200">' . $status . '</span>';
+                            elseif ($statusLower === 'recommended'):
+                                echo '<span class="inline-flex items-center bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full border border-indigo-200">' . $status . '</span>';
+                            elseif ($statusLower === 'rejected'):
+                                echo '<span class="inline-flex items-center bg-rose-50 text-rose-700 text-xs font-bold px-2.5 py-1 rounded-full border border-rose-200">' . $status . '</span>';
+                            elseif ($statusLower === 'under review'):
+                                echo '<span class="inline-flex items-center bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full border border-blue-200">' . $status . '</span>';
+                            else:
+                                echo '<span class="inline-flex items-center bg-amber-50 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200">' . $status . '</span>';
+                            endif;
+                            ?>
                         </td>
 
                         <td class="px-6 py-4 text-center">

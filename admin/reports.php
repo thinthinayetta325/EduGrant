@@ -14,10 +14,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'ပညာသင်ဆုအစီအစဉ်များ',
     'reviewers' => 'စိစစ်ရေးမှူးများ',
     'applications' => 'လျှောက်လွှာများ',
-    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်း',
+    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်းများ',
     'recipients' => 'ဆုရရှိသူများ',
     'disbursements' => 'ငွေပေးချေမှုများ',
     'reports' => 'အစီရင်ခံစာများ',
+    'messages' => 'စာတိုပေးစာများ',
     'logout' => 'ထွက်မည်',
     'page_title' => 'အစီရင်ခံစာများ',
 ] : [
@@ -25,10 +26,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'Schemes',
     'reviewers' => 'Reviewers',
     'applications' => 'Applications',
-    'bank_verify' => 'Bank Verification',
+    'bank_verify' => 'Bank Verifications',
     'recipients' => 'Recipients',
     'disbursements' => 'Disbursements',
     'reports' => 'Reports',
+    'messages' => 'Messages',
     'logout' => 'Logout',
     'page_title' => 'Reports',
 ];
@@ -50,6 +52,15 @@ $scheme_apps = $conn->query("SELECT sc.scheme_name, COUNT(a.id) AS app_count, CO
     GROUP BY sc.id");
 
 $monthly = $conn->query("SELECT DATE_FORMAT(apply_date, '%Y-%m') AS month, COUNT(*) AS apps FROM applications WHERE apply_date IS NOT NULL GROUP BY month ORDER BY month DESC LIMIT 12");
+
+$disbursements = $conn->query("SELECT pr.*, s.name AS student_name, s.roll_no, sc.scheme_name, bd.bank_name, bd.account_number
+    FROM payment_records pr
+    JOIN scholarship_recipients sr ON pr.recipient_id = sr.id
+    JOIN applications a ON sr.application_id = a.id
+    JOIN student s ON a.student_id = s.id
+    JOIN schemes sc ON a.scheme_id = sc.id
+    LEFT JOIN bank_details bd ON pr.bank_id = bd.id
+    ORDER BY pr.payment_date DESC");
 $current_page = 'reports';
 ?>
 <!DOCTYPE html>
@@ -247,6 +258,50 @@ $current_page = 'reports';
                     </table>
                 </div>
             </div>
+        </div>
+
+        <div class="admin-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div>
+                    <h2 class="card-title">💵 Disbursements</h2>
+                    <p class="card-subtitle">All payment records</p>
+                </div>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student</th>
+                        <th>Roll No</th>
+                        <th>Scheme</th>
+                        <th>Bank</th>
+                        <th>Amount (MMK)</th>
+                        <th>Year</th>
+                        <th>Semester</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($disbursements && $disbursements->num_rows > 0): ?>
+                        <?php while ($d = $disbursements->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo $d['id']; ?></td>
+                                <td><strong><?php echo htmlspecialchars($d['student_name']); ?></strong></td>
+                                <td><?php echo htmlspecialchars($d['roll_no'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($d['scheme_name']); ?></td>
+                                <td><?php echo htmlspecialchars($d['bank_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo number_format(floatval($d['amount'])); ?></td>
+                                <td><?php echo htmlspecialchars($d['academic_year'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($d['semester'] ?? '-'); ?></td>
+                                <td><?php echo $d['payment_date'] ?? '-'; ?></td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr><td colspan="9" style="text-align:center; padding:20px; color:#94a3b8;">No disbursement records found.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <!-- <div class="admin-card" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">

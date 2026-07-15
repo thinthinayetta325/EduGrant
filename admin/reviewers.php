@@ -14,10 +14,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'ပညာသင်ဆုအစီအစဉ်များ',
     'reviewers' => 'စိစစ်ရေးမှူးများ',
     'applications' => 'လျှောက်လွှာများ',
-    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်း',
+    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်းများ',
     'recipients' => 'ဆုရရှိသူများ',
     'disbursements' => 'ငွေပေးချေမှုများ',
     'reports' => 'အစီရင်ခံစာများ',
+    'messages' => 'စာတိုပေးစာများ',
     'logout' => 'ထွက်မည်',
     'page_title' => 'စိစစ်ရေးမှူးများစီမံရန်',
 ] : [
@@ -25,10 +26,11 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'Schemes',
     'reviewers' => 'Reviewers',
     'applications' => 'Applications',
-    'bank_verify' => 'Bank Verification',
+    'bank_verify' => 'Bank Verifications',
     'recipients' => 'Recipients',
     'disbursements' => 'Disbursements',
     'reports' => 'Reports',
+    'messages' => 'Messages',
     'logout' => 'Logout',
     'page_title' => 'Reviewers',
 ];
@@ -218,7 +220,7 @@ $current_page = 'reviewers';
                                     <form method="POST" class="inline-form" onsubmit="return confirm('Delete this reviewer?')">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                                        <button type="submit" class="btn-red-sm">🗑️</button>
+                                        <button type="submit" class="btn-red-sm" style="padding:4px 10px; font-size:10px;">🗑️ Delete</button>
                                     </form>
                                 </td>
                             </tr>

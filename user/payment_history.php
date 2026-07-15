@@ -135,57 +135,7 @@ $conn->close();
 <div class="min-h-screen flex flex-col justify-between">
     
     <!-- Navbar Header -->
-    <header class="bg-[#006D69] px-4 sm:px-6 py-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            
-            <!-- Brand Logo -->
-            <a href="index.php?lang=<?php echo $lang_param; ?>" class="min-w-0 flex-shrink block hover:opacity-90 transition">
-                <div class="flex items-center gap-2.5">
-                    <div class="bg-white/10 p-1.5 rounded-lg text-teal-300 shrink-0">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="text-white text-lg sm:text-xl font-bold leading-tight truncate">EduGrant</h1>
-                        <p class="text-teal-200 text-[11px] sm:text-xs mt-0.5 opacity-90 tracking-wide"><?php echo $lang['brand_sub']; ?></p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Navigation Links -->
-            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-teal-100">
-                <a href="index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition"><?php echo $lang['nav_home']; ?></a>
-                <a href="scholarships.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition"><?php echo $lang['nav_scholarships']; ?></a>
-                <a href="status.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition"><?php echo $lang['nav_status']; ?></a>
-                <a href="contact.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition"><?php echo $lang['nav_contact']; ?></a>
-            </nav>
-
-            <!-- Language and Profile Actions -->
-            <div class="flex items-center gap-4 shrink-0">
-                <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10">
-                    <a href="?lang=en" class="px-2 py-1 text-[11px] font-semibold rounded transition <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">ENG</a>
-                    <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
-                    <a href="?lang=mm" class="px-2 py-1 text-[11px] font-medium rounded transition <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">မြန်မာ</a>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <a href="profile.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-2 bg-[#003D3B] text-white pl-1.5 pr-3.5 py-1 rounded-full border border-teal-400 transition shadow-sm">
-                        <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center border border-white/20">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
-                        </div>
-                        <span class="text-xs sm:text-sm font-semibold tracking-wide">
-                            <?php echo htmlspecialchars($student_info['name'] ?? 'Student'); ?>
-                        </span>
-                    </a>
-                    
-                    <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-bold px-3 py-2 rounded-md transition border border-red-500/20">
-                        <?php echo $p_lang['nav_logout']; ?>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+          <?php include_once("../includes/header.php");?>
 
     <!-- Main History Table Area -->
     <main class="max-w-5xl mx-auto px-4 my-12 flex-grow w-full">
@@ -265,11 +215,8 @@ $conn->close();
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#003D3B] text-teal-200/60 text-xs text-center py-6 border-t border-white/10">
-        <div class="max-w-7xl mx-auto px-4">
-            &copy; 2026 EduGrant Portal. All rights reserved.
-        </div>
-    </footer>
+  
+     <?php include_once("../includes/footer.php");?>
 
 </div>
 

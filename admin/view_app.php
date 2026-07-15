@@ -117,7 +117,7 @@ $current_page = 'applications';
         .card-header h3 { font-size: 15px; font-weight: 600; }
         .card-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
         .info-row { display: flex; padding: 11px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
@@ -210,6 +210,62 @@ $current_page = 'applications';
 <div class="workspace">
     <?php $page_title = $sidebar_lang['app_details'] ?? 'Application Details'; include 'header.php'; ?>
 
+    <?php if ($app['status'] !== 'Approved' && $app['status'] !== 'Rejected'): ?>
+    <div style="padding:0 28px;">
+        <div style="background:#fffbe6;border:2px solid #FFD700;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:42px;height:42px;background:linear-gradient(135deg,#FFD700,#f59e0b);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">⚖️</div>
+                <div>
+                    <h3 style="font-size:15px;font-weight:700;color:#004D4A;margin:0;">Admin Decision</h3>
+                    <p style="font-size:11px;color:var(--text-secondary);margin:2px 0 0 0;">Approve or reject this application</p>
+                </div>
+            </div>
+            <form method="POST" action="applications.php" style="display:flex;gap:10px;">
+                <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
+                <button type="submit" name="action" value="approve" class="btn-primary" onclick="return confirm('Approve this application?')">✓ Approve</button>
+                <button type="submit" name="action" value="reject" class="btn-red" onclick="return confirm('Reject this application?')">✕ Reject</button>
+            </form>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <div style="padding:0 28px;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:42px;height:42px;background:linear-gradient(135deg,#dcfce7,#10b981);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">📋</div>
+                <div>
+                    <h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:0;">Reviewer Recommendation</h3>
+                    <p style="font-size:11px;color:var(--text-secondary);margin:2px 0 0 0;">
+                        <?php if ($app['reviewer_name']): ?>
+                            By <strong><?php echo htmlspecialchars($app['reviewer_name']); ?></strong>
+                            <?php if ($app['reviewer_dept']): ?> (<?php echo htmlspecialchars($app['reviewer_dept']); ?>)<?php endif; ?>
+                        <?php else: ?>
+                            No reviewer assigned yet
+                        <?php endif; ?>
+                    </p>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <?php if ($app['recommendation']): ?>
+                    <span class="badge <?php echo $app['recommendation'] === 'Recommended' ? 'badge-recommend' : 'badge-not-recommend'; ?>" style="font-size:12px;padding:5px 14px;">
+                        <?php echo $app['recommendation'] === 'Recommended' ? '👍 Recommended' : '👎 Not Recommended'; ?>
+                    </span>
+                <?php else: ?>
+                    <span class="badge badge-review" style="font-size:12px;padding:5px 14px;">⏳ Pending Review</span>
+                <?php endif; ?>
+                <?php if ($app['reviewed_at']): ?>
+                    <p style="font-size:10px;color:var(--text-muted);margin-top:4px;"><?php echo date('d M Y, h:i A', strtotime($app['reviewed_at'])); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php if ($app['remarks']): ?>
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:0 0 12px 12px;border-top:none;padding:12px 24px;margin-top:-1px;">
+            <p style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:0 0 4px 0;">Remarks:</p>
+            <p style="font-size:12px;color:var(--text-primary);margin:0;"><?php echo nl2br(htmlspecialchars($app['remarks'])); ?></p>
+        </div>
+        <?php endif; ?>
+    </div>
+
     <div class="dashboard-body">
 
         <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
@@ -262,36 +318,15 @@ $current_page = 'applications';
         </div>
 
         <?php if ($app['reviewer_name']): ?>
-        <div class="grid-3">
-            <div class="card">
-                <h3 class="section-title">Review & Recommendation</h3>
-                <div class="info-row"><span class="info-label">Reviewer</span><span class="info-value"><strong><?php echo htmlspecialchars($app['reviewer_name']); ?></strong> (<?php echo htmlspecialchars($app['reviewer_dept'] ?? 'General'); ?>)</span></div>
-                <div class="info-row"><span class="info-label">Recommendation</span><span class="info-value">
-                    <?php if ($app['recommendation']): ?>
-                        <span class="badge <?php echo $app['recommendation'] === 'Recommended' ? 'badge-recommend' : 'badge-not-recommend'; ?>"><?php echo $app['recommendation']; ?></span>
-                    <?php else: ?>
-                        <span style="color:var(--text-muted);">Pending</span>
-                    <?php endif; ?>
-                </span></div>
-                <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
-                    <span class="info-label">Remarks</span>
-                    <span class="info-value" style="font-size:12px;color:var(--text-secondary);background:var(--body-bg);padding:10px;border-radius:8px;width:100%;"><?php echo nl2br(htmlspecialchars($app['remarks'] ?? 'No remarks provided.')); ?></span>
-                </div>
-                <?php if ($app['reviewed_at']): ?>
-                    <div class="info-row"><span class="info-label">Reviewed At</span><span class="info-value"><?php echo date('d M Y, h:i A', strtotime($app['reviewed_at'])); ?></span></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="card">
-                <h3 class="section-title">Bank Details</h3>
-                <?php if ($bd): ?>
-                    <div class="info-row"><span class="info-label">Bank</span><span class="info-value"><?php echo htmlspecialchars($bd['bank_name'] ?? 'N/A'); ?></span></div>
-                    <div class="info-row"><span class="info-label">Account No</span><span class="info-value"><?php echo htmlspecialchars($bd['account_number'] ?? 'N/A'); ?></span></div>
-                    <div class="info-row"><span class="info-label">Account Holder</span><span class="info-value"><?php echo htmlspecialchars($bd['account_holder'] ?? 'N/A'); ?></span></div>
-                <?php else: ?>
-                    <p style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No bank details on file.</p>
-                <?php endif; ?>
-            </div>
+        <div class="card">
+            <h3 class="section-title">Bank Details</h3>
+            <?php if ($bd): ?>
+                <div class="info-row"><span class="info-label">Bank</span><span class="info-value"><?php echo htmlspecialchars($bd['bank_name'] ?? 'N/A'); ?></span></div>
+                <div class="info-row"><span class="info-label">Account No</span><span class="info-value"><?php echo htmlspecialchars($bd['account_number'] ?? 'N/A'); ?></span></div>
+                <div class="info-row"><span class="info-label">Account Holder</span><span class="info-value"><?php echo htmlspecialchars($bd['account_holder'] ?? 'N/A'); ?></span></div>
+            <?php else: ?>
+                <p style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No bank details on file.</p>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
 
@@ -312,22 +347,6 @@ $current_page = 'applications';
                     <?php endwhile; ?>
                 </tbody>
             </table>
-        </div>
-        <?php endif; ?>
-
-        <?php if ($app['status'] !== 'Approved' && $app['status'] !== 'Rejected'): ?>
-        <div class="card" style="border:2px solid #FFD700;background:#fffbe6;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <h3 style="font-size:15px;font-weight:700;color:#004D4A;">Administrative Decision</h3>
-                    <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Approve or reject this application</p>
-                </div>
-                <form method="POST" action="applications.php" style="display:flex;gap:10px;">
-                    <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
-                    <button type="submit" name="action" value="approve" class="btn-primary" onclick="return confirm('Approve this application?')">✓ Approve</button>
-                    <button type="submit" name="action" value="reject" class="btn-red" onclick="return confirm('Reject this application?')">✕ Reject</button>
-                </form>
-            </div>
         </div>
         <?php endif; ?>
 

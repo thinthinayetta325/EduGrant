@@ -224,24 +224,57 @@ if ($is_mm) {
                                 </span>
                             <?php endif; ?>
                         </a>
-                        <a href="profile.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-2 bg-[#004D4A] hover:bg-[#003D3B] text-white pl-1.5 pr-3.5 py-1 rounded-full border border-teal-500/30 transition shadow-sm">
-                            <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border border-white/20">
-                                <?php if (!empty($profile_image) && file_exists('../uploads/profile_pics/' . $profile_image)): ?>
-                                    <img src="../uploads/profile_pics/<?php echo $profile_image; ?>" alt="" class="w-full h-full object-cover">
-                                <?php else: ?>
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                    </svg>
-                                <?php endif; ?>
+
+                        <div class="relative" id="userProfileDropdown">
+                            <button onclick="document.getElementById('userProfileMenu').classList.toggle('hidden')" class="flex items-center gap-2 bg-[#004D4A] hover:bg-[#003D3B] text-white pl-1.5 pr-3 py-1 rounded-full border border-teal-500/30 transition shadow-sm cursor-pointer">
+                                <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border border-white/20">
+                                    <?php if (!empty($profile_image) && file_exists('../uploads/profile_pics/' . $profile_image)): ?>
+                                        <img src="../uploads/profile_pics/<?php echo $profile_image; ?>" alt="" class="w-full h-full object-cover">
+                                    <?php else: ?>
+                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                        </svg>
+                                    <?php endif; ?>
+                                </div>
+                                <span class="text-xs sm:text-sm font-semibold ml-1 hidden sm:inline">
+                                    <?php echo htmlspecialchars($user_name ?? 'User'); ?>
+                                </span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-teal-300">
+                                    <path d="m6 9 6 6 6-6"></path>
+                                </svg>
+                            </button>
+
+                            <div id="userProfileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+                                <a href="profile.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
+                                    <svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                    My Profile
+                                </a>
+                                <a href="my_applications.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    My Applications
+                                </a>
+                                <a href="payment_history.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Payment History
+                                </a>
+                                <hr class="my-1 border-slate-100">
+                                <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    Logout
+                                </a>
                             </div>
-                            <span class="text-xs sm:text-sm font-semibold ml-2">
-                                <?php echo htmlspecialchars($user_name ?? 'User'); ?>
-                            </span>
-                        </a>
-                        <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs sm:text-sm font-bold px-3 py-2 rounded-md transition border border-red-500/20">
-                            <?php echo $lang['nav_logout']; ?>
-                        </a>
+                        </div>
                     </div>
+
+                    <script>
+                    document.addEventListener('click', function(e) {
+                        var dropdown = document.getElementById('userProfileDropdown');
+                        var menu = document.getElementById('userProfileMenu');
+                        if (dropdown && !dropdown.contains(e.target)) {
+                            menu.classList.add('hidden');
+                        }
+                    });
+                    </script>
                 <?php else: ?>
                     <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] text-xs sm:text-sm font-bold px-3.5 sm:px-5 py-2 rounded-md hover:bg-slate-100 transition whitespace-nowrap">
                         <?php echo $lang['btn_login']; ?>

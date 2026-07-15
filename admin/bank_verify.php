@@ -14,23 +14,25 @@ $sidebar_lang = $is_mm ? [
     'schemes' => 'ပညာသင်ဆုအစီအစဉ်များ',
     'reviewers' => 'စိစစ်ရေးမှူးများ',
     'applications' => 'လျှောက်လွှာများ',
-    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်း',
+    'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်းများ',
     'recipients' => 'ဆုရရှိသူများ',
     'disbursements' => 'ငွေပေးချေမှုများ',
     'reports' => 'အစီရင်ခံစာများ',
+    'messages' => 'စာတိုပေးစာများ',
     'logout' => 'ထွက်မည်',
-    'page_title' => 'ဘဏ်စစ်ဆေးခြင်း',
+    'page_title' => 'ဘဏ်စစ်ဆေးခြင်းများ',
 ] : [
     'dashboard' => 'Dashboard ',
     'schemes' => ' Schemes',
     'reviewers' => 'Reviewers',
     'applications' => 'Applications',
-    'bank_verify' => 'Bank Verification',
+    'bank_verify' => 'Bank Verifications',
     'recipients' => 'Recipients',
     'disbursements' => 'Disbursements',
     'reports' => 'Reports',
+    'messages' => 'Messages',
     'logout' => 'Logout',
-    'page_title' => 'Bank Verification',
+    'page_title' => 'Bank Verifications',
 ];
 // include "header.php";
 // Auto-migration: ensure is_verified column exists on bank_details
@@ -117,6 +119,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     die("Error inserting payment_record: " . $stmt3->error);
                 }
                 $stmt3->close();
+
+                // Update application payment_status to Paid
+                $conn->query("UPDATE applications SET payment_status = 'Paid' WHERE id = $app_id");
 
                 // Send notification to student
                 $app_info = $conn->query("SELECT application_no FROM applications WHERE id = $app_id")->fetch_assoc();

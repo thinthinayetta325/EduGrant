@@ -142,6 +142,12 @@ if ($col_check && $col_check->num_rows === 0) {
     $conn->query("ALTER TABLE student ADD COLUMN profile_image VARCHAR(255) DEFAULT NULL AFTER phone");
 }
 
+// Ensure downloaded column exists in receipts table
+$dl_col_check = $conn->query("SHOW COLUMNS FROM receipts LIKE 'downloaded'");
+if ($dl_col_check && $dl_col_check->num_rows === 0) {
+    $conn->query("ALTER TABLE receipts ADD COLUMN downloaded TINYINT(1) DEFAULT 0");
+}
+
 // 6. Handle profile update form submission
 $update_success = false;
 $update_error = '';
@@ -234,11 +240,11 @@ $needs_bank = $approved_count > 0 && !$has_bank_details;
 
 // Check if student has a receipt to download
 $receipt_data = null;
-$receipt_query = $conn->prepare("SELECT r.filename, sc.scheme_name, r.created_at
+$receipt_query = $conn->prepare("SELECT r.id, r.filename, sc.scheme_name, r.created_at
     FROM receipts r
     JOIN applications a ON r.application_id = a.id
     JOIN schemes sc ON a.scheme_id = sc.id
-    WHERE r.student_id = ?
+    WHERE r.student_id = ? AND (r.downloaded = 0 OR r.downloaded IS NULL)
     ORDER BY r.created_at DESC LIMIT 1");
 if ($receipt_query) {
     $receipt_query->bind_param("i", $student_id);
@@ -317,16 +323,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 <!-- Main Profile Management Content Grid -->
 <main class="max-w-7xl mx-auto px-4 sm:px-6 my-12 flex-grow w-full">
-    <div class="mb-8">
+    <div class="mb-8 text-center">
         <h2 class="text-2xl sm:text-3xl font-extrabold text-[#003D3B] tracking-tight">
             <?php echo $p_lang['title']; ?>
         </h2>
         <p class="text-sm text-slate-500 mt-1.5"><?php echo $p_lang['subtitle']; ?></p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    <div class="max-w-md mx-auto space-y-6">
         
-        <!-- Left Column: Student Bio Metadata Card -->
+        <!-- Student Bio Metadata Card -->
         <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6 text-center">
             <form method="POST" action="" enctype="multipart/form-data" id="profileImageForm">
                 <input type="hidden" name="action" value="upload_image">
@@ -375,99 +381,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </button>
         </div>
 
-        <!-- Right Column: Scholarship Pipeline History Ledger -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-                    <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                        <svg class="w-5 h-5 text-[#006D69]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 00-2 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        <?php echo $p_lang['section_history']; ?>
-                    </h3>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <?php
-                    $history_query = $conn->prepare("
-                        SELECT a.id, a.application_no, a.apply_date, a.family_income, a.status, s.scheme_name
-                        FROM applications a
-                        JOIN schemes s ON a.scheme_id = s.id
-                        WHERE a.student_id = ?
-                        ORDER BY a.apply_date DESC
-                    ");
-                    $history_query->bind_param("i", $student_id);
-                    $history_query->execute();
-                    $history = $history_query->get_result();
-
-                    if ($history && $history->num_rows > 0):
-                    ?>
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-                                    <th class="py-3.5 px-6"><?php echo $p_lang['col_app_no']; ?></th>
-                                    <th class="py-3.5 px-6"><?php echo $p_lang['col_scheme']; ?></th>
-                                    <th class="py-3.5 px-6"><?php echo $p_lang['col_income']; ?></th>
-                                    <th class="py-3.5 px-6 whitespace-nowrap"><?php echo $p_lang['col_date']; ?></th>
-                                    <th class="py-3.5 px-6"><?php echo $p_lang['col_status']; ?></th>
-                                    <th class="py-3.5 px-6 text-center"><?php echo $p_lang['col_action']; ?></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm">
-                                <?php while($row = $history->fetch_assoc()): ?>
-                                    <tr class="hover:bg-slate-50/50 transition duration-150">
-                                        <td class="py-4 px-6 font-semibold text-slate-800">
-                                            <?php echo htmlspecialchars($row['application_no']); ?>
-                                        </td>
-                                        <td class="py-4 px-6 text-slate-800 max-w-[200px] truncate">
-                                            <?php echo htmlspecialchars($row['scheme_name']); ?>
-                                        </td>
-                                        <td class="py-4 px-6 text-slate-600">
-                                            <?php echo number_format($row['family_income']); ?> MMK
-                                        </td>
-                                        <td class="py-4 px-6 text-slate-500 whitespace-nowrap">
-                                            <?php echo date('M d, Y', strtotime($row['apply_date'])); ?>
-                                        </td>
-                                        <td class="py-4 px-6 whitespace-nowrap">
-                                            <?php
-                                            $status = strtolower($row['status']);
-                                            if ($status === 'approved'):
-                                                echo '<span class="inline-flex items-center bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-200">Approved</span>';
-                                            elseif ($status === 'rejected'):
-                                                echo '<span class="inline-flex items-center bg-rose-50 text-rose-700 text-xs font-bold px-2.5 py-1 rounded-full border border-rose-200">Rejected</span>';
-                                            elseif ($status === 'under review'):
-                                                echo '<span class="inline-flex items-center bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full border border-blue-200">Under Review</span>';
-                                            elseif ($status === 'recommended'):
-                                                echo '<span class="inline-flex items-center bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full border border-indigo-200">Recommended</span>';
-                                            else:
-                                                echo '<span class="inline-flex items-center bg-amber-50 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200">Submitted</span>';
-                                            endif;
-                                            ?>
-                                        </td>
-                                        <td class="py-4 px-6 text-center">
-                                            <a href="application_details.php?id=<?php echo $row['id']; ?>" class="inline-flex items-center gap-1 bg-[#006D69] hover:bg-[#004F4B] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">
-                                                <?php echo $p_lang['view_btn']; ?>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <div class="text-center py-12 px-6">
-                            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-4m-8 0H4"></path></svg>
-                            </div>
-                            <p class="text-sm text-slate-500 font-medium"><?php echo $p_lang['no_applications']; ?></p>
-                        </div>
-                    <?php
-                    endif;
-                    $history_query->close();
-                    $conn->close();
-                    ?>
-                </div>
-            </div>
-
-            <?php if ($receipt_data): ?>
-                <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+        <?php if ($receipt_data): ?>
+                <div id="fundReleasedBox" class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
                     <div class="px-6 py-5 border-b border-slate-100 bg-emerald-50/50">
                         <h3 class="font-bold text-emerald-800 text-base flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -478,7 +393,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <p class="text-sm text-slate-600">
                             <?php echo $is_mm ? 'သင်၏ ' : 'Your scholarship for '; ?><strong><?php echo htmlspecialchars($receipt_data['scheme_name']); ?></strong><?php echo $is_mm ? ' အတွက် ငွေကြေးထောက်ပံ့မှု ထုတ်ပေးပြီးပါပြီ။' : ' has been disbursed.'; ?>
                         </p>
-                        <a href="../uploads/receipts/<?php echo $receipt_data['filename']; ?>" download class="mt-4 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition">
+                        <a href="download_receipt.php" onclick="setTimeout(function(){ document.getElementById('fundReleasedBox').style.display='none'; }, 1500);" class="mt-4 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             <?php echo $is_mm ? 'ငွေလက်ခံဖြတ်ပိုင်း ဒေါင်းလုဒ်' : 'Download Receipt'; ?>
                         </a>
@@ -503,8 +418,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </div>
                 </div>
             <?php endif; ?>
-
-        </div>
 
     </div>
 </main>

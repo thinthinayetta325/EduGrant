@@ -214,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['success_message'] =
                     $page_lang['success'];
 
-                header("Location: profile.php?lang=" . $lang_param);
+                header("Location: my_applications.php?lang=" . $lang_param);
                 exit();
 
             } else {

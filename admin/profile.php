@@ -24,6 +24,7 @@ $sidebar_lang = $is_mm ? [
     'recipients' => 'ဆုရရှိသူများ',
     'disbursements' => 'ငွေပေးချေမှုများ',
     'reports' => 'အစီရင်ခံစာများ',
+     'messages' => 'စာတိုပေးစာများ',
     'my_profile' => 'ကိုယ်ရေးအချက်အလက်',
     'logout' => 'ထွက်မည်',
     'page_title' => 'အက်ဒ်မင် ကိုယ်ရေးအချက်အလက်',

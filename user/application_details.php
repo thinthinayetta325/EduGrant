@@ -36,6 +36,8 @@ if (!$app) {
     header("Location: my_applications.php");
     exit();
 }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,7 +64,7 @@ if (!$app) {
     <main class="max-w-4xl mx-auto px-4 py-10">
 
         <!-- Back link -->
-        <a href="profile.php" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[#004D4A] transition mb-6">
+        <a href="my_applications.php" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[#004D4A] transition mb-6">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
             Back to My Applications
         </a>
