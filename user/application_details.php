@@ -37,6 +37,17 @@ if (!$app) {
     exit();
 }
 
+// Fetch rejection remarks if rejected
+$reject_reason = null;
+if ($app['status'] === 'Rejected') {
+    $stmt2 = $conn->prepare("SELECT remarks FROM application_reviews WHERE application_id = ? AND remarks IS NOT NULL AND remarks != '' ORDER BY reviewed_at DESC LIMIT 1");
+    $stmt2->bind_param("i", $app_id);
+    $stmt2->execute();
+    $res2 = $stmt2->get_result()->fetch_assoc();
+    $reject_reason = $res2['remarks'] ?? null;
+    $stmt2->close();
+}
+
 
 ?>
 <!DOCTYPE html>
@@ -92,6 +103,24 @@ if (!$app) {
                 <?= htmlspecialchars($status) ?>
             </span>
         </div>
+
+        <!-- Rejection Reason -->
+        <?php if ($status === 'Rejected' && $reject_reason): ?>
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-red-800">Rejection Reason</h3>
+                    <p class="text-xs text-red-600">Please review the reason below</p>
+                </div>
+            </div>
+            <p class="text-sm text-red-700 leading-relaxed"><?= nl2br(htmlspecialchars($reject_reason)) ?></p>
+        </div>
+        <?php endif; ?>
 
         <!-- Application Info Card -->
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">

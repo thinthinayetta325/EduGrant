@@ -71,7 +71,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (strlen($password) < 8) {
         $message = $is_mm ? "စကားဝှက်သည် အနည်းဆုံး ၈ လုံးရှိရပါမည်။" : "Password must be at least 8 characters long.";
+    } elseif (!preg_match('/^(\+?95|0)9\d{8,9}$/', preg_replace('/[\s\-]/', '', $phone))) {
+        $message = $is_mm ? "ဖုန်းနံပါတ် ပုံစံမှားနေသည်။ ဥပမာ: 09 123456789" : "Invalid phone number format. Example: 09 123456789";
     } else {
+        // Check if roll_no already exists
+        $checkRoll = $conn->prepare("SELECT id FROM student WHERE roll_no = ? LIMIT 1");
+        $checkRoll->bind_param("s", $roll_no);
+        $checkRoll->execute();
+        $checkRoll->store_result();
+        if ($checkRoll->num_rows > 0) {
+            $message = $is_mm ? "ဤ Roll No ဖြင့် အကောင့်ရှိပြီးသားဖြစ်သည်။" : "An account with this Roll No already exists.";
+        } else {
         // Check if email already exists
         $check = $conn->prepare("SELECT id FROM student WHERE email = ? LIMIT 1");
         $check->bind_param("s", $email);
@@ -92,6 +102,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         $check->close();
+        }
+        $checkRoll->close();
     }
     $conn->close();
 }
@@ -152,9 +164,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $r_lang['phone']; ?></label>
-                        <input type="text" name="phone" required
+                        <input type="tel" name="phone" required pattern="(\+?95|0)9[0-9]{8,9}"
                                class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none"
-                               placeholder="+95 9 123 456 789">
+                               placeholder="09 123456789">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $r_lang['gender']; ?></label>

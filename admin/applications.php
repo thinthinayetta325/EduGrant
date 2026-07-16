@@ -63,7 +63,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
                 $stmt->close();
             }
         } elseif ($action === 'reject') {
+            $reject_reason = trim($_POST['reject_reason'] ?? '');
             $conn->query("UPDATE applications SET status='Rejected', approved_by=$admin_id, approved_at=NOW() WHERE id=$id AND status NOT IN ('Approved','Rejected')");
+
+            // Save rejection reason in application_reviews
+            if ($reject_reason) {
+                $stmt = $conn->prepare("INSERT INTO application_reviews (application_id, reviewer_id, recommendation, remarks, reviewed_at) VALUES (?, 0, 'Not Recommended', ?, NOW()) ON DUPLICATE KEY UPDATE remarks=?, reviewed_at=NOW()");
+                $stmt->bind_param("iss", $id, $reject_reason, $reject_reason);
+                $stmt->execute();
+                $stmt->close();
+            }
 
             $app_data = $conn->query("SELECT student_id, application_no FROM applications WHERE id=$id")->fetch_assoc();
             if ($app_data) {
@@ -76,6 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
                 $stmt->close();
             }
         }
+    }
+
+    // Redirect to user's application_details if requested
+    if (isset($_POST['redirect_user']) && $action === 'reject' && !empty($ids)) {
+        header("Location: ../user/application_details.php?id=" . $ids[0]);
+        exit();
     }
 
     header("Location: applications.php?status=" . ($action === 'approve' ? 'Approved' : 'Rejected'));
@@ -263,7 +278,6 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
             <div class="filter-bar">
                 <a href="applications.php?lang=<?php echo $lang_param; ?>" class="status-link <?php echo !$status_filter ? 'active' : ''; ?>">All</a>
                 <a href="applications.php?status=Submitted&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Submitted' ? 'active' : ''; ?>">Submitted</a>
-                <a href="applications.php?status=Under Review&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Under Review' ? 'active' : ''; ?>">Under Review</a>
                 <a href="applications.php?status=Recommended&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Recommended' ? 'active' : ''; ?>">Recommended</a>
                 <a href="applications.php?status=Approved&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Approved' ? 'active' : ''; ?>">Approved</a>
                 <a href="applications.php?status=Rejected&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
@@ -306,7 +320,14 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                                 <td><?php echo htmlspecialchars($row['scheme_name']); ?></td>
                                 <td><span class="badge <?php echo $cls; ?>"><?php echo $stat; ?></span></td>
                                 <td><?php echo htmlspecialchars($row['reviewer_name'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($row['recommendation'] ?? '-'); ?></td>
+                                <td><?php
+                                    $rec = $row['recommendation'] ?? '';
+                                    if ($stat === 'Approved') echo '<span style="color:#15803d;font-weight:600;">👍 Recommended</span>';
+                                    elseif ($stat === 'Rejected') echo '<span style="color:#b91c1c;font-weight:600;">👎 Not Recommended</span>';
+                                    elseif ($rec === 'Recommended') echo '<span style="color:#15803d;font-weight:600;">👍 Recommended</span>';
+                                    elseif ($rec === 'Not Recommended') echo '<span style="color:#b91c1c;font-weight:600;">👎 Not Recommended</span>';
+                                    else echo '-';
+                                ?></td>
                                 <td style="display:flex;gap:6px;align-items:center;">
                                     <a href="view_app.php?id=<?php echo $row['id']; ?>&amp;lang=<?php echo $lang_param; ?>" class="btn-blue-sm" style="padding:4px 10px; font-size:10px; text-decoration:none;">🔍 View</a>
                                     <a href="?delete=<?php echo $row['id']; ?>&amp;lang=<?php echo $lang_param; ?>" class="btn-red-sm" style="padding:4px 10px; font-size:10px; text-decoration:none;" onclick="return confirm('<?php echo $is_mm ? 'ဤလျှောက်လွှာကိုဖျက်ရန်သေချာပါသလား။' : 'Are you sure you want to delete this application?'; ?>')">🗑️ Delete</a>

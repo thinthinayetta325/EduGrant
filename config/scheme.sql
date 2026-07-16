@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS bank_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     bank_name VARCHAR(50),
-    account_number VARCHAR(50),
+    account_number VARCHAR(20),
     account_holder VARCHAR(50),
     is_verified BOOLEAN DEFAULT FALSE,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

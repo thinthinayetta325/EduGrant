@@ -260,12 +260,15 @@ $current_page = 'reports';
             </div>
         </div>
 
-        <div class="admin-card">
+        <div class="admin-card" id="disbursements-section">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div>
                     <h2 class="card-title">💵 Disbursements</h2>
                     <p class="card-subtitle">All payment records</p>
                 </div>
+                <button onclick="printDisbursements()" class="btn-blue-sm" style="display:flex;align-items:center;gap:6px;">
+                    🖨️ Print
+                </button>
             </div>
 
             <table class="admin-table">
@@ -313,6 +316,28 @@ $current_page = 'reports';
     </div>
 
 </div>
+
+<script>
+function printDisbursements() {
+    var content = document.getElementById('disbursements-section').innerHTML;
+    var printWindow = window.open('', '_blank');
+    printWindow.document.write('<html><head><title>Disbursements Report</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write('body { font-family: sans-serif; padding: 20px; }');
+    printWindow.document.write('table { width: 100%; border-collapse: collapse; font-size: 12px; }');
+    printWindow.document.write('th, td { padding: 8px; border: 1px solid #e2e8f0; text-align: left; }');
+    printWindow.document.write('th { background: #f8fafc; font-weight: bold; }');
+    printWindow.document.write('h2 { margin-bottom: 10px; }');
+    printWindow.document.write('p { color: #64748b; margin-bottom: 15px; }');
+    printWindow.document.write('button { display: none; }');
+    printWindow.document.write('</style></head><body>');
+    printWindow.document.write(content);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+</script>
 
 </body>
 </html>

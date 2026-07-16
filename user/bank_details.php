@@ -32,7 +32,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $account_number = trim($_POST['account_number']);
     $account_holder = trim($_POST['account_holder']);
 
-    if (!empty($bank_name) && !empty($account_number) && !empty($account_holder)) {
+    if (strlen($account_number) < 10 || strlen($account_number) > 17) {
+        $error_msg = $is_mm ? "ဘဏ်အကောင့်နံပါတ်သည် ဂဏန်း ၁၀ မှ ၁၇ ကြား ဖြစ်ရပါမည်။" : "Account number must be between 10 and 17 digits.";
+    } elseif (!preg_match('/^\d+$/', $account_number)) {
+        $error_msg = $is_mm ? "ဘဏ်အကောင့်နံပါတ်သည် ဂဏန်းများသာ ဖြစ်ရပါမည်။" : "Account number must contain only digits.";
+    } elseif (!empty($bank_name) && !empty($account_number) && !empty($account_holder)) {
         // Check if records already exist for this student
         $check_query = $conn->prepare("SELECT id FROM bank_details WHERE student_id = ?");
         $check_query->bind_param("i", $student_id);
@@ -308,7 +312,7 @@ $conn->close();
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
                         <?php echo $b_lang['label_number']; ?> <span class="text-rose-500">*</span>
                     </label>
-                    <input type="text" name="account_number" required
+                    <input type="text" name="account_number" required minlength="10" maxlength="17" pattern="\d{10,17}"
                            placeholder="<?php echo htmlspecialchars($b_lang['placeholder_number']); ?>" 
                            value="<?php echo htmlspecialchars($bank_data['account_number'] ?? ''); ?>"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#006D69] focus:bg-white transition text-sm">

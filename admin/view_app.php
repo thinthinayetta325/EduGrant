@@ -220,10 +220,32 @@ $current_page = 'applications';
                     <p style="font-size:11px;color:var(--text-secondary);margin:2px 0 0 0;">Approve or reject this application</p>
                 </div>
             </div>
-            <form method="POST" action="applications.php" style="display:flex;gap:10px;">
+            <form method="POST" action="applications.php" style="display:flex;gap:10px;align-items:center;">
                 <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
+                <input type="hidden" name="redirect_user" value="1">
                 <button type="submit" name="action" value="approve" class="btn-primary" onclick="return confirm('Approve this application?')">✓ Approve</button>
-                <button type="submit" name="action" value="reject" class="btn-red" onclick="return confirm('Reject this application?')">✕ Reject</button>
+                <button type="button" class="btn-red" onclick="document.getElementById('rejectModal').classList.remove('hidden')">✕ Reject</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div style="background:#fff;border-radius:12px;padding:24px;width:90%;max-width:420px;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 8px 0;">Reject Application</h3>
+            <p style="font-size:12px;color:#64748b;margin:0 0 16px 0;">Please provide a reason for rejection.</p>
+            <form method="POST" action="applications.php">
+                <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
+                <input type="hidden" name="redirect_user" value="1">
+                <textarea name="reject_reason" rows="4" required
+                    style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"
+                    placeholder="Enter rejection reason..."></textarea>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+                    <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden')"
+                        style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;">Cancel</button>
+                    <button type="submit" name="action" value="reject"
+                        style="padding:8px 16px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Confirm Reject</button>
+                </div>
             </form>
         </div>
     </div>
@@ -268,29 +290,7 @@ $current_page = 'applications';
 
     <div class="dashboard-body">
 
-        <div class="card" style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:16px;">
-                <div style="width:50px;height:50px;background:var(--body-bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">📄</div>
-                <div>
-                    <h2 style="font-size:18px;font-weight:700;"><?php echo htmlspecialchars($app['student_name']); ?></h2>
-                    <p style="font-size:13px;color:var(--text-secondary);"><?php echo htmlspecialchars($app['application_no']); ?> · <?php echo htmlspecialchars($app['roll_no']); ?></p>
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <?php
-                $s = $app['status'];
-                $c = 'badge-submitted';
-                if ($s === 'Under Review') $c = 'badge-review';
-                elseif ($s === 'Recommended') $c = 'badge-recommended';
-                elseif ($s === 'Approved') $c = 'badge-approved';
-                elseif ($s === 'Rejected') $c = 'badge-rejected';
-                ?>
-                <span class="badge <?php echo $c; ?>" style="font-size:13px;padding:5px 16px;"><?php echo $s; ?></span>
-                <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">Applied: <?php echo $app['apply_date'] ? date('d M Y', strtotime($app['apply_date'])) : 'N/A'; ?></p>
-            </div>
-        </div>
-
-        <div class="grid-2">
+        <div class="grid-2" style="grid-template-columns: 1fr 1fr 1fr;">
             <div class="card">
                 <h3 class="section-title">Student Information</h3>
                 <div class="info-row"><span class="info-label">Full Name</span><span class="info-value"><?php echo htmlspecialchars($app['student_name']); ?></span></div>
@@ -315,40 +315,18 @@ $current_page = 'applications';
                     <span class="info-value" style="font-size:12px;color:var(--text-secondary);"><?php echo nl2br(htmlspecialchars($app['eligibility'] ?? 'N/A')); ?></span>
                 </div>
             </div>
-        </div>
 
-        <?php if ($app['reviewer_name']): ?>
-        <div class="card">
-            <h3 class="section-title">Bank Details</h3>
-            <?php if ($bd): ?>
-                <div class="info-row"><span class="info-label">Bank</span><span class="info-value"><?php echo htmlspecialchars($bd['bank_name'] ?? 'N/A'); ?></span></div>
-                <div class="info-row"><span class="info-label">Account No</span><span class="info-value"><?php echo htmlspecialchars($bd['account_number'] ?? 'N/A'); ?></span></div>
-                <div class="info-row"><span class="info-label">Account Holder</span><span class="info-value"><?php echo htmlspecialchars($bd['account_holder'] ?? 'N/A'); ?></span></div>
-            <?php else: ?>
-                <p style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No bank details on file.</p>
-            <?php endif; ?>
+            <div class="card">
+                <h3 class="section-title">Bank Details</h3>
+                <?php if ($bd): ?>
+                    <div class="info-row"><span class="info-label">Bank</span><span class="info-value"><?php echo htmlspecialchars($bd['bank_name'] ?? 'N/A'); ?></span></div>
+                    <div class="info-row"><span class="info-label">Account No</span><span class="info-value"><?php echo htmlspecialchars($bd['account_number'] ?? 'N/A'); ?></span></div>
+                    <div class="info-row"><span class="info-label">Account Holder</span><span class="info-value"><?php echo htmlspecialchars($bd['account_holder'] ?? 'N/A'); ?></span></div>
+                <?php else: ?>
+                    <p style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No bank details on file.</p>
+                <?php endif; ?>
+            </div>
         </div>
-        <?php endif; ?>
-
-        <?php if ($payments && $payments->num_rows > 0): ?>
-        <div class="card">
-            <h3 class="section-title">Payment / Disbursement History</h3>
-            <table class="admin-table">
-                <thead><tr><th>ID</th><th>Amount</th><th>Academic Year</th><th>Semester</th><th>Payment Date</th></tr></thead>
-                <tbody>
-                    <?php while ($p = $payments->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $p['id']; ?></td>
-                        <td><strong><?php echo number_format($p['amount']); ?> MMK</strong></td>
-                        <td><?php echo $p['academic_year']; ?></td>
-                        <td><?php echo $p['semester']; ?></td>
-                        <td><?php echo $p['payment_date']; ?></td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php endif; ?>
 
     </div>
 
