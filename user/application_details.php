@@ -19,6 +19,8 @@ if ($app_id <= 0) {
 $stmt = $conn->prepare("
     SELECT a.application_no, a.family_income, a.apply_date, a.status,
            a.payment_status, a.approved_at,
+           a.father_occupation, a.mother_occupation, a.grade_10_marks,
+           a.num_siblings, a.house_photo, a.reason,
            s.name AS student_name, s.roll_no, s.email AS student_email,
            sc.scheme_name, sc.amount
     FROM applications a
@@ -155,6 +157,38 @@ if ($app['status'] === 'Rejected') {
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Payment Status</label>
                     <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['payment_status'] ?? 'Pending') ?></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Father's Occupation</label>
+                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['father_occupation'] ?? '-') ?></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Mother's Occupation</label>
+                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['mother_occupation'] ?? '-') ?></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Total 10th Grade Marks</label>
+                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['grade_10_marks'] ?? '-') ?></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Number of Siblings</label>
+                    <p class="text-lg font-semibold text-slate-900"><?= (int)($app['num_siblings'] ?? 0) ?></p>
+                </div>
+
+                <?php if (!empty($app['house_photo'])): ?>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">House Photo</label>
+                    <img src="../uploads/house_photos/<?= htmlspecialchars($app['house_photo']) ?>" alt="House Photo" class="mt-2 rounded-xl border border-slate-200 max-h-64 object-cover">
+                </div>
+                <?php endif; ?>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Reason for Applying</label>
+                    <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap"><?= nl2br(htmlspecialchars($app['reason'] ?? '-')) ?></p>
                 </div>
 
                 <?php if ($app['approved_at']): ?>

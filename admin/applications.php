@@ -206,7 +206,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
         .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
         .status-link { padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; text-decoration: none; color: #475569; background: #f1f5f9; }
         .status-link.active { background: #053b29; color: #fff; }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
         .badge-count { margin-left: auto; background: rgba(255,255,255,0.1); padding: 1px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
 
         /* Dark Mode */

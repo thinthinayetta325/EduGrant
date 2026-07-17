@@ -145,6 +145,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         header("Location: bank_verify.php?rejected=1");
         exit();
     }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_verified') {
+    $del_id = (int)$_POST['application_id'];
+    $app_row = $conn->query("SELECT student_id FROM applications WHERE id = $del_id")->fetch_assoc();
+    if ($app_row) {
+        $stu_id = $app_row['student_id'];
+        $conn->query("DELETE FROM payment_records WHERE recipient_id IN (SELECT id FROM scholarship_recipients WHERE application_id = $del_id)");
+        $conn->query("DELETE FROM receipts WHERE application_id = $del_id");
+        $conn->query("DELETE FROM scholarship_recipients WHERE application_id = $del_id");
+        $conn->query("UPDATE bank_details SET is_verified = FALSE WHERE student_id = $stu_id");
+        $conn->query("UPDATE applications SET status = 'Approved', payment_status = NULL WHERE id = $del_id");
+    }
+    header("Location: bank_verify.php?deleted=1");
+    exit();
 }
 
 $pending_bank = $conn->query("SELECT COUNT(*) FROM applications a LEFT JOIN bank_details b ON a.student_id = b.student_id WHERE a.status='Approved' AND b.id IS NULL")->fetch_row()[0] ?? 0;
@@ -169,7 +182,7 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
     <title>Bank Verification - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: sans-serif; background-color: #f1f5f9; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
         .sidebar { width: 240px; background-color: #006D69; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
@@ -301,7 +314,7 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
                                 </p>
                                 <p class="detail"><strong>App No:</strong> <?php echo htmlspecialchars($row['application_no']); ?></p>
                             </div>
-                            <div>
+                            <div style="display:flex; align-items:center; gap:6px;">
                                 <?php if ($row['is_verified']): ?>
                                     <span class="badge badge-verified">✓ Bank Verified</span>
                                 <?php else: ?>
@@ -309,6 +322,13 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
                                 <?php endif; ?>
                                 <?php if ($row['receipt_file']): ?>
                                     <span class="badge badge-verified" style="margin-left:4px;">📄 Receipt Uploaded</span>
+                                <?php endif; ?>
+                                <?php if ($row['is_verified'] && $row['receipt_file']): ?>
+                                    <form method="POST" class="inline-form" onsubmit="return confirm('Delete this verified record and reset to Approved status?')">
+                                        <input type="hidden" name="action" value="delete_verified">
+                                        <input type="hidden" name="application_id" value="<?php echo $row['id']; ?>">
+                                        <button type="submit" class="btn-red-sm" style="padding:4px 10px; font-size:10px;">✕ Delete</button>
+                                    </form>
                                 <?php endif; ?>
                             </div>
                         </div>

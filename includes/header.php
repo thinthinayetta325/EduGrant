@@ -74,6 +74,7 @@ if ($is_mm) {
 <!DOCTYPE html>
 <html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
 <script>if(localStorage.getItem('user_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,6 +86,11 @@ if ($is_mm) {
         .myanmar-font {
             font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
             line-height: 1.8;
+        }
+        .myanmar-font header,
+        .myanmar-font header * {
+            line-height: 1.2 !important;
+            font-family: 'Inter', sans-serif !important;
         }
         .myanmar-font section h1 {
             letter-spacing: 0.02em;
@@ -167,17 +173,17 @@ if ($is_mm) {
 
 <div class="min-h-screen flex flex-col justify-between">
 
-    <header class="bg-[#006D69] px-4 sm:px-6 py-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <header class="bg-[#006D69] px-4 sm:px-6 shadow-md z-50" style="position:fixed; top:0; left:0; right:0; height:64px; display:flex; align-items:center; overflow:hidden; width:100%; box-sizing:border-box; flex-shrink:0;">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 w-full" style="min-width:0;">
 
-            <a href="index.php?lang=<?php echo $lang_param; ?>" class="min-w-0 flex-shrink block hover:opacity-90 transition">
+            <a href="index.php?lang=<?php echo $lang_param; ?>" class="flex-shrink-0 block hover:opacity-90 transition" style="min-width:0; max-width:180px;">
                 <div class="flex items-center gap-2.5">
                     <div class="bg-white/10 p-1.5 rounded-lg shrink-0">
                         <svg class="w-6 h-6 sm:w-7 sm:h-7" style="color:#FFD700;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
                     </div>
-                    <div class="min-w-0">
+                    <div style="min-width:0;">
                         <h1 class="text-white text-lg sm:text-xl font-bold leading-tight truncate">EduGrant</h1>
-                        <p class="text-teal-200 text-[11px] sm:text-xs mt-0.5 opacity-90 tracking-wide"><?php echo $lang['brand_sub']; ?></p>
+                        <p class="text-teal-200 text-[11px] sm:text-xs mt-0.5 opacity-90 tracking-wide truncate"><?php echo $lang['brand_sub']; ?></p>
                     </div>
                 </div>
             </a>
@@ -192,28 +198,28 @@ if ($is_mm) {
                 $status_link = $is_logged_in ? 'status.php' : '../common/status.php';
                 $contact_link = $is_logged_in ? 'contact.php' : '../common/contact.php';
             ?>
-            <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-                <a href="index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition <?php echo $nav_is_active(['index.php','home.php']) ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_home']; ?></a>
-                <a href="<?php echo $scholarships_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition <?php echo $nav_is_active('scholarships.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_scholarships']; ?></a>
-                <a href="<?php echo $status_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition <?php echo $nav_is_active('status.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_status']; ?></a>
-                <a href="<?php echo $contact_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
+            <nav class="hidden md:flex items-center gap-6 text-sm font-medium" style="flex-shrink:1; min-width:0; <?php echo $is_mm ? 'font-size:13px; gap:5px;' : ''; ?>">
+                <a href="index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active(['index.php','home.php']) ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_home']; ?></a>
+                <a href="<?php echo $scholarships_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active('scholarships.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_scholarships']; ?></a>
+                <a href="<?php echo $status_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active('status.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_status']; ?></a>
+                <a href="<?php echo $contact_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
             </nav>
 
-            <div class="flex items-center flex-shrink-0 gap-3 sm:gap-4">
-                <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10">
-                    <a href="?lang=en" class="px-2 py-1 text-[11px] sm:text-xs font-semibold rounded transition <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">ENG</a>
+            <div class="flex items-center flex-shrink-0 gap-3 sm:gap-4" style="max-width:340px;">
+                <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10 flex-shrink-0">
+                    <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-2 py-1 text-[11px] sm:text-xs font-semibold rounded transition text-center" style="min-width:36px; <?php echo !$is_mm ? 'color:white;background:rgba(255,255,255,0.2);' : 'color:#5eead4;'; ?>">ENG</a>
                     <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
-                    <a href="?lang=mm" class="px-2 py-1 text-[11px] sm:text-xs font-medium rounded transition <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">မြန်မာ</a>
+                    <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-2 py-1 text-[11px] sm:text-xs font-medium rounded transition text-center" style="min-width:50px; <?php echo $is_mm ? 'color:white;background:rgba(255,255,255,0.2);' : 'color:#5eead4;'; ?>">မြန်မာ</a>
                 </div>
 
-                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                <button class="theme-toggle flex-shrink-0" onclick="toggleTheme()" title="Toggle dark mode">
                     <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                     <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 </button>
 
                 <?php if ($is_logged_in): ?>
-                    <div class="flex items-center gap-3">
-                        <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="relative p-2 text-teal-100 hover:text-white bg-[#003D3B] border border-white/10 rounded-full transition shadow-sm group" aria-label="View Notifications">
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                        <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="relative p-2 text-teal-100 hover:text-white bg-[#003D3B] border border-white/10 rounded-full transition shadow-sm group flex-shrink-0" aria-label="View Notifications">
                             <svg class="w-5 h-5 transition transform group-hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                             <?php if ($unread_count > 0): ?>
                                 <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
@@ -226,7 +232,7 @@ if ($is_mm) {
                         </a>
 
                         <div class="relative" id="userProfileDropdown">
-                            <button onclick="document.getElementById('userProfileMenu').classList.toggle('hidden')" class="flex items-center gap-2 bg-[#004D4A] hover:bg-[#003D3B] text-white pl-1.5 pr-3 py-1 rounded-full border border-teal-500/30 transition shadow-sm cursor-pointer">
+                            <button onclick="var m=document.getElementById('userProfileMenu'); m.classList.toggle('hidden'); if(!m.classList.contains('hidden')){var r=m.getBoundingClientRect(); if(r.right>window.innerWidth)m.style.right='0',m.style.left='auto';}" class="flex items-center gap-2 bg-[#004D4A] hover:bg-[#003D3B] text-white pl-1.5 pr-3 py-1 rounded-full border border-teal-500/30 transition shadow-sm cursor-pointer">
                                 <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border border-white/20">
                                     <?php if (!empty($profile_image) && file_exists('../uploads/profile_pics/' . $profile_image)): ?>
                                         <img src="../uploads/profile_pics/<?php echo $profile_image; ?>" alt="" class="w-full h-full object-cover">
@@ -244,7 +250,7 @@ if ($is_mm) {
                                 </svg>
                             </button>
 
-                            <div id="userProfileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+                            <div id="userProfileMenu" class="hidden fixed right-4 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-[100]">
                                 <a href="profile.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
                                     <svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                                     My Profile
@@ -252,10 +258,6 @@ if ($is_mm) {
                                 <a href="my_applications.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
                                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                     My Applications
-                                </a>
-                                <a href="payment_history.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
-                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    Payment History
                                 </a>
                                 <hr class="my-1 border-slate-100">
                                 <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
@@ -276,13 +278,14 @@ if ($is_mm) {
                     });
                     </script>
                 <?php else: ?>
-                    <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] text-xs sm:text-sm font-bold px-3.5 sm:px-5 py-2 rounded-md hover:bg-slate-100 transition whitespace-nowrap">
+                    <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] text-xs sm:text-sm font-bold px-3.5 sm:px-5 py-2 rounded-md hover:bg-slate-100 transition whitespace-nowrap flex-shrink-0" style="width:100px; text-align:center; <?php echo $is_mm ? 'font-size:12px;' : ''; ?>">
                         <?php echo $lang['btn_login']; ?>
                     </a>
-                    <a href="../auth/register.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] text-xs sm:text-sm font-bold px-3.5 sm:px-5 py-2 rounded-md hover:bg-slate-100 transition whitespace-nowrap">
+                    <a href="../auth/register.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] text-xs sm:text-sm font-bold px-3.5 sm:px-5 py-2 rounded-md hover:bg-slate-100 transition whitespace-nowrap flex-shrink-0" style="width:100px; text-align:center; <?php echo $is_mm ? 'font-size:12px;' : ''; ?>">
                         <?php echo $lang['btn_register']; ?>
                     </a>
                 <?php endif; ?>
             </div>
         </div>
     </header>
+    <div style="height:64px;"></div>

@@ -137,7 +137,7 @@ $current_page = 'recipients';
         .modal-box { background: #fff; border-radius: 10px; padding: 25px; width: 500px; }
         .modal-box h3 { margin-bottom: 15px; font-size: 16px; }
         .close-btn { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
         /* Dark Mode */
         html.dark-mode body { background: #0f172a; color: #e2e8f0; }
         html.dark-mode .sidebar { background: #1e293b; }

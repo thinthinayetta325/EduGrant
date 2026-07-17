@@ -151,7 +151,7 @@ $current_page = 'applications';
         .section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
 
         .bottom-bar { background: #fff; border-top: 1px solid var(--border); padding: 12px 28px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
 
         /* Dark Mode */
         html.dark-mode { --card-bg: #1e293b; --body-bg: #0f172a; --border: #334155; --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b; }

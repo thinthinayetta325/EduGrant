@@ -96,7 +96,7 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | EduGrant</title>
     <style>
-        body.dark-mode { color: #fff; }
+        html.dark { color: #fff; }
 
         .glass {
             background: rgba(255,255,255,0.04);
@@ -110,8 +110,8 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
             -webkit-backdrop-filter: blur(30px);
             border: 1px solid rgba(255,255,255,0.1);
         }
-        body.dark-mode .glass { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        body.dark-mode .glass-strong { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        html.dark .glass { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        html.dark .glass-strong { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
 
         /* Main layout */
         .page-wrapper {
@@ -140,7 +140,7 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
             width: 100%; height: 100%; border-radius: 50%; background: #0f172a;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        body.dark-mode .profile-header .avatar-inner { background: #1e293b; }
+        html.dark .profile-header .avatar-inner { background: #1e293b; }
         .profile-header .avatar-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         .profile-header .avatar-letter {
             font-size: 22px; font-weight: 800;
@@ -158,7 +158,7 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
             width: 100%; height: 100%; border-radius: 50%; background: #f0f7f5;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        body.dark-mode .profile-header .avatar-inner { background: #1e293b; }
+        html.dark .profile-header .avatar-inner { background: #1e293b; }
         .profile-header .avatar-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         .profile-header .avatar-letter {
             font-size: 22px; font-weight: 800;
@@ -167,9 +167,9 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
         }
         .profile-header-text { min-width: 0; }
         .profile-header-name { font-size: 18px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        body.dark-mode .profile-header-name { color: #fff; }
+        html.dark .profile-header-name { color: #fff; }
         .profile-header-role { font-size: 12px; color: #64748b; margin-top: 2px; }
-        body.dark-mode .profile-header-role { color: rgba(255,255,255,0.4); }
+        html.dark .profile-header-role { color: rgba(255,255,255,0.4); }
 
         /* Content grid */
         .content-grid {
@@ -183,15 +183,15 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
             border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
         }
         .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-1px); }
-        body.dark-mode .card { background: #1e293b; border: 1px solid rgba(255,255,255,0.08); }
+        html.dark .card { background: #1e293b; border: 1px solid rgba(255,255,255,0.08); }
         .card-full { grid-column: 1 / -1; }
         .content-grid hr { border: none; border-top: 1px solid #e2e8f0; margin: 20px 0; }
-        body.dark-mode .content-grid hr { border-top: 1px solid rgba(255,255,255,0.08); }
+        html.dark .content-grid hr { border-top: 1px solid rgba(255,255,255,0.08); }
         .card-title {
             font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;
             display: flex; align-items: center; gap: 10px;
         }
-        body.dark-mode .card-title { color: #fff; }
+        html.dark .card-title { color: #fff; }
         .card-title .icon-box {
             width: 36px; height: 36px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
@@ -201,7 +201,7 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
         .icon-blue { background: rgba(6,182,212,0.12); color: #06b6d4; }
         .icon-purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
         .card-subtitle { font-size: 13px; color: #64748b; margin-bottom: 18px; }
-        body.dark-mode .card-subtitle { color: #94a3b8; }
+        html.dark .card-subtitle { color: #94a3b8; }
 
         /* Form elements */
         .form-group { margin-bottom: 14px; }
@@ -210,18 +210,18 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
             color: #64748b; margin-bottom: 6px;
             text-transform: uppercase; letter-spacing: 0.5px;
         }
-        body.dark-mode .form-label { color: #94a3b8; }
+        html.dark .form-label { color: #94a3b8; }
         .form-input {
             width: 100%; padding: 11px 14px; border-radius: 10px;
             font-size: 14px; font-family: inherit; outline: none;
             background: #f8fafc; border: 1.5px solid #e2e8f0;
             color: #0f172a; transition: all 0.25s;
         }
-        body.dark-mode .form-input { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); color: #fff; }
+        html.dark .form-input { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); color: #fff; }
         .form-input::placeholder { color: #94a3b8; }
-        body.dark-mode .form-input::placeholder { color: rgba(255,255,255,0.25); }
+        html.dark .form-input::placeholder { color: rgba(255,255,255,0.25); }
         .form-input:focus { border-color: #006D69; box-shadow: 0 0 0 3px rgba(0,109,105,0.1); background: #fff; }
-        body.dark-mode .form-input:focus { background: rgba(255,255,255,0.07); }
+        html.dark .form-input:focus { background: rgba(255,255,255,0.07); }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
         /* File upload */
@@ -250,10 +250,10 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
 
         /* Password strength */
         .strength-bar { height: 4px; background: #e2e8f0; border-radius: 4px; margin-top: 8px; overflow: hidden; }
-        body.dark-mode .strength-bar { background: rgba(255,255,255,0.08); }
+        html.dark .strength-bar { background: rgba(255,255,255,0.08); }
         .strength-fill { height: 100%; border-radius: 4px; transition: all 0.3s; width: 0; }
         .strength-text { font-size: 11px; margin-top: 6px; color: #94a3b8; }
-        body.dark-mode .strength-text { color: rgba(255,255,255,0.3); }
+        html.dark .strength-text { color: rgba(255,255,255,0.3); }
 
         /* Alert */
         .alert {
@@ -269,8 +269,8 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
         }
         .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
         .alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-        body.dark-mode .alert-success { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
-        body.dark-mode .alert-error { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        html.dark .alert-success { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+        html.dark .alert-error { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
 
         @keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -284,8 +284,8 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
         }
         .back-link:hover { color: #006D69; }
         .back-link svg { width: 16px; height: 16px; }
-        body.dark-mode .back-link { color: rgba(255,255,255,0.3); }
-        body.dark-mode .back-link:hover { color: #10b981; }
+        html.dark .back-link { color: rgba(255,255,255,0.3); }
+        html.dark .back-link:hover { color: #10b981; }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -375,13 +375,13 @@ $total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] 
     <script>
     // Theme toggle
     function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('reviewer_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     }
 
     // Load saved theme (default light)
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
+    if (localStorage.getItem('reviewer_theme') === 'dark') {
+        document.documentElement.classList.add('dark');
     }
 
     function checkStrength(val) {

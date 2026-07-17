@@ -81,6 +81,7 @@ if ($count_query) {
 
 <!DOCTYPE html>
 <html lang="<?= $lang ?>">
+<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <head>
     <meta charset="UTF-8">
     <title><?= $txt["title"] ?></title>
@@ -136,9 +137,9 @@ if ($count_query) {
 
             <div class="flex items-center flex-shrink-0 gap-3 sm:gap-4">
                 <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10">
-                    <a href="?lang=en" class="px-2 py-1 text-[11px] sm:text-xs font-semibold rounded transition <?= !$is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">ENG</a>
+                    <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-2 py-1 text-[11px] sm:text-xs font-semibold rounded transition <?= !$is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">ENG</a>
                     <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
-                    <a href="?lang=mm" class="px-2 py-1 text-[11px] sm:text-xs font-medium rounded transition <?= $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">မြန်မာ</a>
+                    <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-2 py-1 text-[11px] sm:text-xs font-medium rounded transition <?= $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">မြန်မာ</a>
                 </div>
 
                 <div class="flex items-center gap-3">

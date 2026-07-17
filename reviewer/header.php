@@ -34,7 +34,8 @@ if ($reviewer_id && isset($conn)) {
     }
 }
 ?>
-<script>if(localStorage.getItem('reviewer_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+<script>if(localStorage.getItem('reviewer_theme')==='dark')document.documentElement.classList.add('dark')</script>
+<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -69,7 +70,7 @@ if ($reviewer_id && isset($conn)) {
     /* Top Header */
     .top-header {
         background: #006D69;
-        padding: 14px 28px;
+        padding: 0 28px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -77,6 +78,7 @@ if ($reviewer_id && isset($conn)) {
         position: sticky;
         top: 0;
         z-index: 50;
+        min-height: 56px;
     }
     .top-header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: #fff; }
     .top-header .sub { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 400; }
@@ -212,11 +214,11 @@ if ($reviewer_id && isset($conn)) {
     }
     .theme-toggle:hover { background: #004D4A; color: #fff; }
     .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
-    html.dark-mode .theme-toggle .icon-sun { display: block; }
-    html:not(.dark-mode) .theme-toggle .icon-moon { display: block; }
+    html.dark .theme-toggle .icon-sun { display: block; }
+    html:not(.dark) .theme-toggle .icon-moon { display: block; }
 
     /* Dark Mode */
-    html.dark-mode {
+    html.dark {
         --card-bg: #1e293b;
         --body-bg: #0f172a;
         --border: #334155;
@@ -227,29 +229,29 @@ if ($reviewer_id && isset($conn)) {
         --shadow-lg: 0 10px 25px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.2);
         color-scheme: dark;
     }
-    html.dark-mode body { background: var(--body-bg); color: var(--text-primary); }
-    html.dark-mode .top-header { background: #1e293b; }
-    html.dark-mode .profile-link { background: #334155; border-color: #475569; }
-    html.dark-mode .profile-link:hover { background: #475569; }
-    html.dark-mode .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
-    html.dark-mode .profile-dropdown-menu a:hover { background: #334155; }
-    html.dark-mode .profile-dropdown-menu hr { border-top-color: #334155; }
-    html.dark-mode .notif-btn { background: #334155; border-color: #475569; }
-    html.dark-mode .notif-btn:hover { background: #475569; border-color: #006D69; }
-    html.dark-mode .language-switch { background: #334155; border-color: #475569; }
-    html.dark-mode .theme-toggle { background: #334155; border-color: #475569; }
-    html.dark-mode .theme-toggle:hover { background: #475569; border-color: #006D69; }
-    html.dark-mode .card { background: #1e293b; border-color: #334155; }
-    html.dark-mode .card-title { color: #f1f5f9; }
-    html.dark-mode .card-subtitle { color: #94a3b8; }
-    html.dark-mode .form-input { background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9; }
-    html.dark-mode .form-input:focus { background: rgba(255,255,255,0.07); }
-    html.dark-mode ::placeholder { color: #64748b; }
-    html.dark-mode hr { border-top-color: #334155; }
+    html.dark body { background: var(--body-bg); color: var(--text-primary); }
+    html.dark .top-header { background: #1e293b; }
+    html.dark .profile-link { background: #334155; border-color: #475569; }
+    html.dark .profile-link:hover { background: #475569; }
+    html.dark .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
+    html.dark .profile-dropdown-menu a:hover { background: #334155; }
+    html.dark .profile-dropdown-menu hr { border-top-color: #334155; }
+    html.dark .notif-btn { background: #334155; border-color: #475569; }
+    html.dark .notif-btn:hover { background: #475569; border-color: #006D69; }
+    html.dark .language-switch { background: #334155; border-color: #475569; }
+    html.dark .theme-toggle { background: #334155; border-color: #475569; }
+    html.dark .theme-toggle:hover { background: #475569; border-color: #006D69; }
+    html.dark .card { background: #1e293b; border-color: #334155; }
+    html.dark .card-title { color: #f1f5f9; }
+    html.dark .card-subtitle { color: #94a3b8; }
+    html.dark .form-input { background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9; }
+    html.dark .form-input:focus { background: rgba(255,255,255,0.07); }
+    html.dark ::placeholder { color: #64748b; }
+    html.dark hr { border-top-color: #334155; }
 
     /* Responsive */
     @media (max-width: 768px) {
-        .top-header { padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
+        .top-header { padding: 0 16px; min-height: 56px; flex-wrap: wrap; gap: 8px; }
         .top-header h1 { font-size: 15px; }
         .top-header .sub { font-size: 11px; }
         .header-actions { gap: 8px; }
@@ -279,11 +281,13 @@ if ($reviewer_id && isset($conn)) {
         <div class="language-switch">
             <?php $clean_get = array_diff_key($_GET, ['lang' => '']); ?>
             <a href="?lang=en<?php echo !empty($clean_get) ? '&' . http_build_query($clean_get) : ''; ?>"
+               onclick="sessionStorage.setItem('scrollPos',window.scrollY)"
                class="<?php echo !$is_mm ? 'active-lang' : ''; ?>">
                 ENG
             </a>
             <span>|</span>
             <a href="?lang=mm<?php echo !empty($clean_get) ? '&' . http_build_query($clean_get) : ''; ?>"
+               onclick="sessionStorage.setItem('scrollPos',window.scrollY)"
                class="<?php echo $is_mm ? 'active-lang' : ''; ?>">
                 မြန်မာ
             </a>
@@ -358,7 +362,7 @@ if ($reviewer_id && isset($conn)) {
 </div>
 <script>
 function toggleTheme() {
-    document.documentElement.classList.toggle('dark-mode');
-    localStorage.setItem('reviewer_theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('reviewer_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 }
 </script>

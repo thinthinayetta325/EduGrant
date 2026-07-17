@@ -139,7 +139,7 @@ $current_page = 'disbursements';
         .close-btn { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
         .summary-strip { display: flex; gap: 15px; margin-bottom: 20px; }
         .summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; flex: 1; text-align: center; }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
         .summary-box .num { font-size: 22px; font-weight: 800; color: #0f172a; }
         .summary-box .lbl { font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; }
         /* Dark Mode */

@@ -35,6 +35,7 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
+<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,9 +81,9 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
                         </span>
                     <?php endif; ?>
                 </a>
-                <a href="?lang=en" class="text-xs font-semibold px-2 py-1 rounded <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-200'; ?>">ENG</a>
+                <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="text-xs font-semibold px-2 py-1 rounded <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-200'; ?>">ENG</a>
                 <span class="text-teal-300/40">|</span>
-                <a href="?lang=mm" class="text-xs font-medium px-2 py-1 rounded <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200'; ?>">မြန်မာ</a>
+                <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="text-xs font-medium px-2 py-1 rounded <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200'; ?>">မြန်မာ</a>
             </div>
         </div>
     </header>

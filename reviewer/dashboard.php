@@ -18,6 +18,8 @@ $reviewer_img = $conn->query("SELECT profile_image FROM reviewers WHERE id = " .
 // UPDATED QUERY: Removed the JOIN to reviewer_scheme so ALL applications appear.
 // I have also included the LEFT JOIN just in case you want to show names/amounts later.
 $query = "SELECT a.id as app_id, a.application_no, a.family_income, a.apply_date, a.status,
+                 a.father_occupation, a.mother_occupation, a.grade_10_marks,
+                 a.num_siblings, a.house_photo, a.reason,
                  s.name as student_name, s.roll_no, 
                  sc.scheme_name, sc.amount
           FROM applications a
@@ -35,6 +37,7 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
 ?>
 <!DOCTYPE html>
 <html lang="en">
+<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,9 +52,9 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
     <?php $page_title = 'Reviewer Workspace'; include 'header.php'; ?>
 
     <!-- KPI Metric Cards -->
-    <section class="max-w-7xl mx-auto px-4 pt-10 pb-6">
+    <section class="max-w-[1400px] mx-auto px-4 pt-10 pb-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
                 <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
@@ -61,7 +64,7 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                     <p class="text-xs text-slate-400">Applications waiting for review</p>
                 </div>
             </div>
-            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
                 <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
@@ -71,7 +74,7 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                     <p class="text-xs text-slate-400">Not yet touched</p>
                 </div>
             </div>
-            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
                 <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
@@ -81,7 +84,7 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                     <p class="text-xs text-slate-400">Reviewed and forwarded</p>
                 </div>
             </div>
-            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition">
+            <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
                 <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
@@ -94,50 +97,32 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
         </div>
     </section>
 
-    <main class="max-w-7xl mx-auto px-3 sm:px-4 pb-10">
-        <div class="mb-6">
+    <main class="max-w-[1400px] mx-auto px-3 sm:px-4 pb-10">
+        <div class="mb-5">
             <h2 class="text-2xl font-bold text-slate-900 dark:text-white">All Applications</h2>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Reviewing all incoming scholarship applications.</p>
         </div>
 
         <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
-            <table class="w-full text-left min-w-[600px]">
-                <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-semibold uppercase">
                     <tr>
-                        <th class="px-6 py-4">App No</th>
-                        <th class="px-6 py-4">Student</th>
-                        <th class="px-6 py-4">Scheme</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4 text-center">Action</th>
+                        <th class="px-4 py-3">App No</th>
+                        <th class="px-4 py-3">Student</th>
+                        <th class="px-4 py-3">Scheme</th>
+                        <th class="px-4 py-3">Income</th>
+                        <th class="px-4 py-3">Father Occ</th>
+                        <th class="px-4 py-3">Mother Occ</th>
+                        <th class="px-4 py-3">10th Marks</th>
+                        <th class="px-4 py-3">Siblings</th>
+                        <th class="px-4 py-3">House Photo</th>
+                        <th class="px-4 py-3">Reason</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3 text-center">Action</th>
                     </tr>
                 </thead>
-                <!-- application table -->
-                <!-- <tbody class="divide-y divide-slate-100 text-sm">
-                    <?php if ($result && $result->num_rows > 0): ?>
-                        <?php while ($row = $result->fetch_assoc()): ?>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-6 py-4 font-mono font-bold"><?php echo htmlspecialchars($row['application_no']); ?></td>
-                                <td class="px-6 py-4"><?php echo htmlspecialchars($row['student_name'] ?? 'N/A'); ?></td>
-                                <td class="px-6 py-4"><?php echo htmlspecialchars($row['scheme_name'] ?? 'N/A'); ?></td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium 
-                                        <?php echo ($row['status'] == 'Submitted') ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'; ?>">
-                                        <?php echo htmlspecialchars($row['status']); ?>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <a href="evaluate.php?id=<?php echo $row['app_id']; ?>" class="bg-[#004D4A] text-white px-4 py-2 rounded-lg text-xs hover:bg-[#003D3B]">Evaluate</a>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="5" class="text-center py-12 text-slate-400">No applications found in the system.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody> -->
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-sm">
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
     <?php
     if ($result && $result->num_rows > 0):
         $result->data_seek(0);
@@ -157,23 +142,48 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
             }
     ?>
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <td class="px-6 py-4 font-mono font-bold text-slate-700 dark:text-slate-300">
+                <td class="px-4 py-3 font-mono font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     <?php echo htmlspecialchars($row['application_no'] ?? 'N/A'); ?>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-4 py-3">
                     <div class="font-semibold text-slate-900 dark:text-white"><?php echo htmlspecialchars($row['student_name'] ?? 'N/A'); ?></div>
-                    <div class="text-xs text-slate-400">Roll: <?php echo htmlspecialchars($row['roll_no'] ?? 'N/A'); ?></div>
+                    <div class="text-[10px] text-slate-400">Roll: <?php echo htmlspecialchars($row['roll_no'] ?? 'N/A'); ?></div>
                 </td>
-                <td class="px-6 py-4">
-                    <div class="font-medium text-slate-800 dark:text-slate-200"><?php echo htmlspecialchars($row['scheme_name'] ?? 'N/A'); ?></div>
+                <td class="px-4 py-3 text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                    <?php echo htmlspecialchars($row['scheme_name'] ?? 'N/A'); ?>
                 </td>
-                <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full border <?php echo $status_class; ?>">
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                    <?php echo number_format($row['family_income'] ?? 0); ?> MMK
+                </td>
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                    <?php echo htmlspecialchars($row['father_occupation'] ?? '-'); ?>
+                </td>
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                    <?php echo htmlspecialchars($row['mother_occupation'] ?? '-'); ?>
+                </td>
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-300 text-center">
+                    <?php echo htmlspecialchars($row['grade_10_marks'] ?? '-'); ?>
+                </td>
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-300 text-center">
+                    <?php echo (int)($row['num_siblings'] ?? 0); ?>
+                </td>
+                <td class="px-4 py-3">
+                    <?php if (!empty($row['house_photo'])): ?>
+                        <img src="../uploads/house_photos/<?php echo htmlspecialchars($row['house_photo']); ?>" alt="House" class="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-600 object-cover">
+                    <?php else: ?>
+                        <span class="text-slate-400">-</span>
+                    <?php endif; ?>
+                </td>
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-300 max-w-[180px] truncate" title="<?php echo htmlspecialchars($row['reason'] ?? ''); ?>">
+                    <?php echo htmlspecialchars(mb_strimwidth($row['reason'] ?? '-', 0, 40, '...')); ?>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 text-[10px] font-semibold rounded-full border <?php echo $status_class; ?>">
                         <?php echo htmlspecialchars($status); ?>
                     </span>
                 </td>
-                <td class="px-6 py-4 text-center">
-                    <a href="evaluate.php?id=<?php echo $row['app_id']; ?>" class="bg-[#004D4A] hover:bg-[#003D3B] text-white font-medium px-4 py-2 rounded-lg text-xs transition">
+                <td class="px-4 py-3 text-center">
+                    <a href="evaluate.php?id=<?php echo $row['app_id']; ?>" class="bg-[#004D4A] hover:bg-[#003D3B] text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition">
                         Evaluate
                     </a>
                 </td>
@@ -183,7 +193,7 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
     else:
     ?>
         <tr>
-            <td colspan="5" class="text-center py-12 text-slate-400 text-sm">
+            <td colspan="12" class="text-center py-12 text-slate-400">
                 No applications found in the system.
             </td>
         </tr>
@@ -195,14 +205,8 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
     </main>
 
     <script>
-        // Theme toggle
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
-
         // Load saved theme
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('reviewer_theme') === 'dark' || (!localStorage.getItem('reviewer_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
     </script>

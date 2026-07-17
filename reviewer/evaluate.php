@@ -99,7 +99,9 @@ else {
         $application_id = intval($_GET["id"]);
         
         // Fetch detailed applicant information for review layout
-        $query_fetch = "SELECT a.application_no, a.family_income, a.apply_date, 
+        $query_fetch = "SELECT a.application_no, a.family_income, a.apply_date,
+                               a.father_occupation, a.mother_occupation, a.grade_10_marks,
+                               a.num_siblings, a.house_photo, a.reason,
                                s.name AS student_name, s.roll_no, s.email AS student_email,
                                sc.scheme_name, sc.amount
                         FROM applications a 
@@ -112,7 +114,7 @@ else {
             $stmt->execute();
             
             // Safe manual data binding sequence (Avoids get_result driver crashes)
-            $stmt->bind_result($app_no, $fam_income, $apply_date, $student_name, $roll_no, $student_email, $scheme_name, $amount);
+            $stmt->bind_result($app_no, $fam_income, $apply_date, $father_occ, $mother_occ, $grade10, $siblings, $house_photo, $reason, $student_name, $roll_no, $student_email, $scheme_name, $amount);
             
             if (!$stmt->fetch()) {
                 // If ID is completely missing or invalid, route back to safety
@@ -133,76 +135,136 @@ else {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluate Application File</title>
-    <style>
-        .eval-box { width: 40%; max-width: 420px; margin: 0 auto; padding: 30px; border-radius: 12px; background: #fff; box-shadow: var(--shadow-lg); }
-        .title { margin-top: 0; font-size: 16px; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; color: var(--text-primary); border-bottom: 2px solid var(--border); }
-        .info-card { padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 14px; background: #f8fafc; border: 1px solid var(--border); }
-        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); }
-        .info-row:last-child { border-bottom: none; }
-        .label-text { font-weight: bold; color: var(--text-secondary); }
-        .value-text { font-weight: 500; color: var(--text-primary); }
-        .error-alert { padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; background: #fef2f2; border: 1px solid #fee2e2; color: #b91c1c; }
-        .form-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; color: var(--text-secondary); }
-        .textarea-input { width: 100%; height: 120px; padding: 12px; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: vertical; margin-bottom: 20px; outline: none; transition: all 0.25s; border: 1px solid #cbd5e1; background: #fff; color: var(--text-primary); }
-        .textarea-input:focus { border-color: #006D69; box-shadow: 0 0 0 3px rgba(0,109,105,0.15); }
-        .actions { display: flex; gap: 10px; }
-        .btn-submit { flex: 2; padding: 12px; background: #006D69; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.25s; }
-        .btn-submit:hover { background: #005a56; transform: translateY(-1px); }
-        .btn-cancel { flex: 1; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-sizing: border-box; transition: all 0.25s; background: #e2e8f0; color: #475569; }
-        .btn-cancel:hover { background: #cbd5e1; }
-        .back-link { display: inline-flex; align-items: center; gap: 6px; margin: 16px 24px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-secondary); text-decoration: none; background: #fff; border: 1px solid var(--border); transition: var(--transition); }
-        .back-link:hover { background: var(--body-bg); color: var(--text-primary); }
-        .eval-content { padding: 0 24px; }
-        @media (max-width: 768px) {
-            .eval-box { width: 100%; margin: 0 16px; padding: 20px; }
-            .actions { flex-direction: column; }
-        }
-    </style>
+    <title>Evaluate Application | EduGrant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen">
 
 <?php $page_title = 'Evaluate Application'; include 'header.php'; ?>
 
-<div class="eval-content">
-<a href="dashboard.php" class="back-link">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-    Back to Dashboard
-</a>
+<main class="max-w-4xl mx-auto px-4 py-8">
 
-<div class="eval-box">
-    <div class="title">
-        <span>📋 Review & Recommend Application</span>
+    <!-- Back -->
+    <a href="dashboard.php" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#004D4A] transition mb-6">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Back to Dashboard
+    </a>
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-slate-900">Review & Recommend</h1>
+        <p class="text-slate-500 mt-1">Verify the applicant information below, then submit your assessment.</p>
     </div>
-    
+
     <?php if (!empty($error_message)): ?>
-        <div class="error-alert">❌ <?php echo htmlspecialchars($error_message); ?></div>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-5 py-3 rounded-2xl mb-6 text-sm font-medium">
+            <?= htmlspecialchars($error_message) ?>
+        </div>
     <?php endif; ?>
 
-    <!-- Display Structural Info Summary -->
-    <div class="info-card">
-        <div class="info-row"><span class="label-text">Application No:</span> <span class="value-text"><?php echo htmlspecialchars($app_no ?? ''); ?></span></div>
-        <div class="info-row"><span class="label-text">Student Name:</span> <span class="value-text"><?php echo htmlspecialchars($student_name ?? ''); ?></span></div>
-        <div class="info-row"><span class="label-text">Roll Number:</span> <span class="value-text"><?php echo htmlspecialchars($roll_no ?? ''); ?></span></div>
-        <div class="info-row"><span class="label-text">Email Address:</span> <span class="value-text"><?php echo htmlspecialchars($student_email ?? ''); ?></span></div>
-        <div class="info-row"><span class="label-text">Requested Scheme:</span> <span class="value-text"><?php echo htmlspecialchars($scheme_name ?? ''); ?></span></div>
-        <div class="info-row"><span class="label-text">Family Income Status:</span> <span class="value-text"><?php echo number_format($fam_income ?? 0); ?> MMK</span></div>
-        <div class="info-row"><span class="label-text">Submission Date:</span> <span class="value-text"><?php echo htmlspecialchars($apply_date ?? ''); ?></span></div>
+    <!-- Combined Application & Student Info Card -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+        <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+            <h2 class="text-lg font-bold text-slate-800">Application & Student Information</h2>
+        </div>
+        <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-5">
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Name</span>
+                <p class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($student_name ?? '') ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Roll Number</span>
+                <p class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($roll_no ?? '') ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email</span>
+                <p class="text-sm font-semibold text-slate-900 break-all"><?= htmlspecialchars($student_email ?? '') ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Application No</span>
+                <p class="text-sm font-bold text-slate-900 font-mono"><?= htmlspecialchars($app_no ?? '') ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Submission Date</span>
+                <p class="text-sm font-semibold text-slate-900"><?= date("d M Y", strtotime($apply_date ?? '')) ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Family Monthly Income</span>
+                <p class="text-sm font-semibold text-slate-900"><?= number_format($fam_income ?? 0) ?> MMK</p>
+            </div>
+            <div class="md:col-span-3">
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Scholarship Scheme</span>
+                <p class="text-sm font-bold text-[#004D4A]"><?= htmlspecialchars($scheme_name ?? '') ?></p>
+                <p class="text-xs text-slate-500 mt-0.5">Funding: <?= number_format($amount ?? 0) ?> MMK</p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Father's Occupation</span>
+                <p class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($father_occ ?? '-') ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Mother's Occupation</span>
+                <p class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($mother_occ ?? '-') ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total 10th Grade Marks</span>
+                <p class="text-sm font-semibold text-slate-900"><?= htmlspecialchars($grade10 ?? '-') ?></p>
+            </div>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Number of Siblings</span>
+                <p class="text-sm font-semibold text-slate-900"><?= (int)($siblings ?? 0) ?></p>
+            </div>
+            <?php if (!empty($house_photo)): ?>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">House Photo</span>
+                <img src="../uploads/house_photos/<?= htmlspecialchars($house_photo) ?>" alt="House Photo" class="mt-1 rounded-xl border border-slate-200 max-h-48 object-cover">
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($reason)): ?>
+            <div class="md:col-span-3">
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reason for Applying</span>
+                <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap"><?= htmlspecialchars($reason) ?></p>
+            </div>
+            <?php endif; ?>
+        </div>
     </div>
 
-    <!-- Reviewer Processing Input Panel -->
-    <form action="" method="POST">
-        <input type="hidden" name="application_id" value="<?php echo htmlspecialchars($application_id); ?>">
-
-        <label class="form-label">📋 Assessor Evaluation Remarks (စိစစ်ချက် မှတ်ချက်)</label>
-        <textarea name="remarks" required class="textarea-input" placeholder="Type verified eligibility checks, certificate matching status, or regional evaluation comments here..."></textarea>
-
-        <div class="actions">
-            <button type="submit" class="btn-submit">Submit Official Assessment Review</button>
-            <a href="dashboard.php" class="btn-cancel">Cancel</a>
+    <!-- Assessment Form Card -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+            <h2 class="text-lg font-bold text-slate-800">Assessment Remarks</h2>
         </div>
-    </form>
-</div>
-</div>
+        <div class="p-8">
+            <form action="" method="POST" class="space-y-6">
+                <input type="hidden" name="application_id" value="<?= htmlspecialchars($application_id) ?>">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                        Evaluation Remarks
+                    </label>
+                    <textarea
+                        name="remarks"
+                        rows="5"
+                        required
+                        placeholder="Type verified eligibility checks, certificate matching status, or regional evaluation comments here..."
+                        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-[#004D4A] focus:ring-2 focus:ring-[#004D4A]/10 transition resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-4">
+                    <button
+                        type="submit"
+                        class="flex-1 bg-[#004D4A] hover:bg-[#003D3B] text-white py-3 rounded-xl font-bold text-sm transition">
+                        Submit Assessment
+                    </button>
+                    <a
+                        href="dashboard.php"
+                        class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold text-sm transition">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</main>
 
 <?php $conn->close(); ?>

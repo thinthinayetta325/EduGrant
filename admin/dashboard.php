@@ -91,12 +91,17 @@ $approved_apps = $conn->query("SELECT COUNT(*) FROM applications WHERE status = 
 $total_disbursed = $conn->query("SELECT COALESCE(SUM(amount),0) FROM payment_records")->fetch_row()[0] ?? 25000000;
 $total_students = $conn->query("SELECT COUNT(*) FROM student")->fetch_row()[0] ?? 0;
 
-$recent_apps = $conn->query("SELECT a.id, a.application_no, s.name AS student_name, sc.scheme_name, r.name AS reviewer_name, ar.recommendation
+$recent_apps = $conn->query("SELECT a.id, a.application_no, s.name AS student_name, s.roll_no, sc.scheme_name,
+    GROUP_CONCAT(DISTINCT r.name SEPARATOR ', ') AS reviewer_name,
+    GROUP_CONCAT(DISTINCT ar.recommendation SEPARATOR ', ') AS recommendation,
+    GROUP_CONCAT(DISTINCT ar.remarks SEPARATOR ' | ') AS remarks,
+    a.status, a.payment_status
     FROM applications a
     JOIN student s ON a.student_id = s.id
     JOIN schemes sc ON a.scheme_id = sc.id
     LEFT JOIN application_reviews ar ON a.id = ar.application_id
     LEFT JOIN reviewers r ON ar.reviewer_id = r.id
+    GROUP BY a.id
     ORDER BY a.id DESC LIMIT 5");
 
 $status_counts = $conn->query("SELECT status, COUNT(*) AS cnt FROM applications GROUP BY status");
@@ -151,11 +156,12 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
             font-family: 'Inter', -apple-system, sans-serif;
             background: var(--body-bg);
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            height: auto;
+            overflow: visible;
             color: var(--text-primary);
         }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -163,14 +169,16 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
 
         .sidebar {
             width: 260px;
-            min-height: 100vh;
+            height: 100vh;
             background: var(--sidebar-bg);
             color: #fff;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            position: relative;
-            z-index: 10;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
         }
         .sidebar-brand {
             padding: 22px 24px;
@@ -217,7 +225,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .admin-meta h4 { font-size: 13px; font-weight: 600; }
         .admin-meta p { font-size: 10px; color: rgba(255,255,255,0.5); font-weight: 400; margin-top: 1px; }
 
-        .sidebar-menu { list-style: none; padding: 12px 0; flex-grow: 1; overflow-y: auto; }
+        .sidebar-menu { list-style: none; padding: 12px 0; flex: 1 1 0; overflow-y: auto; min-height: 0; }
         .menu-label { padding: 16px 24px 6px; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.8px; }
         .menu-item a {
             display: flex;
@@ -253,7 +261,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         }
         .sidebar-footer {
             margin-top: auto;
-            padding: 16px 0 14px;
+            padding: 10px 0 10px;
             border-top: 1px solid rgba(255,255,255,0.08);
         }
         .logout-btn {
@@ -284,16 +292,17 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
             transform: translateX(3px);
         }
 
-        .workspace { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .workspace { flex-grow: 1; display: flex; flex-direction: column; overflow: visible; height: auto; margin-left: 260px; }
 
         .top-header {
             background: #fff;
-            padding: 12px 28px;
+            padding: 0 28px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
+            min-height: 56px;
         }
         .top-header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
         .top-header .sub { font-size: 12px; color: var(--text-secondary); font-weight: 400; }
@@ -337,21 +346,23 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .dashboard-body {
             flex-grow: 1;
             padding: 24px 28px;
-            overflow-y: auto;
+            overflow: visible;
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 16px;
+            width: 100%;
+            height: auto;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 14px;
+            gap: 10px;
         }
         .stat-card {
             background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 18px 20px;
+            border-radius: var(--radius-sm);
+            padding: 10px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             transition: var(--transition);
@@ -360,26 +371,26 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         }
         .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
         .stat-card .stat-icon {
-            font-size: 22px;
-            margin-bottom: 10px;
+            font-size: 16px;
+            margin-bottom: 4px;
         }
         .stat-card .stat-label {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
         .stat-card .stat-value {
-            font-size: 26px;
+            font-size: 18px;
             font-weight: 800;
             letter-spacing: -0.5px;
             margin-top: 2px;
         }
         .stat-card .stat-change {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 500;
-            margin-top: 6px;
+            margin-top: 3px;
             display: flex;
             align-items: center;
             gap: 4px;
@@ -408,7 +419,9 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .stat-card:nth-child(6) .stat-value { color: #004D4A; font-size: 20px; }
         .stat-card:nth-child(6) .stat-glow { background: #FFD700; }
 
-        .grid-2col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-2col .card { min-height: 320px; display: flex; flex-direction: column; }
+        .grid-2col .card .flex-list-item { flex: 1; }
         .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
         .grid-4col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
 
@@ -417,7 +430,8 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
-            padding: 20px 22px;
+            padding: 20px;
+            overflow: visible;
         }
         .card-header {
             display: flex;
@@ -445,17 +459,15 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .admin-table {
             width: 100%;
             border-collapse: collapse;
+            text-align: left;
             font-size: 12px;
         }
         .admin-table th {
-            text-align: left;
+            background: #f8fafc;
             padding: 10px 8px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            border-bottom: 1px solid var(--border);
+            font-weight: bold;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
         }
         .admin-table td {
             padding: 10px 8px;
@@ -475,6 +487,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .badge-pending, .badge-review { background: #fef3c7; color: #92400e; }
         .badge-submitted { background: #dbeafe; color: #1e40af; }
         .badge-rejected { background: #fee2e2; color: #b91c1c; }
+        .badge-under-review, .badge-under\ review { background: #fef3c7; color: #92400e; }
 
         .action-link {
             color: #006D69;
@@ -483,6 +496,20 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
             font-size: 12px;
         }
         .action-link:hover { color: #003D3B; }
+
+        .btn-blue-sm {
+            background-color: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-blue-sm:hover { background-color: #1d4ed8; }
 
         .btn-primary {
             background: #FFD700;
@@ -573,7 +600,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .quick-item {
             background: var(--body-bg);
             border-radius: 8px;
-            padding: 12px;
+            padding: 20px;
             text-align: center;
             font-size: 11px;
             font-weight: 500;
@@ -640,7 +667,8 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         html.dark-mode .welcome-banner { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         html.dark-mode .admin-table td { border-bottom-color: #334155; color: #e2e8f0; }
         html.dark-mode .admin-table tr:hover td { background: rgba(255,255,255,0.03); }
-        html.dark-mode .admin-table th { color: #94a3b8; border-bottom-color: #334155; }
+        html.dark-mode .admin-table th { color: #94a3b8; border-bottom-color: #334155; background: #1e293b; }
+        html.dark-mode .btn-blue-sm { opacity: 0.9; }
         html.dark-mode .flex-list-item { border-bottom-color: #334155; }
         html.dark-mode .flex-list-item .name { color: #e2e8f0; }
         html.dark-mode .chart-track { background: #334155; }
@@ -656,7 +684,24 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         html.dark-mode .badge-pending, html.dark-mode .badge-review { background: rgba(245,158,11,0.15); color: #fbbf24; }
         html.dark-mode .badge-submitted { background: rgba(37,99,235,0.15); color: #60a5fa; }
         html.dark-mode .badge-rejected { background: rgba(220,38,38,0.15); color: #f87171; }
+        html.dark-mode .badge-under-review, html.dark-mode .badge-under\ review { background: rgba(245,158,11,0.15); color: #fbbf24; }
         html.dark-mode .recipient-avatars span { border-color: #1e293b; }
+    </style>
+    <style>
+        /* Override admin-style.php for dashboard */
+        body { height: auto !important; overflow: visible !important; }
+        .workspace { overflow: visible !important; height: auto !important; }
+        .dashboard-body { overflow: visible !important; overflow-y: visible !important; overflow-x: visible !important; height: auto !important; }
+        .dashboard-body .card { overflow: visible !important; overflow-x: visible !important; }
+        .dashboard-body table { min-width: unset !important; }
+        .top-header { position: sticky !important; top: 0 !important; z-index: 50 !important; }
+        .sidebar { position: fixed !important; top: 0 !important; left: 0 !important; height: 100vh !important; z-index: 100 !important; }
+        .workspace { margin-left: 260px !important; }
+        @media (max-width: 768px) {
+            .sidebar { left: -280px !important; width: 260px !important; transition: left 0.3s ease !important; }
+            .sidebar.open { left: 0 !important; }
+            .workspace { margin-left: 0 !important; width: 100% !important; }
+        }
     </style>
          <?php include_once 'admin-style.php'; ?>
 </head>
@@ -722,44 +767,73 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
             </div>
         </div>
 
-        <div class="grid-2col">
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h3><?php echo $sidebar_lang['recent_apps']; ?></h3>
-                        <p class="card-subtitle">Latest submissions across all schemes</p>
-                    </div>
-                    <a href="applications.php" class="card-action">View All →</a>
+        <div class="card" style="width:100%;">
+            <div class="card-header">
+                <div>
+                    <h3><?php echo $sidebar_lang['recent_apps']; ?></h3>
+                    <p class="card-subtitle">Latest submissions across all schemes</p>
                 </div>
-                <table class="admin-table">
-                    <thead>
-                        <tr><th><?php echo $sidebar_lang['app_no']; ?></th><th><?php echo $sidebar_lang['student']; ?></th><th><?php echo $sidebar_lang['scheme']; ?></th><th><?php echo $sidebar_lang['reviewer']; ?></th><th><?php echo $sidebar_lang['status']; ?></th><th></th></tr>
-                    </thead>
-                    <tbody>
-                        <?php if ($recent_apps && $recent_apps->num_rows > 0): ?>
-                            <?php while ($r = $recent_apps->fetch_assoc()): ?>
-                                <tr>
-                                    <td><strong><?php echo htmlspecialchars($r['application_no']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($r['student_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($r['scheme_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($r['reviewer_name'] ?? '-'); ?></td>
-                                    <td><span class="badge badge-recommended"><?php echo $r['recommendation'] ?? 'Submitted'; ?></span></td>
-                                    <td><a href="view_app.php?id=<?php echo $r['id']; ?>" class="action-link">View</a></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr><td colspan="6" style="padding:20px;text-align:center;color:var(--text-muted);">No recent applications.</td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                <a href="applications.php" class="card-action">View All →</a>
             </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>App No</th>
+                        <th>Student</th>
+                        <th>Roll No</th>
+                        <th>Scheme</th>
+                        <th>Status</th>
+                        <th>Reviewer</th>
+                        <th>Recommendation</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($recent_apps && $recent_apps->num_rows > 0): ?>
+                        <?php while ($r = $recent_apps->fetch_assoc()): ?>
+                            <?php
+                            $stat = $r['status'];
+                            $cls = 'badge-submitted';
+                            if ($stat === 'Under Review') $cls = 'badge-review';
+                            elseif ($stat === 'Recommended') $cls = 'badge-recommended';
+                            elseif ($stat === 'Approved') $cls = 'badge-approved';
+                            elseif ($stat === 'Rejected') $cls = 'badge-rejected';
+                            ?>
+                            <tr>
+                                <td data-label="App No"><strong><?php echo htmlspecialchars($r['application_no']); ?></strong></td>
+                                <td data-label="Student"><?php echo htmlspecialchars($r['student_name']); ?></td>
+                                <td data-label="Roll No"><?php echo htmlspecialchars($r['roll_no'] ?? '-'); ?></td>
+                                <td data-label="Scheme"><?php echo htmlspecialchars($r['scheme_name']); ?></td>
+                                <td data-label="Status"><span class="badge <?php echo $cls; ?>"><?php echo $stat; ?></span></td>
+                                <td data-label="Reviewer"><?php echo htmlspecialchars($r['reviewer_name'] ?? 'N/A'); ?></td>
+                                <td data-label="Recommendation"><?php
+                                    $rec = $r['recommendation'] ?? '';
+                                    if ($stat === 'Approved') echo '<span style="color:#15803d;font-weight:600;">👍 Recommended</span>';
+                                    elseif ($stat === 'Rejected') echo '<span style="color:#b91c1c;font-weight:600;">👎 Not Recommended</span>';
+                                    elseif ($rec === 'Recommended') echo '<span style="color:#15803d;font-weight:600;">👍 Recommended</span>';
+                                    elseif ($rec === 'Not Recommended') echo '<span style="color:#b91c1c;font-weight:600;">👎 Not Recommended</span>';
+                                    else echo '-';
+                                ?></td>
+                                <td data-label="Action">
+                                    <a href="view_app.php?id=<?php echo $r['id']; ?>&amp;lang=<?php echo $lang_param; ?>" class="btn-blue-sm" style="padding:4px 10px; font-size:10px; text-decoration:none;">🔍 View</a>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">No recent applications.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
 
+        <div class="grid-2col">
             <div class="card">
                 <div class="card-header">
                     <div>
                         <h3><?php echo $sidebar_lang['application_status']; ?></h3>
                         <p class="card-subtitle">Breakdown of all submissions</p>
                     </div>
+                    <a href="applications.php" class="card-action">View All →</a>
                 </div>
                 <div class="chart-bar-group">
                     <?php
@@ -775,15 +849,8 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
                     </div>
                     <?php endforeach; ?>
                 </div>
-                <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-                    <a href="applications.php?status=Submitted" class="btn-outline btn-sm">View Submitted</a>
-                    <a href="applications.php?status=Under Review" class="btn-outline btn-sm">Under Review</a>
-                    <a href="applications.php?status=Recommended" class="btn-outline btn-sm">Recommended</a>
-                </div>
             </div>
-        </div>
 
-        <div class="grid-3col">
             <div class="card">
                 <div class="card-header">
                     <div>
@@ -829,7 +896,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
                 <?php else: ?>
                     <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">No reviewers</div>
                 <?php endif; ?>
-                <a href="reviewers.php?action=add" class="btn-outline" style="margin-top:10px;width:100%;justify-content:center;">+ Add Reviewer</a>
+                <a href="reviewers.php?action=add" class="btn-primary" style="margin-top:10px;width:100%;justify-content:center;">+ Add Reviewer</a>
             </div>
 
             <div class="card">
@@ -853,31 +920,11 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
                 <?php else: ?>
                     <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">No recipients yet</div>
                 <?php endif; ?>
-                <a href="recipients.php" class="btn-outline" style="margin-top:10px;width:100%;justify-content:center;">Manage Recipients</a>
+                <a href="recipients.php" class="btn-primary" style="margin-top:10px;width:100%;justify-content:center;">Manage Recipients</a>
             </div>
         </div>
 
     
-
-        <div class="grid-4col">
-            <a href="bank_verify.php" class="quick-item">
-                <div style="font-size:24px;margin-bottom:6px;">🏦</div>
-                <?php echo $sidebar_lang['bank_verify']; ?>
-            </a>
-            <a href="disbursements.php" class="quick-item">
-                <div style="font-size:24px;margin-bottom:6px;">💰</div>
-                <?php echo $sidebar_lang['disbursements']; ?>
-            </a>
-            <a href="reports.php" class="quick-item">
-                <div style="font-size:24px;margin-bottom:6px;">📈</div>
-                Analytics
-            </a>
-            <div class="quick-item" style="background:linear-gradient(135deg,#006D69,#003D3B);color:#fff;border:none;">
-                <div style="font-size:12px;font-weight:700;">🎯</div>
-                <div style="font-size:11px;margin-top:2px;"><?php echo $approved_apps; ?> <?php echo $sidebar_lang['approved']; ?></div>
-            </div>
-        </div>
-
     </div>
 </div>
 

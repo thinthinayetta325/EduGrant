@@ -116,7 +116,7 @@ $current_page = 'reports';
         .bar-label { width: 100px; font-size: 11px; font-weight: bold; color: #475569; text-align: right; }
         .bar-track { flex-grow: 1; height: 20px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
         .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 6px; font-size: 10px; color: #fff; font-weight: bold; }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
+        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
 
         /* Dark Mode */
         html.dark-mode body { background: #0f172a; color: #e2e8f0; }

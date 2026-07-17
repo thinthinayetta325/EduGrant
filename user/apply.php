@@ -24,6 +24,16 @@ if ($is_mm) {
         'error_income' => 'ဝင်ငွေသည် ကိန်းဂဏန်း မှန်ကန်ရပါမည်။',
         'error_duplicate' => 'ဤပညာသင်ဆုအတွက် သင်လျှောက်ထားပြီးဖြစ်ပါသည်။',
         'error_submit' => 'လျှောက်လွှာ တင်သွင်းရန် မအောင်မြင်ပါ။',
+        'label_father_occ' => 'ဖခင်အလုပ်အကိုင်',
+        'label_mother_occ' => 'မိခင်အလုပ်အကိုင်',
+        'label_grade10_marks' => 'အတန်တန် (၁၀) ရမှတ်စုစုပေါင်း',
+        'label_siblings' => 'ညီအကိုမောင်နှမ အရေအတွက်',
+        'label_house_photo' => 'အိမ်ဓာတ်ပုံ',
+        'label_reason' => 'လျှောက်ထားရခြင်း အကြောင်းရင်း',
+        'placeholder_father_occ' => 'ဥပမာ - စိုက်ပျိုးရေး',
+        'placeholder_mother_occ' => 'ဥပမာ - အိမ်ထောင်ရှင်',
+        'placeholder_grade10_marks' => 'ဥပမာ - ၄၅၀',
+        'placeholder_reason' => 'သင်ဘာကြောင့် လျှောက်ထားသည်ကို ရေးပါ',
     ];
 } else {
     $page_lang = [
@@ -43,6 +53,16 @@ if ($is_mm) {
         'error_income' => 'Income must be a valid number (no leading zeros).',
         'error_duplicate' => 'You have already applied for this scholarship.',
         'error_submit' => 'Failed to submit application.',
+        'label_father_occ' => "Father's Occupation",
+        'label_mother_occ' => "Mother's Occupation",
+        'label_grade10_marks' => 'Total 10th Grade Marks',
+        'label_siblings' => 'Number of Siblings',
+        'label_house_photo' => 'House Photo',
+        'label_reason' => 'Reason for Applying',
+        'placeholder_father_occ' => 'e.g. Farmer',
+        'placeholder_mother_occ' => 'e.g. Housewife',
+        'placeholder_grade10_marks' => 'e.g. 450',
+        'placeholder_reason' => 'Why are you applying?',
     ];
 }
 
@@ -99,10 +119,34 @@ $stmt->close();
 /* Apply Form Submit */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    $scheme_id = (int)$_POST['scheme_id'];
-    $family_income = trim($_POST['family_income']);
+    $scheme_id          = (int)$_POST['scheme_id'];
+    $family_income      = trim($_POST['family_income']);
+    $father_occupation  = trim($_POST['father_occupation']);
+    $mother_occupation  = trim($_POST['mother_occupation']);
+    $grade_10_marks     = trim($_POST['grade_10_marks']);
+    $num_siblings       = (int)$_POST['num_siblings'];
+    $reason             = trim($_POST['reason']);
 
-    if (empty($scheme_id) || empty($family_income)) {
+    /* Handle house photo upload */
+    $house_photo_name = null;
+    if (isset($_FILES['house_photo']) && $_FILES['house_photo']['error'] === UPLOAD_ERR_OK) {
+        $allowed = ['image/jpeg','image/png','image/jpg','image/webp'];
+        $finfo   = finfo_open(FILEINFO_MIME_TYPE);
+        $mime    = finfo_file($finfo, $_FILES['house_photo']['tmp_name']);
+        finfo_close($finfo);
+
+        if (in_array($mime, $allowed)) {
+            $ext = pathinfo($_FILES['house_photo']['name'], PATHINFO_EXTENSION);
+            $house_photo_name = 'house_' . uniqid() . '.' . $ext;
+            $upload_dir = __DIR__ . '/../uploads/house_photos/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+            move_uploaded_file($_FILES['house_photo']['tmp_name'], $upload_dir . $house_photo_name);
+        }
+    }
+
+    if (empty($scheme_id) || empty($family_income) || empty($father_occupation) || empty($mother_occupation) || empty($grade_10_marks) || empty($reason)) {
 
         $error = $page_lang['error_fields'];
 
@@ -145,6 +189,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     scheme_id,
                     application_no,
                     family_income,
+                    father_occupation,
+                    mother_occupation,
+                    grade_10_marks,
+                    num_siblings,
+                    house_photo,
+                    reason,
                     apply_date,
                     status,
                     approved_by,
@@ -152,6 +202,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 )
                 VALUES
                 (
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
                     ?,
                     ?,
                     ?,
@@ -164,11 +220,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ");
 
             $insert->bind_param(
-                "iisds",
+                "iissssissss",
                 $student_id,
                 $scheme_id,
                 $application_no,
                 $family_income,
+                $father_occupation,
+                $mother_occupation,
+                $grade_10_marks,
+                $num_siblings,
+                $house_photo_name,
+                $reason,
                 $status
             );
 
@@ -313,7 +375,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
 
         <!-- Application Form -->
-        <form method="POST" class="space-y-6">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
 
             <!-- Scheme -->
             <div>
@@ -377,6 +439,86 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     placeholder="<?= $page_lang['placeholder_income'] ?>"
                     class="w-full border border-slate-200 rounded-xl px-4 py-3">
 
+            </div>
+
+            <!-- Father's Occupation -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                    <?= $page_lang['label_father_occ'] ?>
+                </label>
+                <input
+                    type="text"
+                    name="father_occupation"
+                    required
+                    placeholder="<?= $page_lang['placeholder_father_occ'] ?>"
+                    class="w-full border border-slate-200 rounded-xl px-4 py-3">
+            </div>
+
+            <!-- Mother's Occupation -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                    <?= $page_lang['label_mother_occ'] ?>
+                </label>
+                <input
+                    type="text"
+                    name="mother_occupation"
+                    required
+                    placeholder="<?= $page_lang['placeholder_mother_occ'] ?>"
+                    class="w-full border border-slate-200 rounded-xl px-4 py-3">
+            </div>
+
+            <!-- Total 10th Grade Marks -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                    <?= $page_lang['label_grade10_marks'] ?>
+                </label>
+                <input
+                    type="number"
+                    name="grade_10_marks"
+                    min="0"
+                    max="600"
+                    required
+                    placeholder="<?= $page_lang['placeholder_grade10_marks'] ?>"
+                    class="w-full border border-slate-200 rounded-xl px-4 py-3">
+            </div>
+
+            <!-- Number of Siblings -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                    <?= $page_lang['label_siblings'] ?>
+                </label>
+                <input
+                    type="number"
+                    name="num_siblings"
+                    min="0"
+                    required
+                    class="w-full border border-slate-200 rounded-xl px-4 py-3">
+            </div>
+
+            <!-- House Photo -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                    <?= $page_lang['label_house_photo'] ?>
+                </label>
+                <input
+                    type="file"
+                    name="house_photo"
+                    accept="image/*"
+                    required
+                    class="w-full border border-slate-200 rounded-xl px-4 py-3">
+            </div>
+
+            <!-- Reason for Applying -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                    <?= $page_lang['label_reason'] ?>
+                </label>
+                <textarea
+                    name="reason"
+                    rows="4"
+                    required
+                    placeholder="<?= $page_lang['placeholder_reason'] ?>"
+                    class="w-full border border-slate-200 rounded-xl px-4 py-3"></textarea>
             </div>
 
             <!-- Submit -->

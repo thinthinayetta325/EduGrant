@@ -45,6 +45,7 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
 }
 ?>
 <script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div class="top-header">
     <div class="header-left">
@@ -60,11 +61,13 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     <div class="header-actions">
         <div class="language-switch">
             <a href="?lang=en&<?php echo http_build_query(array_diff_key($_GET, ['lang' => ''])); ?>"
+               onclick="sessionStorage.setItem('scrollPos',window.scrollY)"
                class="<?php echo !$is_mm ? 'active-lang' : ''; ?>">
                 ENG
             </a>
             <span>|</span>
             <a href="?lang=mm&<?php echo http_build_query(array_diff_key($_GET, ['lang' => ''])); ?>"
+               onclick="sessionStorage.setItem('scrollPos',window.scrollY)"
                class="<?php echo $is_mm ? 'active-lang' : ''; ?>">
                 မြန်မာ
             </a>
@@ -139,21 +142,6 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     </div>
 </div>
 <style>
-    .hamburger-btn {
-        display: none;
-        align-items: center;
-        justify-content: center;
-        width: 38px;
-        height: 38px;
-        border-radius: 8px;
-        background: var(--body-bg);
-        border: 1px solid var(--border);
-        color: var(--text-primary);
-        cursor: pointer;
-        transition: var(--transition);
-        flex-shrink: 0;
-    }
-    .hamburger-btn:hover { background: var(--border); }
     .header-left { display: flex; align-items: center; gap: 12px; }
 
     .sidebar-overlay {
