@@ -150,7 +150,7 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
         top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.5);
         z-index: 90;
-        backdrop-filter: blur(2px);
+
         transition: opacity 0.3s ease;
     }
     .sidebar-overlay.active { display: block; }
@@ -223,6 +223,18 @@ function toggleSidebar() {
     var overlay = document.querySelector('.sidebar-overlay');
     sidebar.classList.toggle('open');
     overlay.classList.toggle('active');
-    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    document.body.classList.toggle('sidebar-open');
 }
+function closeSidebar() {
+    var sidebar = document.querySelector('.sidebar');
+    var overlay = document.querySelector('.sidebar-overlay');
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
+}
+document.querySelectorAll('.sidebar-menu .menu-item a').forEach(function(link) {
+    link.addEventListener('click', function() {
+        if (window.innerWidth <= 768) closeSidebar();
+    });
+});
 </script>

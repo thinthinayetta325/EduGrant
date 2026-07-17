@@ -244,13 +244,15 @@
 
         .sidebar {
             width: 260px;
-            min-height: 100vh;
+            height: 100vh;
             background: var(--sidebar-bg);
             color: #fff;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
             z-index: 10;
         }
         .sidebar-brand {
@@ -365,7 +367,7 @@
             transform: translateX(3px);
         }
 
-        .workspace { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; overflow-x: hidden; }
+        .workspace { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; overflow-x: hidden; margin-left: 260px; }
 
         .top-header {
             background: #fff;
@@ -905,16 +907,15 @@
         html.dark-mode .notif-unread:hover { background: rgba(16,185,129,0.12); }
 
         /* ============ RESPONSIVE ============ */
-        /* Sidebar mobile: off-canvas overlay */
+        /* Sidebar mobile: thin click-strip to close */
         .sidebar-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            top: 0; right: 0; bottom: 0;
+            width: 0;
             z-index: 90;
-            backdrop-filter: blur(2px);
         }
-        .sidebar-overlay.active { display: block; }
+        .sidebar-overlay.active { display: block; width: 100%; background: transparent; }
 
         .hamburger-btn {
             display: none;
@@ -956,7 +957,14 @@
 
             .hamburger-btn { display: flex; }
 
-            .workspace { width: 100%; margin-left: 0 !important; }
+            .workspace {
+                width: 100%;
+                margin-left: 0 !important;
+                transition: margin-left 0.3s ease !important;
+            }
+            body.sidebar-open .workspace {
+                margin-left: 0 !important;
+            }
 
             .top-header {
                 position: sticky;

@@ -700,7 +700,8 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         @media (max-width: 768px) {
             .sidebar { left: -280px !important; width: 260px !important; transition: left 0.3s ease !important; }
             .sidebar.open { left: 0 !important; }
-            .workspace { margin-left: 0 !important; width: 100% !important; }
+            .workspace { margin-left: 0 !important; width: 100% !important; transition: margin-left 0.3s ease !important; }
+            body.sidebar-open .workspace { margin-left: 276px !important; }
         }
     </style>
          <?php include_once 'admin-style.php'; ?>
