@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS applications (
     grade_10_marks DECIMAL(5,2),
     num_siblings INT DEFAULT 0,
     house_photo VARCHAR(255),
+    household_registration VARCHAR(255),
     reason TEXT,
     FOREIGN KEY (student_id) REFERENCES student(id),
     FOREIGN KEY (scheme_id) REFERENCES schemes(id),

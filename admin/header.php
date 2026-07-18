@@ -44,8 +44,13 @@ if (empty($admin_image) && isset($_SESSION['admin_id'])) {
     }
 }
 ?>
+<script>
+(function(){
+    var sp = sessionStorage.getItem('scrollPos');
+    if(sp) { window.scrollTo(0, parseInt(sp)); sessionStorage.removeItem('scrollPos'); }
+})();
+</script>
 <script>if(localStorage.getItem('admin_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
-<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div class="top-header">
     <div class="header-left">

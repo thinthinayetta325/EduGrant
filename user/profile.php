@@ -331,8 +331,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </div>
 
     <div class="max-w-md mx-auto space-y-6">
-        
-        <!-- Student Bio Metadata Card -->
+
+        <?php if ($receipt_data): ?>
+            <div id="fundReleasedBox" class="bg-white border-2 border-emerald-300 rounded-2xl shadow-lg overflow-hidden relative z-10">
+                <div class="px-6 py-5 border-b border-emerald-100 bg-emerald-50">
+                    <h3 class="font-bold text-emerald-800 text-base flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <?php echo $is_mm ? 'ငွေထုတ်ပေးပြီးပါပြီ' : 'Funds Released'; ?> 🎉
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-slate-600">
+                        <?php echo $is_mm ? 'သင်၏ ' : 'Your scholarship for '; ?><strong><?php echo htmlspecialchars($receipt_data['scheme_name']); ?></strong><?php echo $is_mm ? ' အတွက် ငွေကြေးထောက်ပံ့မှု ထုတ်ပေးပြီးပါပြီ။' : ' has been disbursed.'; ?>
+                    </p>
+                    <a href="download_receipt.php" onclick="setTimeout(function(){ document.getElementById('fundReleasedBox').style.display='none'; var pc = document.getElementById('profileContent'); pc.classList.remove('blur-sm','pointer-events-none','select-none'); }, 1500);" class="mt-4 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition shadow">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <?php echo $is_mm ? 'ငွေလက်ခံဖြတ်ပိုင်း ဒေါင်းလုဒ်' : 'Download Receipt'; ?>
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($needs_bank): ?>
+            <div class="bg-white border-2 border-amber-300 rounded-2xl shadow-lg overflow-hidden relative z-10">
+                <div class="px-6 py-5 border-b border-amber-100 bg-amber-50">
+                    <h3 class="font-bold text-amber-800 text-base flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        Bank Details Required
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-slate-600">Your application has been approved. Please provide your bank account details to receive the scholarship disbursement.</p>
+                    <a href="bank_details.php?lang=<?php echo $lang_param; ?>" class="mt-4 inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition shadow">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                        Fill Bank Details
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <div id="profileContent" class="<?php echo ($needs_bank || $receipt_data) ? 'blur-sm pointer-events-none select-none' : ''; ?>">
         <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6 text-center">
             <form method="POST" action="" enctype="multipart/form-data" id="profileImageForm">
                 <input type="hidden" name="action" value="upload_image">
@@ -381,43 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </button>
         </div>
 
-        <?php if ($receipt_data): ?>
-                <div id="fundReleasedBox" class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="px-6 py-5 border-b border-slate-100 bg-emerald-50/50">
-                        <h3 class="font-bold text-emerald-800 text-base flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <?php echo $is_mm ? 'ငွေထုတ်ပေးပြီးပါပြီ' : 'Funds Released'; ?> 🎉
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <p class="text-sm text-slate-600">
-                            <?php echo $is_mm ? 'သင်၏ ' : 'Your scholarship for '; ?><strong><?php echo htmlspecialchars($receipt_data['scheme_name']); ?></strong><?php echo $is_mm ? ' အတွက် ငွေကြေးထောက်ပံ့မှု ထုတ်ပေးပြီးပါပြီ။' : ' has been disbursed.'; ?>
-                        </p>
-                        <a href="download_receipt.php" onclick="setTimeout(function(){ document.getElementById('fundReleasedBox').style.display='none'; }, 1500);" class="mt-4 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <?php echo $is_mm ? 'ငွေလက်ခံဖြတ်ပိုင်း ဒေါင်းလုဒ်' : 'Download Receipt'; ?>
-                        </a>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($needs_bank): ?>
-                <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="px-6 py-5 border-b border-slate-100 bg-amber-50/50">
-                        <h3 class="font-bold text-amber-800 text-base flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                            Bank Details Required
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <p class="text-sm text-slate-600">Your application has been approved. Please provide your bank account details to receive the scholarship disbursement.</p>
-                        <a href="bank_details.php?lang=<?php echo $lang_param; ?>" class="mt-4 inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                            Fill Bank Details
-                        </a>
-                    </div>
-                </div>
-            <?php endif; ?>
+        </div>
 
     </div>
 </main>

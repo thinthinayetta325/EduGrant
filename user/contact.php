@@ -4,6 +4,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $is_logged_in = isset($_SESSION['student_id']);
+$is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
+$lang_param = $is_mm ? 'mm' : 'en';
+$student_data = ['name' => '', 'email' => ''];
+$form_success = '';
+$form_error = '';
+
+$contact_locked = false;
+$allowed_student = false;
 
 if ($is_logged_in) {
     include '../config/db.php';
@@ -16,9 +24,33 @@ if ($is_logged_in) {
     $student_data = $res ? ['name' => $res['name'], 'email' => $res['email']] : ['name' => '', 'email' => ''];
     $stmt->close();
 
-    $form_success = '';
-    $form_error = '';
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
+    $allowed_student = (isset($student_data['name']) && strtolower(trim($student_data['name'])) === 'mya mya');
+
+    if ($allowed_student) {
+        $lock_check = $conn->prepare("SELECT student_id FROM contact_locks WHERE student_id != ? LIMIT 1");
+        $lock_check->bind_param("i", $student_id);
+        $lock_check->execute();
+        $lock_result = $lock_check->get_result();
+        $lock_check->close();
+
+        if ($lock_result->num_rows > 0) {
+            $contact_locked = true;
+        } else {
+            $contact_locked = false;
+            $upsert = $conn->prepare("INSERT INTO contact_locks (student_id, locked_at) VALUES (?, NOW()) ON DUPLICATE KEY UPDATE locked_at = NOW()");
+            $upsert->bind_param("i", $student_id);
+            $upsert->execute();
+            $upsert->close();
+        }
+    } else {
+        $lock_check = $conn->prepare("SELECT student_id FROM contact_locks LIMIT 1");
+        $lock_check->execute();
+        $lock_result = $lock_check->get_result();
+        $lock_check->close();
+        $contact_locked = ($lock_result->num_rows > 0);
+    }
+
+    if ($allowed_student && !$contact_locked && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
         $c_full_name = trim($_POST['full_name'] ?? '');
         $c_email = trim($_POST['email'] ?? '');
         $c_subject = trim($_POST['subject'] ?? '');
@@ -55,9 +87,6 @@ if ($is_logged_in) {
 
     $conn->close();
 }
-
-$is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
-$lang_param = $is_mm ? 'mm' : 'en';
 
 if ($is_mm) {
     $c_lang = [
@@ -161,6 +190,7 @@ if ($is_mm) {
                     <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium"><?php echo $form_error; ?></div>
                 <?php endif; ?>
 
+                <?php if ($is_logged_in && $allowed_student && !$contact_locked): ?>
                 <form action="?lang=<?php echo $lang_param; ?>" method="POST" class="space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -189,6 +219,31 @@ if ($is_mm) {
                         </button>
                     </div>
                 </form>
+                <?php else: ?>
+                <div class="text-center py-10">
+                    <div class="text-4xl mb-4">
+                        <?php
+                        if ($contact_locked) echo '⏳';
+                        elseif ($is_logged_in) echo '🚫';
+                        else echo '🔒';
+                        ?>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">
+                        <?php
+                        if ($contact_locked && $is_logged_in) {
+                            echo $is_mm ? 'အခြားကျောင်းသားတစ်ဦးက စာတိုပေးစာပို့နေပါသည်။ ကျေးဇူးပြု၍ နောက်မှ ထပ်ကြိုးစားပါ။' : 'Another student is currently sending a message. Please try again later.';
+                        } elseif ($is_logged_in) {
+                            echo $is_mm ? 'သင့်အား စာတိုပေးစာပို့ခွင့် မရှိပါ။' : 'You are not authorized to send messages.';
+                        } else {
+                            echo $is_mm ? 'စာတိုပေးစာပို့ရန် အကောင့်ဝင်ရန် လိုအပ်ပါသည်။' : 'Please log in to send a message.';
+                        }
+                        ?>
+                    </p>
+                    <?php if (!$is_logged_in): ?>
+                    <a href="login.php?lang=<?php echo $lang_param; ?>" class="inline-block bg-[#006D69] hover:bg-[#005753] text-white font-bold text-sm px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition"><?php echo $is_mm ? 'အကောင့်ဝင်ရန်' : 'Log In'; ?></a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 

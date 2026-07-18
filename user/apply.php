@@ -29,6 +29,7 @@ if ($is_mm) {
         'label_grade10_marks' => 'အတန်တန် (၁၀) ရမှတ်စုစုပေါင်း',
         'label_siblings' => 'ညီအကိုမောင်နှမ အရေအတွက်',
         'label_house_photo' => 'အိမ်ဓာတ်ပုံ',
+        'label_household_reg' => 'မိသားစုစာရင်းဇယား',
         'label_reason' => 'လျှောက်ထားရခြင်း အကြောင်းရင်း',
         'placeholder_father_occ' => 'ဥပမာ - စိုက်ပျိုးရေး',
         'placeholder_mother_occ' => 'ဥပမာ - အိမ်ထောင်ရှင်',
@@ -58,6 +59,7 @@ if ($is_mm) {
         'label_grade10_marks' => 'Total 10th Grade Marks',
         'label_siblings' => 'Number of Siblings',
         'label_house_photo' => 'House Photo',
+        'label_household_reg' => 'Household Registration List',
         'label_reason' => 'Reason for Applying',
         'placeholder_father_occ' => 'e.g. Farmer',
         'placeholder_mother_occ' => 'e.g. Housewife',
@@ -146,6 +148,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    /* Handle household registration upload */
+    $household_reg_name = null;
+    if (isset($_FILES['household_registration']) && $_FILES['household_registration']['error'] === UPLOAD_ERR_OK) {
+        $allowed = ['image/jpeg','image/png','image/jpg','image/webp'];
+        $finfo   = finfo_open(FILEINFO_MIME_TYPE);
+        $mime    = finfo_file($finfo, $_FILES['household_registration']['tmp_name']);
+        finfo_close($finfo);
+
+        if (in_array($mime, $allowed)) {
+            $ext = pathinfo($_FILES['household_registration']['name'], PATHINFO_EXTENSION);
+            $household_reg_name = 'hhreg_' . uniqid() . '.' . $ext;
+            $upload_dir = __DIR__ . '/../uploads/household_registration/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+            move_uploaded_file($_FILES['household_registration']['tmp_name'], $upload_dir . $household_reg_name);
+        }
+    }
+
     if (empty($scheme_id) || empty($family_income) || empty($father_occupation) || empty($mother_occupation) || empty($grade_10_marks) || empty($reason)) {
 
         $error = $page_lang['error_fields'];
@@ -194,6 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     grade_10_marks,
                     num_siblings,
                     house_photo,
+                    household_registration,
                     reason,
                     apply_date,
                     status,
@@ -212,6 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     ?,
                     ?,
                     ?,
+                    ?,
                     NOW(),
                     ?,
                     NULL,
@@ -220,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ");
 
             $insert->bind_param(
-                "iissssissss",
+                "iissssisssss",
                 $student_id,
                 $scheme_id,
                 $application_no,
@@ -230,6 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $grade_10_marks,
                 $num_siblings,
                 $house_photo_name,
+                $household_reg_name,
                 $reason,
                 $status
             );
@@ -503,6 +527,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input
                     type="file"
                     name="house_photo"
+                    accept="image/*"
+                    required
+                    class="w-full border border-slate-200 rounded-xl px-4 py-3">
+            </div>
+
+            <!-- Household Registration List -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                    <?= $page_lang['label_household_reg'] ?>
+                </label>
+                <input
+                    type="file"
+                    name="household_registration"
                     accept="image/*"
                     required
                     class="w-full border border-slate-200 rounded-xl px-4 py-3">

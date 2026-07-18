@@ -94,7 +94,7 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
         <div class="space-y-3">
             <?php if ($notifications && $notifications->num_rows > 0): ?>
                 <?php while ($n = $notifications->fetch_assoc()): ?>
-                    <a href="mark_read.php?id=<?php echo $n['id']; ?>&lang=<?php echo $lang_param; ?>" class="block bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition <?php echo !$n['is_read'] ? 'border-l-4 border-l-teal-500' : ''; ?>">
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition <?php echo !$n['is_read'] ? 'border-l-4 border-l-teal-500' : ''; ?>">
                         <div class="flex items-start gap-4">
                             <div class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0 text-lg">
                                 <?php
@@ -110,11 +110,22 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
                                 <p class="text-slate-600 text-sm mt-1"><?php echo htmlspecialchars($n['message'] ?? ''); ?></p>
                                 <p class="text-slate-400 text-xs mt-2"><?php echo date('d M Y, h:i A', strtotime($n['created_at'])); ?></p>
                             </div>
-                            <?php if (!$n['is_read']): ?>
-                                <span class="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 mt-2"></span>
-                            <?php endif; ?>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <?php if (!$n['is_read']): ?>
+                                    <a href="mark_read.php?id=<?php echo $n['id']; ?>&lang=<?php echo $lang_param; ?>" class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        Unread
+                                    </a>
+                                    <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-1 text-xs text-slate-400 font-medium px-3 py-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        Read
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </a>
+                    </div>
                 <?php endwhile; ?>
             <?php else: ?>
                 <div class="bg-white border border-dashed border-slate-200 rounded-xl p-12 text-center">

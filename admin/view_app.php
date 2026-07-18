@@ -210,48 +210,46 @@ $current_page = 'applications';
 <div class="workspace">
     <?php $page_title = $sidebar_lang['app_details'] ?? 'Application Details'; include 'header.php'; ?>
 
-    <?php if ($app['status'] !== 'Approved' && $app['status'] !== 'Rejected'): ?>
-    <div style="padding:0 28px;">
-        <div style="background:#fffbe6;border:2px solid #FFD700;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-            <div style="display:flex;align-items:center;gap:12px;">
+    <div class="dashboard-body">
+
+        <?php if ($app['status'] !== 'Approved' && $app['status'] !== 'Rejected'): ?>
+        <div style="background:#fffbe6;border:2px solid #FFD700;border-radius:12px;padding:20px 24px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
                 <div style="width:42px;height:42px;background:linear-gradient(135deg,#FFD700,#f59e0b);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">⚖️</div>
                 <div>
                     <h3 style="font-size:15px;font-weight:700;color:#004D4A;margin:0;">Admin Decision</h3>
                     <p style="font-size:11px;color:var(--text-secondary);margin:2px 0 0 0;">Approve or reject this application</p>
                 </div>
             </div>
-            <form method="POST" action="applications.php" style="display:flex;gap:10px;align-items:center;">
-                <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
-                <input type="hidden" name="redirect_user" value="1">
-                <button type="submit" name="action" value="approve" class="btn-primary" onclick="return confirm('Approve this application?')">✓ Approve</button>
-                <button type="button" class="btn-red" onclick="document.getElementById('rejectModal').classList.remove('hidden')">✕ Reject</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Reject Modal -->
-    <div id="rejectModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div style="background:#fff;border-radius:12px;padding:24px;width:90%;max-width:420px;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 8px 0;">Reject Application</h3>
-            <p style="font-size:12px;color:#64748b;margin:0 0 16px 0;">Please provide a reason for rejection.</p>
-            <form method="POST" action="applications.php">
-                <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
-                <input type="hidden" name="redirect_user" value="1">
-                <textarea name="reject_reason" rows="4" required
-                    style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"
-                    placeholder="Enter rejection reason..."></textarea>
-                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
-                    <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden')"
-                        style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;">Cancel</button>
-                    <button type="submit" name="action" value="reject"
-                        style="padding:8px 16px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Confirm Reject</button>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+                <form method="POST" action="applications.php" style="flex:1;">
+                    <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
+                    <input type="hidden" name="redirect_user" value="1">
+                    <button type="submit" name="action" value="approve" class="btn-primary" style="width:100%;justify-content:center;" onclick="return confirm('Approve this application?')">✓ Approve</button>
+                </form>
+                <div style="flex:1;" id="rejectSection">
+                    <button type="button" class="btn-red" style="width:100%;justify-content:center;" onclick="document.getElementById('rejectTextarea').classList.toggle('hidden');">✕ Reject</button>
+                    <div id="rejectTextarea" class="hidden" style="margin-top:10px;max-width:280px;">
+                        <p style="font-size:12px;color:#64748b;margin:0 0 8px 0;">Please provide a reason for rejection.</p>
+                        <form method="POST" action="applications.php">
+                            <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
+                            <input type="hidden" name="redirect_user" value="1">
+                            <textarea name="reject_reason" rows="3" required
+                                style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"
+                                placeholder="Enter rejection reason..."></textarea>
+                            <div style="display:flex;gap:8px;margin-top:8px;">
+                                <button type="button" onclick="document.getElementById('rejectTextarea').classList.add('hidden');"
+                                    style="flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;">Cancel</button>
+                                <button type="submit" name="action" value="reject"
+                                    style="flex:1;padding:8px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Confirm Reject</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <div style="padding:0 28px;">
         <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             <div style="display:flex;align-items:center;gap:12px;">
                 <div style="width:42px;height:42px;background:linear-gradient(135deg,#dcfce7,#10b981);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">📋</div>
@@ -286,11 +284,8 @@ $current_page = 'applications';
             <p style="font-size:12px;color:var(--text-primary);margin:0;"><?php echo nl2br(htmlspecialchars($app['remarks'])); ?></p>
         </div>
         <?php endif; ?>
-    </div>
 
-    <div class="dashboard-body">
-
-        <div class="grid-2" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="grid-2" style="grid-template-columns: 1fr 1fr;">
             <div class="card">
                 <h3 class="section-title">Student Information</h3>
                 <div class="info-row"><span class="info-label">Full Name</span><span class="info-value"><?php echo htmlspecialchars($app['student_name']); ?></span></div>
@@ -299,21 +294,32 @@ $current_page = 'applications';
                 <div class="info-row"><span class="info-label">Phone</span><span class="info-value"><?php echo htmlspecialchars($app['phone'] ?? 'N/A'); ?></span></div>
                 <div class="info-row"><span class="info-label">Gender</span><span class="info-value"><?php echo htmlspecialchars($app['gender'] ?? 'N/A'); ?></span></div>
                 <div class="info-row"><span class="info-label">Address</span><span class="info-value"><?php echo htmlspecialchars($app['address'] ?? 'N/A'); ?></span></div>
-                <div class="info-row"><span class="info-label">Family Income</span><span class="info-value"><?php echo $app['family_income'] ? number_format($app['family_income']) . ' MMK' : 'N/A'; ?></span></div>
-            </div>
-
-            <div class="card">
-                <h3 class="section-title">Scheme Information</h3>
+                <div class="info-row"><span class="info-label">Application No</span><span class="info-value"><?php echo htmlspecialchars($app['application_no']); ?></span></div>
+                <div class="info-row"><span class="info-label">Apply Date</span><span class="info-value"><?php echo date("d M Y", strtotime($app['apply_date'])); ?></span></div>
                 <div class="info-row"><span class="info-label">Scheme Name</span><span class="info-value"><strong><?php echo htmlspecialchars($app['scheme_name']); ?></strong></span></div>
-                <div class="info-row"><span class="info-label">Amount</span><span class="info-value" style="color:#006D69;font-weight:700;"><?php echo number_format($app['amount']); ?> MMK</span></div>
-                <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
-                    <span class="info-label">Description</span>
-                    <span class="info-value" style="font-size:12px;color:var(--text-secondary);"><?php echo nl2br(htmlspecialchars($app['scheme_desc'] ?? 'N/A')); ?></span>
+                <div class="info-row"><span class="info-label">Family Income</span><span class="info-value"><?php echo $app['family_income'] ? number_format($app['family_income']) . ' MMK' : 'N/A'; ?></span></div>
+                <div class="info-row"><span class="info-label">Father's Occupation</span><span class="info-value"><?php echo htmlspecialchars($app['father_occupation'] ?? '-'); ?></span></div>
+                <div class="info-row"><span class="info-label">Mother's Occupation</span><span class="info-value"><?php echo htmlspecialchars($app['mother_occupation'] ?? '-'); ?></span></div>
+                <div class="info-row"><span class="info-label">10th Grade Marks</span><span class="info-value"><?php echo htmlspecialchars($app['grade_10_marks'] ?? '-'); ?></span></div>
+                <div class="info-row"><span class="info-label">Siblings</span><span class="info-value"><?php echo (int)($app['num_siblings'] ?? 0); ?></span></div>
+                <?php if (!empty($app['house_photo'])): ?>
+                <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                    <span class="info-label">House Photo</span>
+                    <img src="../uploads/house_photos/<?php echo htmlspecialchars($app['house_photo']); ?>" alt="House Photo" style="max-height:180px;border-radius:8px;border:1px solid var(--border);object-fit:cover;">
                 </div>
-                <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
-                    <span class="info-label">Eligibility</span>
-                    <span class="info-value" style="font-size:12px;color:var(--text-secondary);"><?php echo nl2br(htmlspecialchars($app['eligibility'] ?? 'N/A')); ?></span>
+                <?php endif; ?>
+                <?php if (!empty($app['household_registration'])): ?>
+                <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+                    <span class="info-label">Household Registration List</span>
+                    <img src="../uploads/household_registration/<?php echo htmlspecialchars($app['household_registration']); ?>" alt="Household Registration" style="max-height:180px;border-radius:8px;border:1px solid var(--border);object-fit:cover;">
                 </div>
+                <?php endif; ?>
+                <?php if (!empty($app['reason'])): ?>
+                <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+                    <span class="info-label">Reason for Applying</span>
+                    <span class="info-value" style="font-size:12px;color:var(--text-secondary);"><?php echo nl2br(htmlspecialchars($app['reason'])); ?></span>
+                </div>
+                <?php endif; ?>
             </div>
 
             <div class="card">

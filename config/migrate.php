@@ -38,5 +38,29 @@ if ($result->num_rows === 0) {
     echo "contact_messages table already exists.\n";
 }
 
+// Add household_registration column to applications table if it doesn't exist
+$result = $conn->query("SHOW COLUMNS FROM applications LIKE 'household_registration'");
+if ($result->num_rows === 0) {
+    $conn->query("ALTER TABLE applications ADD COLUMN household_registration VARCHAR(255) DEFAULT NULL AFTER house_photo");
+    echo "Added household_registration column to applications table.\n";
+} else {
+    echo "household_registration column already exists.\n";
+}
+
 echo "Migration complete.\n";
+
+// Create contact_locks table if it doesn't exist
+$result = $conn->query("SHOW TABLES LIKE 'contact_locks'");
+if ($result->num_rows === 0) {
+    $conn->query("CREATE TABLE IF NOT EXISTS contact_locks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT NOT NULL,
+        locked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY (student_id)
+    ) ENGINE=InnoDB");
+    echo "Created contact_locks table.\n";
+} else {
+    echo "contact_locks table already exists.\n";
+}
+
 $conn->close();

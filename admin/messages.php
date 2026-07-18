@@ -31,6 +31,9 @@ $sidebar_lang = $is_mm ? [
     'view' => 'ကြည့်ရန်',
     'close' => 'ပိတ်ရန်',
     'mark_read' => 'ဖတ်ပြီးဟု မှတ်ပါ',
+    'mark_unread' => 'မဖတ်ရသေးဟု မှတ်ပါ',
+    'delete' => 'ဖျက်ရန်',
+    'confirm_delete' => 'ဤစာတိုကို ဖျက်မည်ဆိုသည်ကို သေချာပါသလား?',
 ] : [
     'dashboard' => 'Dashboard',
     'schemes' => 'Schemes',
@@ -52,12 +55,41 @@ $sidebar_lang = $is_mm ? [
     'view' => 'View',
     'close' => 'Close',
     'mark_read' => 'Mark as Read',
+    'mark_unread' => 'Mark as Unread',
+    'delete' => 'Delete',
+    'confirm_delete' => 'Are you sure you want to delete this message?',
 ];
 
 // Handle mark single message as read
 if (isset($_GET['action']) && $_GET['action'] === 'mark_read' && isset($_GET['id'])) {
     $msg_id = intval($_GET['id']);
     $stmt = $conn->prepare("UPDATE contact_messages SET is_read = 1 WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $msg_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+    header("Location: messages.php?lang=" . $lang_param);
+    exit();
+}
+
+// Handle mark single message as unread
+if (isset($_GET['action']) && $_GET['action'] === 'mark_unread' && isset($_GET['id'])) {
+    $msg_id = intval($_GET['id']);
+    $stmt = $conn->prepare("UPDATE contact_messages SET is_read = 0 WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $msg_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+    header("Location: messages.php?lang=" . $lang_param);
+    exit();
+}
+
+// Handle delete single message
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $msg_id = intval($_GET['id']);
+    $stmt = $conn->prepare("DELETE FROM contact_messages WHERE id = ?");
     if ($stmt) {
         $stmt->bind_param("i", $msg_id);
         $stmt->execute();
@@ -107,6 +139,11 @@ $messages = $conn->query("SELECT * FROM contact_messages ORDER BY created_at DES
         .badge-new { background: #22c55e; color: #fff; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 600; margin-left: 6px; }
         .btn-mark-read { background: #006D69; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
         .btn-mark-read:hover { background: #005753; }
+        .btn-unread { background: #f59e0b; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+        .btn-unread:hover { background: #d97706; }
+        .btn-delete { background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+        .btn-delete:hover { background: #dc2626; }
+        .msg-actions { display: flex; gap: 8px; margin-top: 10px; }
         .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         /* Dark Mode */
@@ -130,6 +167,10 @@ $messages = $conn->query("SELECT * FROM contact_messages ORDER BY created_at DES
         html.dark-mode .msg-date { color: #64748b; }
         html.dark-mode .msg-body { border-top-color: #334155; color: #cbd5e1; }
         html.dark-mode .msg-meta { color: #64748b; }
+        html.dark-mode .btn-unread { background: #d97706; }
+        html.dark-mode .btn-unread:hover { background: #b45309; }
+        html.dark-mode .btn-delete { background: #dc2626; }
+        html.dark-mode .btn-delete:hover { background: #b91c1c; }
         html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
         html.dark-mode .bottom-links a { color: #94a3b8; }
     </style>
@@ -169,6 +210,14 @@ $messages = $conn->query("SELECT * FROM contact_messages ORDER BY created_at DES
                                 <?php if ($msg['student_id']): ?>
                                     <span>🎓 Student ID: <?php echo $msg['student_id']; ?></span>
                                 <?php endif; ?>
+                            </div>
+                            <div class="msg-actions">
+                                <?php if (!$msg['is_read']): ?>
+                                    <a href="messages.php?action=mark_read&id=<?php echo $msg['id']; ?>&lang=<?php echo $lang_param; ?>" class="btn-mark-read"><?php echo $sidebar_lang['mark_read']; ?></a>
+                                <?php else: ?>
+                                    <a href="messages.php?action=mark_unread&id=<?php echo $msg['id']; ?>&lang=<?php echo $lang_param; ?>" class="btn-unread"><?php echo $sidebar_lang['mark_unread']; ?></a>
+                                <?php endif; ?>
+                                <a href="messages.php?action=delete&id=<?php echo $msg['id']; ?>&lang=<?php echo $lang_param; ?>" class="btn-delete" onclick="return confirm('<?php echo $sidebar_lang['confirm_delete']; ?>')"><?php echo $sidebar_lang['delete']; ?></a>
                             </div>
                         </div>
                     </div>

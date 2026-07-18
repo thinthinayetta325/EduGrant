@@ -101,7 +101,7 @@ else {
         // Fetch detailed applicant information for review layout
         $query_fetch = "SELECT a.application_no, a.family_income, a.apply_date,
                                a.father_occupation, a.mother_occupation, a.grade_10_marks,
-                               a.num_siblings, a.house_photo, a.reason,
+                               a.num_siblings, a.house_photo, a.household_registration, a.reason,
                                s.name AS student_name, s.roll_no, s.email AS student_email,
                                sc.scheme_name, sc.amount
                         FROM applications a 
@@ -114,7 +114,7 @@ else {
             $stmt->execute();
             
             // Safe manual data binding sequence (Avoids get_result driver crashes)
-            $stmt->bind_result($app_no, $fam_income, $apply_date, $father_occ, $mother_occ, $grade10, $siblings, $house_photo, $reason, $student_name, $roll_no, $student_email, $scheme_name, $amount);
+            $stmt->bind_result($app_no, $fam_income, $apply_date, $father_occ, $mother_occ, $grade10, $siblings, $house_photo, $household_registration, $reason, $student_name, $roll_no, $student_email, $scheme_name, $amount);
             
             if (!$stmt->fetch()) {
                 // If ID is completely missing or invalid, route back to safety
@@ -217,6 +217,12 @@ else {
             <div>
                 <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">House Photo</span>
                 <img src="../uploads/house_photos/<?= htmlspecialchars($house_photo) ?>" alt="House Photo" class="mt-1 rounded-xl border border-slate-200 max-h-48 object-cover">
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($household_registration)): ?>
+            <div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Household Registration List</span>
+                <img src="../uploads/household_registration/<?= htmlspecialchars($household_registration) ?>" alt="Household Registration" class="mt-1 rounded-xl border border-slate-200 max-h-48 object-cover">
             </div>
             <?php endif; ?>
             <?php if (!empty($reason)): ?>

@@ -20,7 +20,7 @@ $stmt = $conn->prepare("
     SELECT a.application_no, a.family_income, a.apply_date, a.status,
            a.payment_status, a.approved_at,
            a.father_occupation, a.mother_occupation, a.grade_10_marks,
-           a.num_siblings, a.house_photo, a.reason,
+           a.num_siblings, a.house_photo, a.household_registration, a.reason,
            s.name AS student_name, s.roll_no, s.email AS student_email,
            sc.scheme_name, sc.amount
     FROM applications a
@@ -156,7 +156,10 @@ if ($app['status'] === 'Rejected') {
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Payment Status</label>
-                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['payment_status'] ?? 'Pending') ?></p>
+                    <?php $p_status = $app['payment_status'] ?? 'Pending'; ?>
+                    <span class="inline-block px-3 py-1 rounded-full text-sm font-bold <?= $p_status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">
+                        <?= htmlspecialchars($p_status) ?>
+                    </span>
                 </div>
 
                 <div>
@@ -183,6 +186,13 @@ if ($app['status'] === 'Rejected') {
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">House Photo</label>
                     <img src="../uploads/house_photos/<?= htmlspecialchars($app['house_photo']) ?>" alt="House Photo" class="mt-2 rounded-xl border border-slate-200 max-h-64 object-cover">
+                </div>
+                <?php endif; ?>
+
+                <?php if (!empty($app['household_registration'])): ?>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Household Registration List</label>
+                    <img src="../uploads/household_registration/<?= htmlspecialchars($app['household_registration']) ?>" alt="Household Registration" class="mt-2 rounded-xl border border-slate-200 max-h-64 object-cover">
                 </div>
                 <?php endif; ?>
 

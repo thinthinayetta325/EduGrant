@@ -195,8 +195,8 @@ if ($is_mm) {
             ?>
             <?php
                 $scholarships_link = $is_logged_in ? 'scholarships.php' : 'scholarships.php';
-                $status_link = $is_logged_in ? 'status.php' : '../common/status.php';
-                $contact_link = $is_logged_in ? 'contact.php' : '../common/contact.php';
+                $status_link = $is_logged_in ? 'status.php' : '../user/status.php';
+                $contact_link = $is_logged_in ? 'contact.php' : '../user/contact.php';
             ?>
             <nav class="hidden md:flex items-center gap-6 text-sm font-medium" style="flex-shrink:1; min-width:0; <?php echo $is_mm ? 'font-size:13px; gap:5px;' : ''; ?>">
                 <a href="index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active(['index.php','home.php']) ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_home']; ?></a>
