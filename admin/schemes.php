@@ -224,7 +224,7 @@ $current_page = 'schemes';
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>No.</th>
                         <th>Image</th>
                         <th>Scheme Name</th>
                         <th>Amount (MMK)</th>
@@ -235,9 +235,9 @@ $current_page = 'schemes';
                 </thead>
                 <tbody>
                     <?php if ($schemes && $schemes->num_rows > 0): ?>
-                        <?php while ($row = $schemes->fetch_assoc()): ?>
+                        <?php $no = 1; while ($row = $schemes->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $no++; ?></td>
                                 <td>
                                     <?php if (!empty($row['image'])): ?>
                                         <img src="../uploads/schemes/<?php echo htmlspecialchars($row['image']); ?>" style="width:50px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #e2e8f0;">
@@ -340,7 +340,6 @@ $current_page = 'schemes';
                     <select name="status" id="edit-status" class="form-select">
                         <option value="Active">Active</option>
                         <option value="Closed">Closed</option>
-                        <option value="Draft">Draft</option>
                     </select>
                 </div>
             </div>

@@ -201,7 +201,7 @@ $current_page = 'recipients';
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>No.</th>
                         <th>Student</th>
                         <th>Roll No</th>
                         <th>Scheme</th>
@@ -212,9 +212,9 @@ $current_page = 'recipients';
                 </thead>
                 <tbody>
                     <?php if ($recipients && $recipients->num_rows > 0): ?>
-                        <?php while ($row = $recipients->fetch_assoc()): ?>
+                        <?php $no = 1; while ($row = $recipients->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $no++; ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['student_name']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['roll_no']); ?></td>
                                 <td><?php echo htmlspecialchars($row['scheme_name']); ?></td>

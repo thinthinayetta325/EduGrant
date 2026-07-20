@@ -9,9 +9,8 @@ $lang_param = $is_mm ? 'mm' : 'en';
 $student_data = ['name' => '', 'email' => ''];
 $form_success = '';
 $form_error = '';
-
-$contact_locked = false;
 $allowed_student = false;
+$contact_locked = false;
 
 if ($is_logged_in) {
     include '../config/db.php';
@@ -21,67 +20,53 @@ if ($is_logged_in) {
     $stmt->bind_param("i", $student_id);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
-    $student_data = $res ? ['name' => $res['name'], 'email' => $res['email']] : ['name' => '', 'email' => ''];
     $stmt->close();
 
-    $allowed_student = (isset($student_data['name']) && strtolower(trim($student_data['name'])) === 'mya mya');
-
-    if ($allowed_student) {
-        $lock_check = $conn->prepare("SELECT student_id FROM contact_locks WHERE student_id != ? LIMIT 1");
-        $lock_check->bind_param("i", $student_id);
-        $lock_check->execute();
-        $lock_result = $lock_check->get_result();
-        $lock_check->close();
-
-        if ($lock_result->num_rows > 0) {
-            $contact_locked = true;
-        } else {
-            $contact_locked = false;
-            $upsert = $conn->prepare("INSERT INTO contact_locks (student_id, locked_at) VALUES (?, NOW()) ON DUPLICATE KEY UPDATE locked_at = NOW()");
-            $upsert->bind_param("i", $student_id);
-            $upsert->execute();
-            $upsert->close();
-        }
-    } else {
-        $lock_check = $conn->prepare("SELECT student_id FROM contact_locks LIMIT 1");
-        $lock_check->execute();
-        $lock_result = $lock_check->get_result();
-        $lock_check->close();
-        $contact_locked = ($lock_result->num_rows > 0);
+    if (!$res) {
+        session_destroy();
+        header("Location: ../auth/login.php?error=" . urlencode("Your account was not found. Please register and login again."));
+        exit();
     }
 
-    if ($allowed_student && !$contact_locked && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
-        $c_full_name = trim($_POST['full_name'] ?? '');
-        $c_email = trim($_POST['email'] ?? '');
-        $c_subject = trim($_POST['subject'] ?? '');
-        $c_message = trim($_POST['message'] ?? '');
+    $student_data = ['name' => $res['name'], 'email' => $res['email']];
+    $allowed_student = true;
 
-        if ($c_full_name !== '' && $c_email !== '' && $c_subject !== '' && $c_message !== '') {
-            $insert_msg = $conn->prepare("INSERT INTO contact_messages (student_id, full_name, email, subject, message) VALUES (?, ?, ?, ?, ?)");
-            if ($insert_msg) {
-                $insert_msg->bind_param("issss", $student_id, $c_full_name, $c_email, $c_subject, $c_message);
-                if ($insert_msg->execute()) {
-                    $insert_msg->close();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
+        if (!$is_logged_in || !$allowed_student) {
+            $form_error = $is_mm ? 'သင့်အား စာတိုပေးစာပို့ခွင့် မရှိပါ။' : 'You are not authorized to send messages.';
+        } elseif ($allowed_student) {
+            $c_full_name = $student_data['name'];
+            $c_email = $student_data['email'];
+            $c_subject = trim($_POST['subject'] ?? '');
+            $c_message = trim($_POST['message'] ?? '');
 
-                    $admin_id = 1;
-                    $notif_title = 'New Contact Message';
-                    $notif_msg = htmlspecialchars($c_full_name) . ' sent a message: ' . htmlspecialchars($c_subject);
-                    $insert_notif = $conn->prepare("INSERT INTO notifications (admin_id, title, message, type, is_read) VALUES (?, ?, ?, 'contact_message', 0)");
-                    if ($insert_notif) {
-                        $insert_notif->bind_param("iss", $admin_id, $notif_title, $notif_msg);
-                        $insert_notif->execute();
-                        $insert_notif->close();
+            if ($c_full_name !== '' && $c_email !== '' && $c_subject !== '' && $c_message !== '') {
+                $insert_msg = $conn->prepare("INSERT INTO contact_messages (student_id, full_name, email, subject, message) VALUES (?, ?, ?, ?, ?)");
+                if ($insert_msg) {
+                    $insert_msg->bind_param("issss", $student_id, $c_full_name, $c_email, $c_subject, $c_message);
+                    if ($insert_msg->execute()) {
+                        $insert_msg->close();
+
+                        $admin_id = 1;
+                        $notif_title = 'New Contact Message';
+                        $notif_msg = htmlspecialchars($c_full_name) . ' sent a message: ' . htmlspecialchars($c_subject);
+                        $insert_notif = $conn->prepare("INSERT INTO notifications (admin_id, title, message, type, is_read) VALUES (?, ?, ?, 'contact_message', 0)");
+                        if ($insert_notif) {
+                            $insert_notif->bind_param("iss", $admin_id, $notif_title, $notif_msg);
+                            $insert_notif->execute();
+                            $insert_notif->close();
+                        }
+
+                        $form_success = $is_mm ? 'သင့်စာတစ်စောင်ပို့ပြီးပါပြီ။' : 'Your message has been sent successfully!';
+                    } else {
+                        $form_error = $is_mm ? 'စာပို့ရာတွင် အမှားရှိနေပါသည်။' : 'Failed to send message. Please try again.';
                     }
-
-                    $form_success = $is_mm ? 'သင့်စာတစ်စောင်ပို့ပြီးပါပြီ။' : 'Your message has been sent successfully!';
                 } else {
                     $form_error = $is_mm ? 'စာပို့ရာတွင် အမှားရှိနေပါသည်။' : 'Failed to send message. Please try again.';
                 }
             } else {
-                $form_error = $is_mm ? 'စာပို့ရာတွင် အမှားရှိနေပါသည်။' : 'Failed to send message. Please try again.';
+                $form_error = $is_mm ? 'ကျေးဇူးပြု၍ အချက်အလက်အားလုံးကို ဖြည့်ပါ။' : 'Please fill in all fields.';
             }
-        } else {
-            $form_error = $is_mm ? 'ကျေးဇူးပြု၍ အချက်အလက်အားလုံးကို ဖြည့်ပါ။' : 'Please fill in all fields.';
         }
     }
 
@@ -195,11 +180,11 @@ if ($is_mm) {
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $c_lang['label_name']; ?></label>
-                            <input type="text" name="full_name" value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                            <input type="text" name="full_name" value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>" readonly required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none cursor-not-allowed">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $c_lang['label_email']; ?></label>
-                            <input type="email" name="email" value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>" required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none">
+                            <input type="email" name="email" value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>" readonly required class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none cursor-not-allowed">
                         </div>
                     </div>
 
@@ -240,7 +225,7 @@ if ($is_mm) {
                         ?>
                     </p>
                     <?php if (!$is_logged_in): ?>
-                    <a href="login.php?lang=<?php echo $lang_param; ?>" class="inline-block bg-[#006D69] hover:bg-[#005753] text-white font-bold text-sm px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition"><?php echo $is_mm ? 'အကောင့်ဝင်ရန်' : 'Log In'; ?></a>
+                    <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="inline-block bg-[#006D69] hover:bg-[#005753] text-white font-bold text-sm px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition"><?php echo $is_mm ? 'အကောင့်ဝင်ရန်' : 'Log In'; ?></a>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>

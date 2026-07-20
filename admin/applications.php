@@ -292,6 +292,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
             <table class="admin-table">
                 <thead>
                     <tr>
+                        <th>No.</th>
                         <th>App No</th>
                         <th>Student</th>
                         <th>Roll No</th>
@@ -304,7 +305,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                 </thead>
                 <tbody>
                     <?php if ($apps && $apps->num_rows > 0): ?>
-                        <?php while ($row = $apps->fetch_assoc()): ?>
+                        <?php $no = 1; while ($row = $apps->fetch_assoc()): ?>
                             <?php
                             $stat = $row['status'];
                             $cls = 'badge-submitted';
@@ -314,6 +315,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                             elseif ($stat === 'Rejected') $cls = 'badge-rejected';
                             ?>
                             <tr>
+                                <td><?php echo $no++; ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['application_no']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['student_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['roll_no']); ?></td>
@@ -335,7 +337,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">No applications found.</td></tr>
+                        <tr><td colspan="9" style="text-align:center; padding:20px; color:#94a3b8;">No applications found.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

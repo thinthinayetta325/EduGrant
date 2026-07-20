@@ -230,7 +230,7 @@ $current_page = 'disbursements';
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>No.</th>
                         <th>Student</th>
                         <th>Scheme</th>
                         <th>Bank</th>
@@ -242,9 +242,9 @@ $current_page = 'disbursements';
                 </thead>
                 <tbody>
                     <?php if ($count > 0): ?>
-                        <?php while ($row = $disbursements->fetch_assoc()): ?>
+                        <?php $no = 1; while ($row = $disbursements->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $no++; ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['student_name']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['scheme_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['bank_name'] ?? 'N/A'); ?></td>

@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS schemes (
     scheme_name VARCHAR(100) NOT NULL,
     amount  VARCHAR(100) NOT NULL,
     deadline DATE,
-    status ENUM('Active','Closed','Draft') DEFAULT 'Active',
+    status ENUM('Active','Closed') DEFAULT 'Active',
     description TEXT,
     eligibility TEXT,
     image VARCHAR(255) DEFAULT NULL,
@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS applications (
     apply_date DATE,
     status ENUM(
         'Submitted',
-        'Under Review',
         'Recommended',
         'Approved',
         'Rejected'
@@ -45,7 +44,6 @@ CREATE TABLE IF NOT EXISTS applications (
     approved_by INT,
     approved_at TIMESTAMP NULL,
     payment_status	enum('Pending', 'Paid'),
-    receipt_file	varchar(255),
     father_occupation VARCHAR(100),
     mother_occupation VARCHAR(100),
     grade_10_marks DECIMAL(5,2),

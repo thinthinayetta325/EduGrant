@@ -213,39 +213,22 @@ $current_page = 'applications';
     <div class="dashboard-body">
 
         <?php if ($app['status'] !== 'Approved' && $app['status'] !== 'Rejected'): ?>
-        <div style="background:#fffbe6;border:2px solid #FFD700;border-radius:12px;padding:20px 24px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                <div style="width:42px;height:42px;background:linear-gradient(135deg,#FFD700,#f59e0b);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">⚖️</div>
-                <div>
-                    <h3 style="font-size:15px;font-weight:700;color:#004D4A;margin:0;">Admin Decision</h3>
-                    <p style="font-size:11px;color:var(--text-secondary);margin:2px 0 0 0;">Approve or reject this application</p>
-                </div>
+        <div style="background:#fffbe6;border:2px solid #FFD700;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.04);flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:16px;">⚖️</span>
+                <span style="font-size:13px;font-weight:700;color:#004D4A;">Admin Decision</span>
             </div>
-            <div style="display:flex;gap:10px;align-items:flex-start;">
-                <form method="POST" action="applications.php" style="flex:1;">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <form method="POST" action="applications.php" style="display:inline;">
                     <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
                     <input type="hidden" name="redirect_user" value="1">
-                    <button type="submit" name="action" value="approve" class="btn-primary" style="width:100%;justify-content:center;" onclick="return confirm('Approve this application?')">✓ Approve</button>
+                    <button type="submit" name="action" value="approve" class="btn-primary" style="padding:6px 14px;font-size:11px;" onclick="return confirm('Approve this application?')">✓ Approve</button>
                 </form>
-                <div style="flex:1;" id="rejectSection">
-                    <button type="button" class="btn-red" style="width:100%;justify-content:center;" onclick="document.getElementById('rejectTextarea').classList.toggle('hidden');">✕ Reject</button>
-                    <div id="rejectTextarea" class="hidden" style="margin-top:10px;max-width:280px;">
-                        <p style="font-size:12px;color:#64748b;margin:0 0 8px 0;">Please provide a reason for rejection.</p>
-                        <form method="POST" action="applications.php">
-                            <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
-                            <input type="hidden" name="redirect_user" value="1">
-                            <textarea name="reject_reason" rows="3" required
-                                style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;"
-                                placeholder="Enter rejection reason..."></textarea>
-                            <div style="display:flex;gap:8px;margin-top:8px;">
-                                <button type="button" onclick="document.getElementById('rejectTextarea').classList.add('hidden');"
-                                    style="flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;">Cancel</button>
-                                <button type="submit" name="action" value="reject"
-                                    style="flex:1;padding:8px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Confirm Reject</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <form method="POST" action="applications.php" style="display:inline;" onsubmit="var r=prompt('Enter rejection reason:');if(!r){return false;}this.insertAdjacentHTML('beforeend','<input type=hidden name=reject_reason value='+encodeURIComponent(r)+'>');">
+                    <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
+                    <input type="hidden" name="redirect_user" value="1">
+                    <button type="submit" name="action" value="reject" class="btn-red" style="padding:6px 14px;font-size:11px;">✕ Reject</button>
+                </form>
             </div>
         </div>
         <?php endif; ?>

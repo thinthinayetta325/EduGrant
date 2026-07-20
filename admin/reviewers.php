@@ -198,7 +198,7 @@ $current_page = 'reviewers';
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>No.</th>
                         <th>Name</th>
                         <th>Department</th>
                         <th>Email</th>
@@ -208,9 +208,9 @@ $current_page = 'reviewers';
                 </thead>
                 <tbody>
                     <?php if ($reviewers && $reviewers->num_rows > 0): ?>
-                        <?php while ($row = $reviewers->fetch_assoc()): ?>
+                        <?php $no = 1; while ($row = $reviewers->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $row['id']; ?></td>
+                                <td><?php echo $no++; ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($row['department'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($row['email']); ?></td>

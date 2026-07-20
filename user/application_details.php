@@ -124,14 +124,29 @@ if ($app['status'] === 'Rejected') {
         </div>
         <?php endif; ?>
 
-        <!-- Application Info Card -->
+        <!-- Combined Application & Student Info Card -->
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
 
             <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
-                <h2 class="text-lg font-bold text-slate-800">Application Information</h2>
+                <h2 class="text-lg font-bold text-slate-800">Application & Student Information</h2>
             </div>
 
             <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Student Name</label>
+                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['student_name']) ?></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Roll Number</label>
+                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['roll_no']) ?></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email</label>
+                    <p class="text-lg font-semibold text-slate-900 break-all"><?= htmlspecialchars($app['student_email']) ?></p>
+                </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Application No</label>
@@ -141,6 +156,14 @@ if ($app['status'] === 'Rejected') {
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Apply Date</label>
                     <p class="text-lg font-semibold text-slate-900"><?= date("d M Y", strtotime($app['apply_date'])) ?></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Payment Status</label>
+                    <?php $p_status = $app['payment_status'] ?? 'Pending'; ?>
+                    <span class="inline-block px-3 py-1 rounded-full text-sm font-bold <?= $p_status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">
+                        <?= htmlspecialchars($p_status) ?>
+                    </span>
                 </div>
 
                 <div class="md:col-span-2">
@@ -155,11 +178,8 @@ if ($app['status'] === 'Rejected') {
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Payment Status</label>
-                    <?php $p_status = $app['payment_status'] ?? 'Pending'; ?>
-                    <span class="inline-block px-3 py-1 rounded-full text-sm font-bold <?= $p_status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">
-                        <?= htmlspecialchars($p_status) ?>
-                    </span>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Total 10th Grade Marks</label>
+                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['grade_10_marks'] ?? '-') ?></p>
                 </div>
 
                 <div>
@@ -170,11 +190,6 @@ if ($app['status'] === 'Rejected') {
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Mother's Occupation</label>
                     <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['mother_occupation'] ?? '-') ?></p>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Total 10th Grade Marks</label>
-                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['grade_10_marks'] ?? '-') ?></p>
                 </div>
 
                 <div>
@@ -207,33 +222,6 @@ if ($app['status'] === 'Rejected') {
                     <p class="text-lg font-semibold text-slate-900"><?= date("d M Y H:i", strtotime($app['approved_at'])) ?></p>
                 </div>
                 <?php endif; ?>
-
-            </div>
-        </div>
-
-        <!-- Student Info Card -->
-        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-
-            <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
-                <h2 class="text-lg font-bold text-slate-800">Student Information</h2>
-            </div>
-
-            <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-6">
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Name</label>
-                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['student_name']) ?></p>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Roll Number</label>
-                    <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($app['roll_no']) ?></p>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email</label>
-                    <p class="text-lg font-semibold text-slate-900 break-all"><?= htmlspecialchars($app['student_email']) ?></p>
-                </div>
 
             </div>
         </div>

@@ -51,6 +51,20 @@ if ($is_mm) {
         $conn = new mysqli("localhost", "root", "", "grant_portal");
         if (!$conn->connect_error) {
             $student_id = $_SESSION['student_id'];
+
+            $validate = $conn->prepare("SELECT id FROM student WHERE id = ?");
+            if ($validate) {
+                $validate->bind_param("i", $student_id);
+                $validate->execute();
+                $v_result = $validate->get_result();
+                $validate->close();
+                if ($v_result->num_rows === 0) {
+                    session_destroy();
+                    header("Location: ../auth/login.php?error=" . urlencode("Your account was not found. Please register and login again."));
+                    exit();
+                }
+            }
+
             $count_query = $conn->prepare("SELECT COUNT(*) AS unread FROM notifications WHERE student_id = ? AND is_read = 0");
             if ($count_query) {
                 $count_query->bind_param("i", $student_id);

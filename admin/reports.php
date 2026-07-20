@@ -274,7 +274,7 @@ $current_page = 'reports';
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>No.</th>
                         <th>Student</th>
                         <th>Roll No</th>
                         <th>Scheme</th>
@@ -287,9 +287,9 @@ $current_page = 'reports';
                 </thead>
                 <tbody>
                     <?php if ($disbursements && $disbursements->num_rows > 0): ?>
-                        <?php while ($d = $disbursements->fetch_assoc()): ?>
+                        <?php $no = 1; while ($d = $disbursements->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $d['id']; ?></td>
+                                <td><?php echo $no++; ?></td>
                                 <td><strong><?php echo htmlspecialchars($d['student_name']); ?></strong></td>
                                 <td><?php echo htmlspecialchars($d['roll_no'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($d['scheme_name']); ?></td>
