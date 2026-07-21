@@ -198,10 +198,11 @@ $current_page = 'disbursements';
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div>
                     <h2 class="card-title">💵 <?php echo $sidebar_lang['page_title']; ?></h2>
-                    <!-- <p class="card-subtitle"><?php echo $is_mm ? 'ငွေထုတ်ပေးမှုမှတ်တမ်း' : 'Disbursements Log'; ?></p> -->
                 </div>
-               
-                <button class="btn-green-sm" onclick="openModal('addModal')">+ New Disbursement</button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="text" id="liveSearch" class="form-input" placeholder="🔍 Search name, scheme..." style="width:220px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;margin-bottom:0;" autocomplete="off">
+                    <button class="btn-green-sm" onclick="openModal('addModal')">+ New Disbursement</button>
+                </div>
             </div>
 
             <?php
@@ -328,6 +329,16 @@ $current_page = 'disbursements';
 </div>
 
 <script>
+document.getElementById('liveSearch').addEventListener('input', function() {
+    var query = this.value.toLowerCase();
+    var rows = document.querySelectorAll('.admin-table tbody tr');
+    rows.forEach(function(row) {
+        if (row.querySelector('td[colspan]')) return;
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+});
+
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 document.querySelectorAll('.modal-overlay').forEach(el => {

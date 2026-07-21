@@ -282,11 +282,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                 <a href="applications.php?status=Approved&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Approved' ? 'active' : ''; ?>">Approved</a>
                 <a href="applications.php?status=Rejected&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
                 <div style="flex-grow:1;"></div>
-                <form method="GET" style="display:flex; gap:8px;">
-                    <input type="hidden" name="lang" value="<?php echo $lang_param; ?>">
-                    <input type="text" name="search" class="form-input" placeholder="Search name or ID..." value="<?php echo htmlspecialchars($search); ?>" style="width:200px;">
-                    <button type="submit" class="btn-blue-sm">🔍 Search</button>
-                </form>
+                <input type="text" id="liveSearch" class="form-input" placeholder="🔍 Search name or ID..." style="width:200px;" autocomplete="off">
             </div>
 
             <table class="admin-table">
@@ -347,6 +343,18 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
 
     
 </div>
+
+<script>
+document.getElementById('liveSearch').addEventListener('input', function() {
+    var query = this.value.toLowerCase();
+    var rows = document.querySelectorAll('.admin-table tbody tr');
+    rows.forEach(function(row) {
+        if (row.querySelector('td[colspan]')) return;
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+});
+</script>
 
 </body>
 </html>

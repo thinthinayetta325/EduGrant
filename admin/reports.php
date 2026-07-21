@@ -318,6 +318,16 @@ $current_page = 'reports';
 </div>
 
 <script>
+document.getElementById('liveSearch').addEventListener('input', function() {
+    var query = this.value.toLowerCase();
+    var rows = document.querySelectorAll('#disbursements-section .admin-table tbody tr');
+    rows.forEach(function(row) {
+        if (row.querySelector('td[colspan]')) return;
+        var text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+});
+
 function printDisbursements() {
     var content = document.getElementById('disbursements-section').innerHTML;
     var printWindow = window.open('', '_blank');

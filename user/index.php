@@ -51,6 +51,10 @@ if (isset($is_mm) && $is_mm) {
         'story_1_desc' => 'ပညာရေး ရည်မှန်းချက်များ အောင်မြင်စေရန်အတွက် ကျောင်းသားများကို ငွေကြေးနှင့် အရင်းအမြစ်များဖြင့် ပံ့ပိုးပေးခြင်း။',
         'story_2_title' => 'ဘွဲ့ရရှိခြင်း အောင်မြင်မှု',
         'story_2_desc' => 'ပညာရေးခရီးလမ်းကို အောင်မြင်စွာ ဖြတ်သန်းခဲ့ကြသော ပညာသင်ဆုရ ကျောင်းသားများကို ဂုဏ်ပြုခြင်း။',
+        'story_3_title' => 'လူထုဦးဆောင်မှု',
+        'story_3_desc' => 'ပညာသင်ဆုရ ကျောင်းသားများက မိမ့်ကျေးရွာများတွင် ပြန်လည်ပေးဆပ်ခြင်းနှင့် ဦးဆောင်ခြင်း။',
+        'story_4_title' => 'သုတေသနတီထွင်မှု',
+        'story_4_desc' => 'ပညာသင်ဆုကျောင်းသားများ၏ တီထွင်ဖန်တီးမှုနှင့် သုတေသနပြုချက်များကို မြှင့်တင်ခြင်း။',
         'sub_title' => 'အချက်အလက်များကို အမြဲသိရှိနေပါ',
         'sub_desc' => 'ပညာသင်ဆုအသစ်များအကြောင်း သိရှိရန် စာရင်းသွင်းပါ။',
         'sub_placeholder' => 'သင့်အီးမေးလ်ကို ထည့်ပါ',
@@ -91,6 +95,10 @@ if (isset($is_mm) && $is_mm) {
         'story_1_desc' => 'Empowering students with resources and financial support to achieve their educational goals.',
         'story_2_title' => 'Graduation Achievement',
         'story_2_desc' => 'Celebrating scholarship recipients who successfully completed their academic journey.',
+        'story_3_title' => 'Community Leadership',
+        'story_3_desc' => 'Scholarship recipients giving back and leading initiatives in their local communities.',
+        'story_4_title' => 'Research Innovation',
+        'story_4_desc' => 'Promoting groundbreaking research and innovation driven by scholarship students.',
         'sub_title' => 'Stay Informed',
         'sub_desc' => 'Subscribe to receive updates about new scholarships.',
         'sub_placeholder' => 'Enter your email',
@@ -136,47 +144,27 @@ $images = [
         <?php endforeach; ?>
     </div>
 
-    <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-12 py-20">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div class="text-slate-900">
-                <span
-                    class="inline-block text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
-                    <?php echo $page_lang['badge']; ?>
-                </span>
-                <h1 class="mt-4 text-4xl sm:text-5xl md:text-5xl font-bold" style="line-height:1.4;">
-                    <?php echo $page_lang['hero_title']; ?>
-                </h1>
-                <p class="mt-4 text-white max-w-xl text-lg">
-                    <?php echo $page_lang['hero_desc']; ?>
-                </p>
-                <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                    <!-- Redirects unauthenticated guest users to Register -->
-                    <a href="/grant_portal/auth/register.php"
-                        class="bg-[#004D4A] hover:bg-[#003D3B] text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition text-center">
-                        <?php echo $page_lang['btn_apply']; ?>
-                    </a>
-                    <a href="/grant_portal/auth/register.php"
-                        class="bg-[#fffff] border border-slate-300  text-white px-8 py-3 rounded-lg transition text-center">
-                        <?php echo $page_lang['btn_view']; ?>
-                    </a>
-                </div>
-            </div>
-
-            <div>
-                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
-                    <img id="heroImage" src="<?php echo $images[0]; ?>"
-                        class="w-full h-72 md:h-96 object-cover transition-all duration-700">
-                    <div class="p-5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center">🏅</div>
-                            <div>
-                                <h3 class="font-semibold text-slate-800"><?php echo $page_lang['grant_title']; ?></h3>
-                                <p class="text-slate-500 text-sm"><?php echo $page_lang['grant_status']; ?></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="relative z-20 max-w-4xl mx-auto px-6 lg:px-12 py-40 text-center">
+        <span
+            class="inline-block text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
+            <?php echo $page_lang['badge']; ?>
+        </span>
+        <h1 class="mt-4 text-4xl sm:text-5xl md:text-5xl font-bold text-slate-900" style="line-height:1.4;">
+            <?php echo $page_lang['hero_title']; ?>
+        </h1>
+        <p class="mt-4 text-white max-w-2xl mx-auto text-lg">
+            <?php echo $page_lang['hero_desc']; ?>
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <!-- Redirects unauthenticated guest users to Register -->
+            <a href="/grant_portal/auth/register.php"
+                class="bg-[#004D4A] hover:bg-[#003D3B] text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition text-center">
+                <?php echo $page_lang['btn_apply']; ?>
+            </a>
+            <a href="/grant_portal/auth/register.php"
+                class="btn-sweep border border-slate-300 font-semibold text-slate-100 px-8 py-3 rounded-lg text-center">
+                <?php echo $page_lang['btn_view']; ?>
+            </a>
         </div>
     </div>
 </section>
@@ -230,38 +218,68 @@ $images = [
 </section>
 
 <!-- impact section -->
-<section id="impact-section" class="px-6 lg:px-12 py-16 bg-slate-100">
+<section id="impact-section" class="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
     <div class="max-w-7xl mx-auto text-center mb-10">
         <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['impact_title']; ?></h3>
     </div>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 max-w-7xl mx-auto">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
             <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="11870">0</div>
-            <p class="text-sm text-slate-500 mt-2 font-medium"><?php echo $page_lang['imp_students']; ?></p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_students']; ?></p>
         </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
             <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="42">0</div>
-            <p class="text-sm text-slate-500 mt-2 font-medium"><?php echo $page_lang['imp_countries']; ?></p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_countries']; ?></p>
         </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
             <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="8300000">0</div>
-            <p class="text-sm text-slate-500 mt-2 font-medium"><?php echo $page_lang['imp_funds']; ?></p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_funds']; ?></p>
         </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
             <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="23">0</div>
-            <p class="text-sm text-slate-500 mt-2 font-medium"><?php echo $page_lang['imp_partners']; ?></p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_partners']; ?></p>
         </div>
     </div>
 </section>
 
 <!-- success stories -->
-<section class="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
+<style>
+    .story-card { opacity: 0; transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+    .story-card.from-left { transform: translateX(-60px); }
+    .story-card.from-right { transform: translateX(60px); }
+    .story-card.visible { opacity: 1; transform: translateX(0); }
+
+    .btn-sweep {
+        position: relative;
+        overflow: hidden;
+        transition: color 0.4s;
+        z-index: 1;
+    }
+    .btn-sweep::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: #003D3B;
+        transition: width 0.4s ease;
+        z-index: -1;
+    }
+    .btn-sweep:hover::before {
+        width: 100%;
+    }
+    .btn-sweep:hover {
+        border-color: #003D3B;
+    }
+</style>
+<section id="stories-section" class="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
     <div class="mb-10">
         <h3 class="text-2xl font-bold text-slate-900"><?php echo $page_lang['story_title']; ?></h3>
         <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_desc']; ?></p>
     </div>
-    <div class="grid md:grid-cols-2 gap-8">
-        <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="story-card from-left bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
             <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200"
                 class="w-full h-64 object-cover">
             <div class="p-6">
@@ -269,12 +287,28 @@ $images = [
                 <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_1_desc']; ?></p>
             </div>
         </div>
-        <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+        <div class="story-card from-left bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
             <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=1200"
                 class="w-full h-64 object-cover">
             <div class="p-6">
                 <h4 class="font-bold text-xl text-slate-800"><?php echo $page_lang['story_2_title']; ?></h4>
                 <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_2_desc']; ?></p>
+            </div>
+        </div>
+        <div class="story-card from-right bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+            <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200"
+                class="w-full h-64 object-cover">
+            <div class="p-6">
+                <h4 class="font-bold text-xl text-slate-800"><?php echo $page_lang['story_3_title']; ?></h4>
+                <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_3_desc']; ?></p>
+            </div>
+        </div>
+        <div class="story-card from-right bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+            <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1200"
+                class="w-full h-64 object-cover">
+            <div class="p-6">
+                <h4 class="font-bold text-xl text-slate-800"><?php echo $page_lang['story_4_title']; ?></h4>
+                <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_4_desc']; ?></p>
             </div>
         </div>
     </div>
@@ -355,6 +389,23 @@ const observer = new IntersectionObserver((entries) => {
 });
 
 observer.observe(impactSection);
+
+const storyCards = document.querySelectorAll('.story-card');
+const storiesSection = document.getElementById('stories-section');
+let storiesAnimated = false;
+
+const storyObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !storiesAnimated) {
+        storyCards.forEach((card, i) => {
+            setTimeout(() => {
+                card.classList.add('visible');
+            }, i * 150);
+        });
+        storiesAnimated = true;
+    }
+}, { threshold: 0.2 });
+
+storyObserver.observe(storiesSection);
 </script>
 
 <?php $conn->close(); ?>

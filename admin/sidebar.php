@@ -41,10 +41,15 @@ if (isset($conn) && $conn instanceof mysqli) {
         <li class="menu-label">Communication</li>
         <li class="menu-item <?php echo $current_page === 'messages' ? 'active' : ''; ?>"><a href="messages.php?lang=<?php echo $lang_param; ?>"><span class="icon">✉️</span> <?php echo $sidebar_lang['messages'] ?? 'Messages'; ?><?php if ($unread_messages > 0): ?><span class="badge-count"><?php echo $unread_messages; ?></span><?php endif; ?></a></li>
     </ul>
-    <div class="sidebar-footer border-spacing-4 rounded-xl">
+    <div class="sidebar-footer">
         <a href="../auth/logout.php" class="logout-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span><?php echo $sidebar_lang['logout'] ?? 'Logout'; ?></span>
+            <span class="logout-icon-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </span>
+            <span class="logout-text"><?php echo $sidebar_lang['logout'] ?? 'Logout'; ?></span>
+            <span class="logout-arrow">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
         </a>
     </div>
 </div>

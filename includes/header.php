@@ -131,6 +131,60 @@ if ($is_mm) {
         html.dark-mode body,
         html.dark-mode .min-h-screen { background: #0f172a; color: #e2e8f0; }
 
+        /* Profile Dropdown */
+        .profile-dropdown { position: relative; }
+        .profile-link {
+            display: flex; align-items: center; gap: 10px;
+            padding: 6px 12px 6px 6px;
+            background: #003D3B;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 40px;
+            text-decoration: none;
+            transition: 0.2s ease;
+        }
+        .profile-link:hover { background: #004D4A; border-color: rgba(255,255,255,0.25); }
+        .profile-image {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #006D69;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 14px;
+            overflow: hidden; border: 2px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
+        }
+        .profile-image img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-info { text-align: left; }
+        .profile-name { font-size: 13px; font-weight: 600; color: #fff; line-height: 1.2; }
+        .profile-role { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 400; }
+
+        .profile-dropdown-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05);
+            min-width: 200px;
+            opacity: 0; visibility: hidden; transform: translateY(-8px);
+            transition: 0.2s ease;
+            z-index: 1000; overflow: hidden;
+        }
+        .profile-dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .profile-dropdown-menu a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 16px; font-size: 13px;
+            color: #1e293b; text-decoration: none;
+            transition: 0.2s ease;
+        }
+        .profile-dropdown-menu a:hover { background: #f8fafc; }
+        .profile-dropdown-menu .menu-icon { width: 20px; text-align: center; color: #64748b; }
+        .profile-dropdown-menu hr { border: none; border-top: 1px solid #e2e8f0; margin: 4px 0; }
+        .profile-dropdown-menu a.logout-link { color: #dc2626; }
+        .profile-dropdown-menu a.logout-link:hover { background: #fef2f2; }
+
+        html.dark-mode .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
+        html.dark-mode .profile-dropdown-menu a { color: #f1f5f9; }
+        html.dark-mode .profile-dropdown-menu a:hover { background: #334155; }
+        html.dark-mode .profile-dropdown-menu hr { border-top-color: #334155; }
+
         html.dark-mode section.bg-slate-100 { background: #1e293b !important; }
 
         html.dark-mode .bg-white { background: #1e293b !important; }
@@ -187,8 +241,8 @@ if ($is_mm) {
 
 <div class="min-h-screen flex flex-col justify-between">
 
-    <header class="bg-[#006D69] px-4 sm:px-6 shadow-md z-50" style="position:fixed; top:0; left:0; right:0; height:64px; display:flex; align-items:center; overflow:hidden; width:100%; box-sizing:border-box; flex-shrink:0;">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 w-full" style="min-width:0;">
+    <header class="bg-[#006D69] shadow-md z-50" style="position:fixed; top:0; left:0; right:0; height:64px; display:flex; align-items:center; overflow:visible; width:100%; box-sizing:border-box; flex-shrink:0; padding: 0 16px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; width:100%; max-width:1280px; margin:0 auto; min-width:0;">
 
             <a href="index.php?lang=<?php echo $lang_param; ?>" class="flex-shrink-0 block hover:opacity-90 transition" style="min-width:0; max-width:180px;">
                 <div class="flex items-center gap-2.5">
@@ -221,9 +275,9 @@ if ($is_mm) {
 
             <div class="flex items-center flex-shrink-0 gap-3 sm:gap-4" style="max-width:340px;">
                 <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10 flex-shrink-0">
-                    <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-2 py-1 text-[11px] sm:text-xs font-semibold rounded transition text-center" style="min-width:36px; <?php echo !$is_mm ? 'color:white;background:rgba(255,255,255,0.2);' : 'color:#5eead4;'; ?>">ENG</a>
+                    <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-3 py-1 text-[11px] sm:text-xs font-semibold rounded transition text-center" style="min-width:50px; <?php echo !$is_mm ? 'color:white;background:rgba(255,255,255,0.2);' : 'color:#5eead4;'; ?>">ENG</a>
                     <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
-                    <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-2 py-1 text-[11px] sm:text-xs font-medium rounded transition text-center" style="min-width:50px; <?php echo $is_mm ? 'color:white;background:rgba(255,255,255,0.2);' : 'color:#5eead4;'; ?>">မြန်မာ</a>
+                    <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-3 py-1 text-[11px] sm:text-xs font-medium rounded transition text-center" style="min-width:50px; <?php echo $is_mm ? 'color:white;background:rgba(255,255,255,0.2);' : 'color:#5eead4;'; ?>">မြန်မာ</a>
                 </div>
 
                 <button class="theme-toggle flex-shrink-0" onclick="toggleTheme()" title="Toggle dark mode">
@@ -245,52 +299,57 @@ if ($is_mm) {
                             <?php endif; ?>
                         </a>
 
-                        <div class="relative" id="userProfileDropdown">
-                            <button onclick="var m=document.getElementById('userProfileMenu'); m.classList.toggle('hidden'); if(!m.classList.contains('hidden')){var r=m.getBoundingClientRect(); if(r.right>window.innerWidth)m.style.right='0',m.style.left='auto';}" class="flex items-center gap-2 bg-[#004D4A] hover:bg-[#003D3B] text-white pl-1.5 pr-3 py-1 rounded-full border border-teal-500/30 transition shadow-sm cursor-pointer">
-                                <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border border-white/20">
+                        <div class="profile-dropdown" id="userProfileDropdown">
+                            <button type="button" onclick="event.stopPropagation(); document.getElementById('userProfileMenu').classList.toggle('show');" class="profile-link">
+                                <div class="profile-image">
                                     <?php if (!empty($profile_image) && file_exists('../uploads/profile_pics/' . $profile_image)): ?>
-                                        <img src="../uploads/profile_pics/<?php echo $profile_image; ?>" alt="" class="w-full h-full object-cover">
+                                        <img src="../uploads/profile_pics/<?php echo $profile_image; ?>" alt="Profile">
                                     <?php else: ?>
-                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                        </svg>
+                                        <?php echo strtoupper(substr($user_name ?? 'U', 0, 1)); ?>
                                     <?php endif; ?>
                                 </div>
-                                <span class="text-xs sm:text-sm font-semibold ml-1 hidden sm:inline">
-                                    <?php echo htmlspecialchars($user_name ?? 'User'); ?>
-                                </span>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-teal-300">
+                                <div class="profile-info">
+                                    <div class="profile-name"><?php echo htmlspecialchars($user_name ?? 'User'); ?></div>
+                                    <div class="profile-role">Student</div>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: rgba(255,255,255,0.5);">
                                     <path d="m6 9 6 6 6-6"></path>
                                 </svg>
                             </button>
 
-                            <div id="userProfileMenu" class="hidden fixed right-4 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-[100]">
-                                <a href="profile.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
-                                    <svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                                    My Profile
-                                </a>
-                                <a href="my_applications.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
-                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <div id="userProfileMenu" class="profile-dropdown-menu">
+                                <a href="my_applications.php?lang=<?php echo $lang_param; ?>">
+                                    <span class="menu-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </span>
                                     My Applications
                                 </a>
-                                <hr class="my-1 border-slate-100">
-                                <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                <a href="profile.php?lang=<?php echo $lang_param; ?>">
+                                    <span class="menu-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                    </span>
+                                    Profile
+                                </a>
+                                <hr>
+                                <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="logout-link">
+                                    <span class="menu-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                            <polyline points="16 17 21 12 16 7"></polyline>
+                                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                                        </svg>
+                                    </span>
                                     Logout
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <script>
-                    document.addEventListener('click', function(e) {
-                        var dropdown = document.getElementById('userProfileDropdown');
-                        var menu = document.getElementById('userProfileMenu');
-                        if (dropdown && !dropdown.contains(e.target)) {
-                            menu.classList.add('hidden');
-                        }
-                    });
-                    </script>
                 <?php else: ?>
                     <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="bg-[#FFD700] text-[#004D4A] text-xs sm:text-sm font-bold px-3.5 sm:px-5 py-2 rounded-md hover:bg-slate-100 transition whitespace-nowrap flex-shrink-0" style="width:100px; text-align:center; <?php echo $is_mm ? 'font-size:12px;' : ''; ?>">
                         <?php echo $lang['btn_login']; ?>
@@ -303,3 +362,13 @@ if ($is_mm) {
         </div>
     </header>
     <div style="height:64px;"></div>
+
+    <script>
+    document.addEventListener('click', function(e) {
+        var dropdown = document.querySelector('.profile-dropdown');
+        var menu = document.getElementById('userProfileMenu');
+        if (dropdown && menu && !dropdown.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+    </script>
