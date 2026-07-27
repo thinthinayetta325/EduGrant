@@ -119,6 +119,15 @@ $where = "WHERE 1=1";
 if ($status_filter) $where .= " AND a.status = '$status_filter'";
 if ($search) $where .= " AND (s.name LIKE '%$search%' OR a.application_no LIKE '%$search%')";
 
+$per_page = 10;
+$page = isset($_GET['p']) ? max(1, (int)$_GET['p']) : 1;
+
+$count_result = $conn->query("SELECT COUNT(*) FROM (SELECT a.id FROM applications a JOIN student s ON a.student_id = s.id $where GROUP BY a.id) sub");
+$total_rows = $count_result->fetch_row()[0];
+$total_pages = max(1, ceil($total_rows / $per_page));
+if ($page > $total_pages) $page = $total_pages;
+$offset = ($page - 1) * $per_page;
+
 $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_name,
     GROUP_CONCAT(DISTINCT r.name SEPARATOR ', ') AS reviewer_name,
     GROUP_CONCAT(DISTINCT ar.recommendation SEPARATOR ', ') AS recommendation,
@@ -130,7 +139,8 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
     LEFT JOIN reviewers r ON ar.reviewer_id = r.id
     $where
     GROUP BY a.id
-    ORDER BY a.id DESC");
+    ORDER BY a.id DESC
+    LIMIT $per_page OFFSET $offset");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -251,6 +261,19 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
         html.dark-mode .notif-btn { background: #334155; border-color: #475569; }
         html.dark-mode .btn-outline { border-color: #475569; color: #94a3b8; }
         html.dark-mode .btn-outline:hover { background: #334155; }
+
+        /* Pagination */
+        .pagination-wrap { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:14px 0 4px; border-top:1px solid #f1f5f9; margin-top:10px; }
+        .pg-links { display:flex; gap:4px; align-items:center; }
+        .pg-btn { display:inline-flex; align-items:center; justify-content:center; min-width:32px; height:32px; padding:0 8px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px; font-weight:600; color:#475569; text-decoration:none; background:#fff; transition:0.15s; }
+        .pg-btn:hover { background:#f1f5f9; border-color:#cbd5e1; }
+        .pg-btn.active { background:#006D69; color:#fff; border-color:#006D69; pointer-events:none; }
+        .pg-dots { color:#94a3b8; font-size:12px; padding:0 2px; }
+        .pg-info { font-size:11px; color:#94a3b8; }
+        html.dark-mode .pagination-wrap { border-top-color:#334155; }
+        html.dark-mode .pg-btn { background:#1e293b; border-color:#334155; color:#94a3b8; }
+        html.dark-mode .pg-btn:hover { background:#334155; }
+        html.dark-mode .pg-btn.active { background:#10b981; border-color:#10b981; color:#fff; }
     </style>
      <?php include_once 'admin-style.php'; ?>
 </head>
@@ -301,7 +324,7 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                 </thead>
                 <tbody>
                     <?php if ($apps && $apps->num_rows > 0): ?>
-                        <?php $no = 1; while ($row = $apps->fetch_assoc()): ?>
+                        <?php $no = $offset + 1; while ($row = $apps->fetch_assoc()): ?>
                             <?php
                             $stat = $row['status'];
                             $cls = 'badge-submitted';
@@ -337,6 +360,51 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                     <?php endif; ?>
                 </tbody>
             </table>
+
+            <?php if ($total_pages > 1): ?>
+            <div class="pagination-wrap">
+                <?php
+                $base_params = http_build_query(array_filter([
+                    'lang'   => $lang_param,
+                    'status' => $status_filter ?: null,
+                    'search' => $search ?: null,
+                ]));
+
+                function pg_url($base_params, $p) {
+                    return '?' . $base_params . '&p=' . $p;
+                }
+                ?>
+                <span class="pg-info"><?php echo $total_rows; ?> total</span>
+                <div class="pg-links">
+                    <?php if ($page > 1): ?>
+                        <a href="<?php echo pg_url($base_params, 1); ?>" class="pg-btn" title="First">&laquo;</a>
+                        <a href="<?php echo pg_url($base_params, $page - 1); ?>" class="pg-btn" title="Prev">&lsaquo;</a>
+                    <?php endif; ?>
+
+                    <?php
+                    $start = max(1, $page - 2);
+                    $end   = min($total_pages, $page + 2);
+                    if ($start > 1): ?>
+                        <a href="<?php echo pg_url($base_params, 1); ?>" class="pg-btn">1</a>
+                        <?php if ($start > 2): ?><span class="pg-dots">...</span><?php endif; ?>
+                    <?php endif; ?>
+                    <?php for ($i = $start; $i <= $end; $i++): ?>
+                        <a href="<?php echo pg_url($base_params, $i); ?>" class="pg-btn <?php echo $i === $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                    <?php endfor; ?>
+                    <?php if ($end < $total_pages): ?>
+                        <?php if ($end < $total_pages - 1): ?><span class="pg-dots">...</span><?php endif; ?>
+                        <a href="<?php echo pg_url($base_params, $total_pages); ?>" class="pg-btn"><?php echo $total_pages; ?></a>
+                    <?php endif; ?>
+
+                    <?php if ($page < $total_pages): ?>
+                        <a href="<?php echo pg_url($base_params, $page + 1); ?>" class="pg-btn" title="Next">&rsaquo;</a>
+                        <a href="<?php echo pg_url($base_params, $total_pages); ?>" class="pg-btn" title="Last">&raquo;</a>
+                    <?php endif; ?>
+                </div>
+                <span class="pg-info">Page <?php echo $page; ?> of <?php echo $total_pages; ?></span>
+            </div>
+            <?php endif; ?>
+
         </div>
 
     </div>

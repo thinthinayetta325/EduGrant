@@ -32,11 +32,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $account_number = trim($_POST['account_number']);
     $account_holder = trim($_POST['account_holder']);
 
-    if (strlen($account_number) < 10 || strlen($account_number) > 17) {
-        $error_msg = $is_mm ? "ဘဏ်အကောင့်နံပါတ်သည် ဂဏန်း ၁၀ မှ ၁၇ ကြား ဖြစ်ရပါမည်။" : "Account number must be between 10 and 17 digits.";
-    } elseif (!preg_match('/^\d+$/', $account_number)) {
+    if (strlen($account_number) !== 16) {
+        $error_msg = $is_mm ? "ဘဏ်အကောင့်နံပါတ်သည် ဂဏန်း ၁၆ ဂဏန်း ဖြစ်ရပါမည်။" : "Account / Wallet Number must be exactly 16 digits.";
+    } elseif (!preg_match('/^\d{16}$/', $account_number)) {
         $error_msg = $is_mm ? "ဘဏ်အကောင့်နံပါတ်သည် ဂဏန်းများသာ ဖြစ်ရပါမည်။" : "Account number must contain only digits.";
-    } elseif (!empty($bank_name) && !empty($account_number) && !empty($account_holder)) {
+    } else {
+        // Fetch registered student name for comparison
+        $name_check = $conn->prepare("SELECT name FROM student WHERE id = ?");
+        $name_check->bind_param("i", $student_id);
+        $name_check->execute();
+        $reg_name = trim($name_check->get_result()->fetch_assoc()['name'] ?? '');
+        $name_check->close();
+
+        if (strcasecmp(trim($account_holder), $reg_name) !== 0) {
+            $error_msg = $is_mm
+                ? "အကောင့်ပိုင်ရှင်အမည်သည် စာရင်းသွင်းထားသည့် ကျောင်းသားအမည်နှင့် မတူညီပါ။ အမည် '$reg_name' ဖြစ်ရပါမည်။"
+                : "Account Holder name must match your registered student name. Your registered name is '$reg_name'.";
+        } elseif (!empty($bank_name) && !empty($account_number) && !empty($account_holder)) {
         // Check if records already exist for this student
         $check_query = $conn->prepare("SELECT id FROM bank_details WHERE student_id = ?");
         $check_query->bind_param("i", $student_id);
@@ -97,6 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $check_query->close();
     } else {
         $error_msg = $is_mm ? "ကျေးဇူးပြု၍ အကွက်အားလုံးကို ဖြည့်စွက်ပေးပါ။" : "Please fill in all required fields.";
+    }
     }
 }
 
@@ -313,7 +326,7 @@ $conn->close();
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
                         <?php echo $b_lang['label_number']; ?> <span class="text-rose-500">*</span>
                     </label>
-                    <input type="text" name="account_number" required minlength="10" maxlength="17" pattern="\d{10,17}"
+                    <input type="text" name="account_number" required minlength="16" maxlength="16" pattern="\d{16}"
                            placeholder="<?php echo htmlspecialchars($b_lang['placeholder_number']); ?>" 
                            value="<?php echo htmlspecialchars($bank_data['account_number'] ?? ''); ?>"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#006D69] focus:bg-white transition text-sm">

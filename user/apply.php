@@ -175,6 +175,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $error = $page_lang['error_income'];
 
+    } elseif (!ctype_digit($grade_10_marks) || $grade_10_marks[0] === '0') {
+
+        $error = $is_mm ? "စုစုပေါင်း ၁၀ တန်း ရမှတ်သည် ဂဏန်းများသာ ဖြစ်ရပြီး ဂဏန်း ၀ ဖြင့် မစတင်ရပါ။" : "Total 10th Grade Marks must contain only digits and must not start with zero.";
+
+    } elseif ((int)$grade_10_marks < 240 || (int)$grade_10_marks > 600) {
+
+        $error = $is_mm ? "စုစုပေါင်း ၁၀ တန်း ရမှတ်သည် ၂၄၀ မှ ၆၀၀ ကြား ဖြစ်ရပါမည်။" : "Total 10th Grade Marks must be between 240 and 600.";
+
     } else {
 
         /* Check Duplicate */
@@ -441,11 +449,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <?php endwhile; ?>
 
                     </select>
-                <?php endif; ?>
+        <?php endif; ?>
 
-            </div>
-
-            <!-- Family Income -->
+        <!-- Family Income -->
             <div>
 
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
@@ -497,13 +503,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?= $page_lang['label_grade10_marks'] ?>
                 </label>
                 <input
-                    type="number"
+                    type="text"
                     name="grade_10_marks"
-                    min="0"
+                    id="grade_10_marks"
+                    inputmode="numeric"
+                    pattern="[1-9][0-9]*"
+                    min="240"
                     max="600"
                     required
+                    oninput="this.value = this.value.replace(/^0+|[^0-9]/g, ''); const v=parseInt(this.value); if(v>600) this.value='600'; document.getElementById('marksMsg').classList.toggle('hidden', this.value===''||(!isNaN(v)&&v>=240));"
                     placeholder="<?= $page_lang['placeholder_grade10_marks'] ?>"
                     class="w-full border border-slate-200 rounded-xl px-4 py-3">
+                <p id="marksMsg" class="text-xs font-semibold text-red-500 mt-1 hidden">Min: 240 – Max: 600</p>
             </div>
 
             <!-- Number of Siblings -->
@@ -568,6 +579,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </button>
 
         </form>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const m = document.getElementById('grade_10_marks');
+    const v = parseInt(m.value);
+    if (m.value && (isNaN(v) || v < 240 || v > 600)) {
+        e.preventDefault();
+        m.focus();
+    }
+});
+</script>
 
     </div>
 

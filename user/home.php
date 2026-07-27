@@ -340,26 +340,26 @@ if (isset($_SESSION['student_id'])) {
         </section>
 
         <!-- impact section -->
-        <section id="impact-section" class="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
+        <section id="impact-section" class="px-6 py-16 max-w-7xl mx-auto">
             <div class="max-w-7xl mx-auto text-center mb-10">
                 <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['impact_title']; ?></h3>
             </div>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 max-w-7xl mx-auto">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
-                    <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="11870">0</div>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_students']; ?></p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 text-center">
+                    <div class="text-4xl lg:text-5xl font-bold text-[#004D4A] counter" data-target="11870">0</div>
+                    <p class="text-sm text-slate-500 mt-2 font-medium leading-snug"><?php echo $page_lang['imp_students']; ?></p>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
-                    <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="42">0</div>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_countries']; ?></p>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 text-center">
+                    <div class="text-4xl lg:text-5xl font-bold text-[#004D4A] counter" data-target="42">0</div>
+                    <p class="text-sm text-slate-500 mt-2 font-medium leading-snug"><?php echo $page_lang['imp_countries']; ?></p>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
-                    <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="8300000">0</div>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_funds']; ?></p>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 text-center">
+                    <div class="text-4xl lg:text-5xl font-bold text-[#004D4A] counter" data-target="8300000">0</div>
+                    <p class="text-sm text-slate-500 mt-2 font-medium leading-snug"><?php echo $page_lang['imp_funds']; ?></p>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center h-[150px] flex flex-col items-center justify-center overflow-hidden">
-                    <div class="text-3xl lg:text-4xl font-bold text-[#004D4A] counter" data-target="23">0</div>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-2 font-medium leading-snug break-words w-full"><?php echo $page_lang['imp_partners']; ?></p>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 text-center">
+                    <div class="text-4xl lg:text-5xl font-bold text-[#004D4A] counter" data-target="23">0</div>
+                    <p class="text-sm text-slate-500 mt-2 font-medium leading-snug"><?php echo $page_lang['imp_partners']; ?></p>
                 </div>
             </div>
         </section>

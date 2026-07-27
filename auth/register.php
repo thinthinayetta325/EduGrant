@@ -23,6 +23,7 @@ if ($is_mm) {
         'email' => 'အီးမေးလ်',
         'phone' => 'ဖုန်းနံပါတ်',
         'pass' => 'စကားဝှက် (အနည်းဆုံး ၈ လုံး)',
+        'confirm_pass' => 'စကားဝှက် အတည်ပြုရန်',
         'gender' => 'ကျား / မ',
         'male' => 'ကျား',
         'female' => 'မ',
@@ -43,6 +44,7 @@ if ($is_mm) {
         'email' => 'Email',
         'phone' => 'Phone',
         'pass' => 'Password (Min 8 characters)',
+        'confirm_pass' => 'Confirm Password',
         'gender' => 'Gender',
         'male' => 'Male',
         'female' => 'Female',
@@ -71,6 +73,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (strlen($password) < 8) {
         $message = $is_mm ? "စကားဝှက်သည် အနည်းဆုံး ၈ လုံးရှိရပါမည်။" : "Password must be at least 8 characters long.";
+    } elseif ($password !== $_POST['confirm_password']) {
+        $message = $is_mm ? "စကားဝှက် နှစ်ခု မတူညီပါ။" : "Passwords do not match.";
     } elseif (!preg_match('/^(09\d{9}|959\d{9})$/', preg_replace('/[\s\-]/', '', $phone))) {
         $message = $is_mm ? "ဖုန်းနံပါတ်သည် 09 ဖြင့် စတင်ပါက ဂဏန်း ၁၁ လုံး ဖြစ်ရပါမည်။ 959 ဖြင့် စတင်ပါက ဂဏန်း ၁၂ လုံး ဖြစ်ရပါမည်။" : "If starting with 09, phone must be 11 digits. If starting with 959, phone must be 12 digits.";
     } else {
@@ -206,6 +210,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
 
+                <!-- Confirm Password -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $r_lang['confirm_pass']; ?></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <input type="password" id="confirm_password" name="confirm_password" minlength="8" required
+                               class="w-full bg-slate-50/50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none"
+                               placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;">
+                    </div>
+                    <p id="confirmMsg" class="text-xs font-semibold mt-1 hidden"></p>
+                </div>
+
                 <!-- Address -->
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $r_lang['address']; ?></label>
@@ -253,6 +271,27 @@ document.getElementById('toggleEye').addEventListener('click', () => {
     eyeOpen.classList.toggle('hidden', !hidden);
     eyeClosed.classList.toggle('hidden', hidden);
 });
+
+const cpw = document.getElementById('confirm_password');
+const confirmMsg = document.getElementById('confirmMsg');
+
+function checkMatch() {
+    if (cpw.value.length === 0) {
+        confirmMsg.classList.add('hidden');
+        return;
+    }
+    confirmMsg.classList.remove('hidden');
+    if (pw.value === cpw.value) {
+        confirmMsg.textContent = '✓';
+        confirmMsg.className = 'text-xs font-semibold mt-1 text-emerald-600';
+    } else {
+        confirmMsg.textContent = '✗';
+        confirmMsg.className = 'text-xs font-semibold mt-1 text-red-500';
+    }
+}
+
+pw.addEventListener('input', checkMatch);
+cpw.addEventListener('input', checkMatch);
 
 pw.addEventListener('input', () => {
     const val = pw.value;

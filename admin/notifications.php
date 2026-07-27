@@ -222,20 +222,15 @@ $unread_q->close();
                         <div style="flex-grow:1;">
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                 <strong style="font-size:13px;"><?php echo htmlspecialchars($n['title']); ?></strong>
-                                <?php if (!$n['is_read']): ?>
-                                    <span class="notif-badge" style="background:#22c55e;color:#fff;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;"><?php echo $sidebar_lang['unread']; ?></span>
-                                <?php else: ?>
-                                    <span class="notif-badge" style="background:#e2e8f0;color:#64748b;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;"><?php echo $sidebar_lang['read']; ?></span>
-                                <?php endif; ?>
                             </div>
                             <p style="font-size:12px;color:#64748b;margin-top:3px;"><?php echo htmlspecialchars($n['message']); ?></p>
                             <span style="font-size:11px;color:#94a3b8;"><?php echo date('M d, Y g:i A', strtotime($n['created_at'])); ?></span>
                         </div>
                         <div class="notif-actions" style="margin-left:-8px;">
                             <?php if (!$n['is_read']): ?>
-                            <button onclick="event.stopPropagation(); markNotifRead(this.closest('.notif-row'), <?php echo $n['id']; ?>)" title="<?php echo $sidebar_lang['mark_read']; ?>" style="width:30px;height:30px;border-radius:8px;border:none;background:#dcfce7;color:#16a34a;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:0.2s;">
-                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            </button>
+                            <span class="notif-badge" style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-right:6px;white-space:nowrap;"><?php echo $sidebar_lang['unread']; ?></span>
+                            <?php else: ?>
+                            <span class="notif-badge" style="background:#e2e8f0;color:#64748b;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-right:6px;white-space:nowrap;"><?php echo $sidebar_lang['read']; ?></span>
                             <?php endif; ?>
                             <button onclick="event.stopPropagation(); deleteNotif(this, <?php echo $n['id']; ?>)" title="<?php echo $sidebar_lang['delete']; ?>" style="width:30px;height:30px;border-radius:8px;border:none;background:#fee2e2;color:#ef4444;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:0.2s;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
