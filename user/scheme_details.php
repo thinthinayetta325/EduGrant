@@ -50,12 +50,12 @@ $lang = $_GET['lang'] ?? 'en';
         font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
     }
 </style>
-<main class="max-w-6xl mx-auto px-4 py-10">
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
     <!-- HERO -->
-    <div class="bg-gradient-to-r from-[#004D4A] to-[#003D3B] text-white p-10 rounded-3xl shadow-lg">
+    <div class="bg-gradient-to-r from-[#004D4A] to-[#003D3B] text-white p-6 sm:p-10 rounded-3xl shadow-lg">
 
-        <h1 class="text-3xl font-bold">
+        <h1 class="text-xl sm:text-3xl font-bold">
 
             <?php if ($lang == 'mm'): ?>
                 <?= htmlspecialchars($scheme['scheme_name_mm']) ?>

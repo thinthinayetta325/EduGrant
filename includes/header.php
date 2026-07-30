@@ -87,16 +87,34 @@ if ($is_mm) {
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
-<script>if(localStorage.getItem('user_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
-<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduGrant Portal</title>
+    <script>if(localStorage.getItem('user_theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+    <script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
+
+        /* Mobile/Desktop fallback - works without Tailwind CDN */
+        #mobileMenuBtn { display: none; }
+        #mobileMenuOverlay { display: none; }
+        #mobileMenuPanel { display: none; }
+        #mobileMenuPanel.open { display: block !important; transform: translateY(0) !important; }
+
+        @media (max-width: 767px) {
+            #mobileMenuBtn { display: flex !important; }
+            #mobileMenuOverlay.visible { display: block !important; }
+            #mobileMenuPanel.visible { display: block !important; transform: translateY(0) !important; }
+            .desktop-nav, .desktop-actions { display: none !important; }
+        }
+        @media (min-width: 768px) {
+            #mobileMenuBtn { display: none !important; }
+            .desktop-nav, .desktop-actions { display: flex !important; }
+        }
+
         .myanmar-font {
             font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
             line-height: 1.8;
@@ -266,14 +284,17 @@ if ($is_mm) {
                 $status_link = $is_logged_in ? 'status.php' : '../user/status.php';
                 $contact_link = $is_logged_in ? 'contact.php' : '../user/contact.php';
             ?>
-            <nav class="hidden md:flex items-center gap-6 text-sm font-medium" style="flex-shrink:1; min-width:0; <?php echo $is_mm ? 'font-size:13px; gap:5px;' : ''; ?>">
+
+            <!-- Desktop Nav -->
+            <nav class="desktop-nav hidden md:flex items-center gap-6 text-sm font-medium" style="flex-shrink:1; min-width:0; <?php echo $is_mm ? 'font-size:13px; gap:5px;' : ''; ?>">
                 <a href="index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active(['index.php','home.php']) ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_home']; ?></a>
                 <a href="<?php echo $scholarships_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active('scholarships.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_scholarships']; ?></a>
                 <a href="<?php echo $status_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active('status.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_status']; ?></a>
                 <a href="<?php echo $contact_link; ?>?lang=<?php echo $lang_param; ?>" class="hover:text-white hover:underline transition whitespace-nowrap <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
             </nav>
 
-            <div class="flex items-center flex-shrink-0 gap-3 sm:gap-4" style="max-width:340px;">
+            <!-- Desktop Right Actions -->
+            <div class="desktop-actions hidden md:flex items-center flex-shrink-0 gap-3 sm:gap-4" style="max-width:340px;">
                 <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10 flex-shrink-0">
                     <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-3 py-1 text-[11px] sm:text-xs font-semibold rounded transition text-center" style="min-width:50px; <?php echo !$is_mm ? 'color:white;background:rgba(255,255,255,0.2);' : 'color:#5eead4;'; ?>">ENG</a>
                     <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
@@ -359,8 +380,103 @@ if ($is_mm) {
                     </a>
                 <?php endif; ?>
             </div>
+
+            <!-- Mobile Hamburger Button -->
+            <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="flex items-center justify-center w-11 h-11 rounded-lg bg-white/10 text-white hover:bg-white/20 transition flex-shrink-0" aria-label="Open menu" style="min-width:44px; min-height:44px;">
+                <svg id="hamburgerIcon" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <svg id="closeIcon" class="w-7 h-7 hidden" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
     </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="fixed inset-0 bg-black/40 z-[99]" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Slide-Down Menu Panel -->
+    <div id="mobileMenuPanel" class="fixed top-[64px] left-0 right-0 z-[100] bg-[#004D4A] shadow-2xl transition-transform duration-300 ease-in-out" style="max-height: calc(100vh - 64px); overflow-y:auto; transform: translateY(-100%);">
+        <div class="px-5 py-5 space-y-1">
+
+            <!-- Nav Links -->
+            <a href="index.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition <?php echo $nav_is_active(['index.php','home.php']) ? 'bg-white/15 text-[#FFD700]' : 'text-teal-100 hover:bg-white/10 hover:text-white'; ?>">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <?php echo $lang['nav_home']; ?>
+            </a>
+            <a href="<?php echo $scholarships_link; ?>?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition <?php echo $nav_is_active('scholarships.php') ? 'bg-white/15 text-[#FFD700]' : 'text-teal-100 hover:bg-white/10 hover:text-white'; ?>">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <?php echo $lang['nav_scholarships']; ?>
+            </a>
+            <a href="<?php echo $status_link; ?>?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition <?php echo $nav_is_active('status.php') ? 'bg-white/15 text-[#FFD700]' : 'text-teal-100 hover:bg-white/10 hover:text-white'; ?>">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <?php echo $lang['nav_status']; ?>
+            </a>
+            <a href="<?php echo $contact_link; ?>?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition <?php echo $nav_is_active('contact.php') ? 'bg-white/15 text-[#FFD700]' : 'text-teal-100 hover:bg-white/10 hover:text-white'; ?>">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <?php echo $lang['nav_contact']; ?>
+            </a>
+
+            <!-- Divider -->
+            <div class="border-t border-white/10 my-3"></div>
+
+            <!-- Logged In Actions -->
+            <?php if ($is_logged_in): ?>
+                <!-- Notification Link -->
+                <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-teal-100 hover:bg-white/10 hover:text-white transition">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <?php echo $is_mm ? 'အကြောင်းကြားချက်များ' : 'Notifications'; ?>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?php echo $unread_count > 9 ? '9+' : $unread_count; ?></span>
+                    <?php endif; ?>
+                </a>
+
+                <!-- My Applications -->
+                <a href="my_applications.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-teal-100 hover:bg-white/10 hover:text-white transition">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <?php echo $is_mm ? 'ကျွန်ုပ်၏ လျှောက်လွှာများ' : 'My Applications'; ?>
+                </a>
+
+                <!-- Profile -->
+                <a href="profile.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-teal-100 hover:bg-white/10 hover:text-white transition">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <?php echo $is_mm ? 'ပရိုဖိုင်' : 'Profile'; ?>
+                </a>
+
+                <!-- Divider -->
+                <div class="border-t border-white/10 my-3"></div>
+            <?php endif; ?>
+
+            <!-- Language Toggle -->
+            <div class="flex items-center gap-2 px-4 py-2">
+                <svg class="w-5 h-5 text-teal-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+                <div class="flex items-center bg-[#003D3B] rounded-lg p-0.5 border border-white/10">
+                    <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-4 py-1.5 text-xs font-semibold rounded-md transition text-center <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-300'; ?>">ENG</a>
+                    <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-4 py-1.5 text-xs font-medium rounded-md transition text-center <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-300'; ?>">မြန်မာ</a>
+                </div>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-teal-100 hover:bg-white/10 hover:text-white transition text-left">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <?php echo $is_mm ? 'အမှောင်/အလင်း ပြောင်းရန်' : 'Toggle Dark Mode'; ?>
+            </button>
+
+            <!-- Logout / Login -->
+            <div class="border-t border-white/10 my-3"></div>
+            <?php if ($is_logged_in): ?>
+                <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-300 hover:bg-red-500/10 hover:text-red-200 transition">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <?php echo $lang['nav_logout']; ?>
+                </a>
+            <?php else: ?>
+                <a href="../auth/login.php?lang=<?php echo $lang_param; ?>" class="flex items-center justify-center gap-2 w-full bg-[#FFD700] text-[#004D4A] text-sm font-bold px-5 py-3 rounded-xl hover:bg-slate-100 transition text-center">
+                    <?php echo $lang['btn_login']; ?>
+                </a>
+                <a href="../auth/register.php?lang=<?php echo $lang_param; ?>" class="flex items-center justify-center gap-2 w-full bg-white/10 border border-white/20 text-white text-sm font-bold px-5 py-3 rounded-xl hover:bg-white/20 transition mt-2 text-center">
+                    <?php echo $lang['btn_register']; ?>
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <div style="height:64px;"></div>
 
     <script>
@@ -371,4 +487,26 @@ if ($is_mm) {
             menu.classList.remove('show');
         }
     });
+
+    function toggleMobileMenu() {
+        var panel = document.getElementById('mobileMenuPanel');
+        var overlay = document.getElementById('mobileMenuOverlay');
+        var hamburger = document.getElementById('hamburgerIcon');
+        var close = document.getElementById('closeIcon');
+        var isOpen = panel.classList.contains('visible');
+
+        if (isOpen) {
+            panel.classList.remove('visible');
+            overlay.classList.remove('visible');
+            hamburger.classList.remove('hidden');
+            close.classList.add('hidden');
+            document.body.style.overflow = '';
+        } else {
+            panel.classList.add('visible');
+            overlay.classList.add('visible');
+            hamburger.classList.add('hidden');
+            close.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
     </script>

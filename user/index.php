@@ -144,12 +144,12 @@ $images = [
         <?php endforeach; ?>
     </div>
 
-    <div class="relative z-20 max-w-4xl mx-auto px-6 lg:px-12 py-40 text-center">
+    <div class="relative z-20 max-w-4xl mx-auto px-6 lg:px-12 py-24 sm:py-32 lg:py-40 text-center">
         <span
-            class="inline-block text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
+            class="inline-block text-[10px] sm:text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
             <?php echo $page_lang['badge']; ?>
         </span>
-        <h1 class="mt-4 text-4xl sm:text-5xl md:text-5xl font-bold text-slate-900" style="line-height:1.4;">
+        <h1 class="mt-4 text-2xl sm:text-4xl md:text-5xl font-bold text-yellow-600/50" style="line-height:1.4;">
             <?php echo $page_lang['hero_title']; ?>
         </h1>
         <p class="mt-4 text-white max-w-2xl mx-auto text-lg">
@@ -170,7 +170,7 @@ $images = [
 </section>
 
 <!-- scholarships section -->
-<section class="max-w-7xl mx-auto px-6 py-12">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
     <div class="mb-10">
         <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['explore_title']; ?></h3>
         <p class="text-slate-500 mt-2"><?php echo $page_lang['explore_desc']; ?></p>
@@ -185,25 +185,25 @@ $images = [
             $img_src = $has_file ? ($upload_path . htmlspecialchars($scheme['image'])) : ('https://picsum.photos/seed/' . $scheme['id'] . '/600/400');
         ?>
         <div
-            class="bg-white rounded-2xl border border-slate-100 shadow-sm flex overflow-hidden hover:shadow-xl transition-all">
-            <div class="w-2/5 relative bg-slate-200">
+            class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row overflow-hidden hover:shadow-xl transition-all">
+            <div class="w-full sm:w-2/5 h-48 sm:h-auto relative bg-slate-200">
                 <img src="<?php echo $img_src; ?>" alt="<?php echo htmlspecialchars($scheme['scheme_name']); ?>"
                     class="absolute inset-0 w-full h-full object-cover">
             </div>
 
-            <div class="flex-1 p-6 flex flex-col justify-between">
+            <div class="flex-1 p-5 sm:p-6 flex flex-col justify-between">
                 <div>
-                    <div class="flex justify-between items-start">
-                        <h4 class="font-bold text-lg text-slate-900">
+                    <div class="flex justify-between items-start gap-2">
+                        <h4 class="font-bold text-base sm:text-lg text-slate-900">
                             <?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
                         <span
-                            class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">Active</span>
+                            class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded shrink-0">Active</span>
                     </div>
                     <p class="text-sm text-slate-500 mt-3 line-clamp-2">
                         <?php echo htmlspecialchars($scheme['description'] ?? ''); ?></p>
                 </div>
 
-                <div class="mt-6 pt-4 border-t flex items-center justify-between">
+                <div class="mt-4 sm:mt-6 pt-4 border-t flex items-center justify-between">
                     <span
                         class="text-xs font-bold text-teal-700"><?php echo $is_mm ? 'ထောက်ပံ့မှု -၁၅၀,၀၀၀ ကျပ်' : 'Funding: 150,000 MMK'; ?></span>
                     <a href="../auth/login.php"
@@ -218,7 +218,7 @@ $images = [
 </section>
 
 <!-- impact section -->
-<section id="impact-section" class="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
+<section id="impact-section" class="px-4 sm:px-6 lg:px-12 py-12 sm:py-16 max-w-7xl mx-auto">
     <div class="max-w-7xl mx-auto text-center mb-10">
         <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['impact_title']; ?></h3>
     </div>
@@ -273,7 +273,7 @@ $images = [
         border-color: #003D3B;
     }
 </style>
-<section id="stories-section" class="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
+<section id="stories-section" class="px-4 sm:px-6 lg:px-12 py-12 sm:py-16 max-w-7xl mx-auto">
     <div class="mb-10">
         <h3 class="text-2xl font-bold text-slate-900"><?php echo $page_lang['story_title']; ?></h3>
         <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_desc']; ?></p>

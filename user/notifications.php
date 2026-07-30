@@ -33,70 +33,18 @@ $page_title = $is_mm ? 'အကြောင်းကြားချက်မျ�
 $no_notif = $is_mm ? 'အကြောင်းကြားချက်များ မရှိသေးပါ။' : 'No notifications yet.';
 $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
 ?>
-<!DOCTYPE html>
-<html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
-<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - EduGrant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
-        @font-face {
-            font-family: 'MyanmarTaungyi';
-            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-        }
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 <?php echo $is_mm ? 'myanmar-font' : ''; ?>">
+<?php include_once('../includes/header.php'); ?>
 
 <div class="min-h-screen flex flex-col">
-    <header class="bg-[#006D69] px-4 sm:px-6 py-4 shadow-md">
-        <div class="max-w-4xl mx-auto flex items-center justify-between">
-            <a href="profile.php?lang=<?php echo $lang_param; ?>" class="text-teal-100 hover:text-white flex items-center gap-2 text-sm font-medium">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                <?php echo $back_link; ?>
-            </a>
-            <div class="flex items-center gap-3">
-                <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="relative p-2 text-teal-100 hover:text-white bg-[#003D3B] border border-white/10 rounded-full transition shadow-sm group">
-                    <svg class="w-5 h-5 transition transform group-hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                    </svg>
-                    <?php if ($unread_count > 0): ?>
-                        <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-5 w-5 bg-red-500 text-[10px] font-extrabold text-white items-center justify-center shadow-sm">
-                                <?php echo $unread_count > 9 ? '9+' : $unread_count; ?>
-                            </span>
-                        </span>
-                    <?php endif; ?>
-                </a>
-                <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="text-xs font-semibold px-3 py-1 rounded <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-200'; ?>">ENG</a>
-                <span class="text-teal-300/40">|</span>
-                <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="text-xs font-medium px-3 py-1 rounded <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200'; ?>">မြန်မာ</a>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 my-8">
-        <h2 class="text-2xl font-extrabold text-[#003D3B] mb-6"><?php echo $page_title; ?></h2>
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 my-6 sm:my-8">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-[#003D3B] mb-4 sm:mb-6"><?php echo $page_title; ?></h2>
 
         <div class="space-y-3">
             <?php if ($notifications && $notifications->num_rows > 0): ?>
                 <?php while ($n = $notifications->fetch_assoc()): ?>
-                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition <?php echo !$n['is_read'] ? 'border-l-4 border-l-teal-500' : ''; ?>">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0 text-lg">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition <?php echo !$n['is_read'] ? 'border-l-4 border-l-teal-500' : ''; ?>">
+                        <div class="flex items-start gap-3 sm:gap-4">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0 text-lg">
                                 <?php
                                 $type = $n['type'] ?? '';
                                 if ($type === 'application_status') echo '📋';
@@ -112,7 +60,7 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
                             </div>
                             <div class="flex items-center gap-2 flex-shrink-0">
                                 <?php if (!$n['is_read']): ?>
-                                    <a href="mark_read.php?id=<?php echo $n['id']; ?>&lang=<?php echo $lang_param; ?>" class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                                    <a href="mark_read.php?id=<?php echo $n['id']; ?>&lang=<?php echo $lang_param; ?>" class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                         Unread
                                     </a>
@@ -128,7 +76,7 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>
-                <div class="bg-white border border-dashed border-slate-200 rounded-xl p-12 text-center">
+                <div class="bg-white border border-dashed border-slate-200 rounded-xl p-8 sm:p-12 text-center">
                     <div class="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
                         <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                     </div>
@@ -140,6 +88,5 @@ $back_link = $is_mm ? 'နောက်သို့' : 'Back to Profile';
 
 </div>
 
-</body>
-</html>
+<?php include_once('../includes/footer.php'); ?>
 <?php $conn->close(); ?>

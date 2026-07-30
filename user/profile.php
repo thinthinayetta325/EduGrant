@@ -289,37 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $p_lang['title']; ?> - EduGrant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        @font-face {
-            font-family: 'MyanmarTaungyi';
-            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-        }
-        body { font-family: 'Inter', sans-serif; }
-        <?php if ($is_mm): ?>
-        body, body * { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.8; }
-        <?php endif; ?>
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800">
-
-<div class="min-h-screen flex flex-col justify-between">
-    
-    <!-- Navbar Header Sync Element -->
-     <?php include_once('../includes/header.php');?>
+<?php include_once('../includes/header.php');?>
 
 <!-- Main Profile Management Content Grid -->
 <main class="max-w-7xl mx-auto px-4 sm:px-6 my-12 flex-grow w-full">
@@ -509,7 +479,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 document.getElementById('editModal').classList.remove('hidden');
 <?php endif; ?>
 </script>
-
-</div>
-</body>
-</html>

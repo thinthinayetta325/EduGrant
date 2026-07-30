@@ -51,30 +51,13 @@ if ($app['status'] === 'Rejected') {
 }
 
 
+$is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
+$lang_param = $is_mm ? 'mm' : 'en';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application Details | EduGrant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @font-face {
-            font-family: 'MyanmarTaungyi';
-            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-        }
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800">
+<?php include_once('../includes/header.php'); ?>
 
-    <main class="max-w-4xl mx-auto px-4 py-10">
+<div class="min-h-screen flex flex-col">
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
         <!-- Back link -->
         <a href="my_applications.php" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[#004D4A] transition mb-6">
@@ -83,8 +66,8 @@ if ($app['status'] === 'Rejected') {
         </a>
 
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-slate-900">Application Details</h1>
+        <div class="mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Application Details</h1>
             <p class="text-slate-500 mt-1">Review your submitted scholarship application.</p>
         </div>
 
@@ -127,11 +110,11 @@ if ($app['status'] === 'Rejected') {
         <!-- Combined Application & Student Info Card -->
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
 
-            <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
-                <h2 class="text-lg font-bold text-slate-800">Application & Student Information</h2>
+            <div class="px-5 sm:px-8 py-4 sm:py-6 border-b border-slate-100 bg-slate-50/50">
+                <h2 class="text-base sm:text-lg font-bold text-slate-800">Application & Student Information</h2>
             </div>
 
-            <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+            <div class="p-5 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-6">
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Student Name</label>
@@ -228,6 +211,7 @@ if ($app['status'] === 'Rejected') {
 
     </main>
 
-</body>
-</html>
+</div>
+
+<?php include_once('../includes/footer.php'); ?>
 <?php $conn->close(); ?>

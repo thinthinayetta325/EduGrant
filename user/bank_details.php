@@ -140,16 +140,8 @@ if ($is_mm) {
         'placeholder_bank' => 'ဥပမာ - KBZ Bank, CB Bank',
         'placeholder_holder' => 'ဘဏ်စာအုပ်ပါအတိုင်း အမည်အပြည့်အစုံ ဖြည့်ပါ',
         'placeholder_number' => 'ဘဏ်အကောင့်နံပါတ် အမှန်ကို ရိုက်ထည့်ပါ',
-        'nav_logout' => 'ထွက်မည်',
         'warning_text' => 'သတိပြုရန် - ဖြည့်စွက်ထားသော ဘဏ်အချက်အလက်များ လွဲမှားပါက ဆုကြေးငွေလွှဲပြောင်းခြင်း လုပ်ငန်းစဉ် နှောင့်နှေးနိုင်ပါသည်။',
         'back_profile' => 'Dashboard သို့ ပြန်သွားရန်'
-    ];
-    $lang = [
-        'brand_sub' => 'မြန်မာ',
-        'nav_home' => 'ပင်မစာမျက်နှာ',
-        'nav_scholarships' => 'ပညာသင်ဆုများ',
-        'nav_status' => 'လျှောက်လွှာအခြေအနေ',
-        'nav_contact' => 'ဆက်သွယ်ရန်',
     ];
 } else {
     $b_lang = [
@@ -163,97 +155,16 @@ if ($is_mm) {
         'placeholder_bank' => 'e.g., KBZ Bank, AYA Bank, CB Bank',
         'placeholder_holder' => 'Exactly as written on your bank book',
         'placeholder_number' => 'Enter digits without dashes or spaces',
-        'nav_logout' => 'Logout',
         'warning_text' => 'Important: Ensure that your account name matches your student ID identity registration data to prevent automatic disbursement failure.',
         'back_profile' => 'Back to Profile'
-    ];
-    $lang = [
-        'brand_sub' => 'Myanmar',
-        'nav_home' => 'Home',
-        'nav_scholarships' => 'Scholarships',
-        'nav_status' => 'Application Status',
-        'nav_contact' => 'Contact Us',
     ];
 }
 $conn->close();
 ?>
-<!DOCTYPE html>
-<html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
-<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $b_lang['title']; ?> - EduGrant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
-        @font-face {
-            font-family: 'MyanmarTaungyi';
-            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        .myanmar-font {
-            font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
-            line-height: 1.8;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-        }
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 <?php echo $is_mm ? 'myanmar-font' : ''; ?>">
+<?php include_once('../includes/header.php'); ?>
 
 <div class="min-h-screen flex flex-col justify-between">
     
-    <!-- Navbar Header -->
-    <header class="bg-[#006D69] px-4 sm:px-6 py-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            
-            <!-- Brand Logo -->
-            <a href="index.php?lang=<?php echo $lang_param; ?>" class="min-w-0 flex-shrink block hover:opacity-90 transition">
-                <div class="flex items-center gap-2.5">
-                    <div class="bg-white/10 p-1.5 rounded-lg text-teal-300 shrink-0">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="text-white text-lg sm:text-xl font-bold leading-tight truncate">EduGrant</h1>
-                        <p class="text-teal-200 text-[11px] sm:text-xs mt-0.5 opacity-90 tracking-wide"><?php echo $lang['brand_sub']; ?></p>
-                    </div>
-                </div>
-            </a>
-
-            <?php
-                $nav_page = basename($_SERVER['PHP_SELF']);
-                $nav_is_active = fn($pages) => in_array($nav_page, (array)$pages);
-                $nav_active_class = 'text-[#FFD700] underline underline-offset-4 decoration-2';
-            ?>
-            <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-                <a href="index.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active(['index.php','home.php']) ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_home']; ?></a>
-                <a href="scholarships.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('scholarships.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_scholarships']; ?></a>
-                <a href="status.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('status.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_status']; ?></a>
-                <a href="contact.php?lang=<?php echo $lang_param; ?>" class="hover:text-white transition <?php echo $nav_is_active('contact.php') ? $nav_active_class : 'text-teal-100'; ?>"><?php echo $lang['nav_contact']; ?></a>
-            </nav>
-
-            <!-- Language and Profile Actions -->
-            <div class="flex items-center gap-4 shrink-0">
-                <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10">
-                    <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-3 py-1 text-[11px] font-semibold rounded transition <?php echo !$is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">ENG</a>
-                    <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
-                    <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-3 py-1 text-[11px] font-medium rounded transition <?php echo $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">မြန်မာ</a>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <a href="../auth/logout.php?lang=<?php echo $lang_param; ?>" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-bold px-3 py-2 rounded-md transition border border-red-500/20">
-                        <?php echo $b_lang['nav_logout']; ?>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-
     <!-- Main Content Form Section -->
     <main class="max-w-2xl mx-auto px-4 my-12 flex-grow w-full">
         <div class="mb-8">
@@ -361,5 +272,3 @@ $conn->close();
     <!-- Footer Area Container -->
    <?php include_once("../includes/footer.php");?>
 </div>
-</body>
-</html>

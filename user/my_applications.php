@@ -79,95 +79,14 @@ if ($count_query) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="<?= $lang ?>">
-<script>if(sessionStorage.getItem('scrollPos')){window.addEventListener('load',function(){setTimeout(function(){window.scrollTo(0,parseInt(sessionStorage.getItem('scrollPos')));sessionStorage.removeItem('scrollPos')},50)})}</script>
-<head>
-    <meta charset="UTF-8">
-    <title><?= $txt["title"] ?></title>
+<?php include_once("../includes/header.php");?>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
-        @font-face {
-            font-family: 'MyanmarTaungyi';
-            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        .myanmar-font {
-            font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
-            line-height: 1.8;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-        }
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-
-<body class="bg-slate-50 text-slate-800 <?= $is_mm ? 'myanmar-font' : ''; ?>">
-
-<div class="min-h-screen flex flex-col justify-between">
-
-    <!-- Authenticated Navbar -->
-     <?php include_once("../includes/header.php");?>
-    <!-- <header class="bg-[#006D69] px-4 sm:px-6 py-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-
-            <a href="index.php?lang=<?= $lang_param; ?>" class="min-w-0 flex-shrink block hover:opacity-90 transition">
-                <div class="flex items-center gap-2.5">
-                    <div class="bg-white/10 p-1.5 rounded-lg text-teal-300 shrink-0">
-                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="text-white text-lg sm:text-xl font-bold leading-tight truncate">EduGrant</h1>
-                        <p class="text-teal-200 text-[11px] sm:text-xs mt-0.5 opacity-90 tracking-wide"><?= $nav['brand_sub']; ?></p>
-                    </div>
-                </div>
-            </a>
-
-            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-teal-100">
-                <a href="home.php?lang=<?= $lang_param; ?>" class="hover:text-white transition"><?= $nav['nav_home']; ?></a>
-                <a href="scholarships.php?lang=<?= $lang_param; ?>" class="hover:text-white transition"><?= $nav['nav_scholarships']; ?></a>
-                <a href="my_applications.php?lang=<?= $lang_param; ?>" class="hover:text-white transition"><?= $nav['nav_status']; ?></a>
-                <a href="contact.php?lang=<?= $lang_param; ?>" class="hover:text-white transition"><?= $nav['nav_contact']; ?></a>
-            </nav>
-
-            <div class="flex items-center flex-shrink-0 gap-3 sm:gap-4">
-                <div class="flex items-center bg-[#003D3B] rounded-md p-0.5 border border-white/10">
-                    <a href="?lang=en" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-3 py-1 text-[11px] sm:text-xs font-semibold rounded transition <?= !$is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">ENG</a>
-                    <span class="text-teal-300/40 px-0.5 text-xs font-light">|</span>
-                    <a href="?lang=mm" onclick="sessionStorage.setItem('scrollPos',window.scrollY)" class="px-3 py-1 text-[11px] sm:text-xs font-medium rounded transition <?= $is_mm ? 'text-white bg-white/20' : 'text-teal-200 hover:text-white'; ?>">မြန်မာ</a>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <a href="notifications.php?lang=<?= $lang_param; ?>" class="relative p-2 text-teal-100 hover:text-white bg-[#003D3B] border border-white/10 rounded-full transition shadow-sm group" aria-label="View Notifications">
-                        <svg class="w-5 h-5 transition transform group-hover:rotate-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                        <?php if ($unread_count > 0): ?>
-                            <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-5 w-5 bg-red-500 text-[10px] font-extrabold text-white items-center justify-center shadow-sm">
-                                    <?= $unread_count > 9 ? '9+' : $unread_count; ?>
-                                </span>
-                            </span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="../auth/logout.php?lang=<?= $lang_param; ?>" class="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs sm:text-sm font-bold px-3 py-2 rounded-md transition border border-red-500/20">
-                        <?= $nav['nav_logout']; ?>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header> -->
-
-<main class="max-w-7xl mx-auto px-4 py-10">
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
     <!-- HEADER -->
-    <div class="mb-8">
+    <div class="mb-6 sm:mb-8">
 
-        <h1 class="text-3xl font-bold text-slate-900">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
             <?= $txt["title"] ?>
         </h1>
 
@@ -187,27 +106,27 @@ if ($count_query) {
                 <thead class="bg-slate-50">
 
                     <tr>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500">
+                        <th class="px-3 sm:px-6 py-4 text-left text-[10px] sm:text-xs font-bold text-slate-500">
                             <?= $txt["app_no"] ?>
                         </th>
 
-                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500">
+                        <th class="px-3 sm:px-6 py-4 text-left text-[10px] sm:text-xs font-bold text-slate-500">
                             <?= $txt["scholarship"] ?>
                         </th>
 
-                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500">
+                        <th class="hidden sm:table-cell px-3 sm:px-6 py-4 text-left text-[10px] sm:text-xs font-bold text-slate-500">
                             <?= $txt["income"] ?>
                         </th>
 
-                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500">
+                        <th class="px-3 sm:px-6 py-4 text-left text-[10px] sm:text-xs font-bold text-slate-500">
                             <?= $txt["date"] ?>
                         </th>
 
-                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500">
+                        <th class="px-3 sm:px-6 py-4 text-left text-[10px] sm:text-xs font-bold text-slate-500">
                             <?= $txt["status"] ?>
                         </th>
 
-                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-500">
+                        <th class="px-3 sm:px-6 py-4 text-center text-[10px] sm:text-xs font-bold text-slate-500">
                             <?= $txt["action"] ?>
                         </th>
                     </tr>
@@ -237,23 +156,23 @@ if ($count_query) {
 
                     <tr class="border-t hover:bg-slate-50">
 
-                        <td class="px-6 py-4 font-semibold">
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-xs sm:text-sm">
                             <?= htmlspecialchars($row['application_no']) ?>
                         </td>
 
-                        <td class="px-6 py-4">
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                             <?= htmlspecialchars($row['scheme_name']) ?>
                         </td>
 
-                        <td class="px-6 py-4">
+                        <td class="hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                             <?= number_format($row['family_income']) ?> MMK
                         </td>
 
-                        <td class="px-6 py-4">
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                             <?= date("d M Y", strtotime($row['apply_date'])) ?>
                         </td>
 
-                        <td class="px-6 py-4">
+                        <td class="px-3 sm:px-6 py-3 sm:py-4">
                             <?php
                             $status = htmlspecialchars($row['status']);
                             $statusLower = strtolower($row['status']);
@@ -271,9 +190,9 @@ if ($count_query) {
                             ?>
                         </td>
 
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
                             <a href="application_details.php?id=<?= $row['id'] ?>"
-                               class="bg-[#003D3B] text-white px-4 py-2 rounded-lg text-sm">
+                               class="bg-[#003D3B] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm">
                                 <?= $txt["action"] ?>
                             </a>
                         </td>

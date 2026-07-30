@@ -30,30 +30,8 @@ include '../config/db.php';
 // --- Fetch Schemes ---
 $schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY scheme_name");
 ?>
-<!DOCTYPE html>
-<html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarships | EduGrant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600;800&display=swap');
-        @font-face {
-            font-family: 'MyanmarTaungyi';
-            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        .myanmar-font { font-family: 'Padauk', sans-serif !important; }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-        }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 <?php echo $is_mm ? 'myanmar-font' : 'font-sans'; ?>">
 <!-- schemes -->
-<div class="max-w-7xl mx-auto px-6 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
     <div class="mb-10">
         <h3 class="text-3xl font-bold"><?php echo $page_lang['explore_title']; ?></h3>
         <p class="text-slate-500 mt-2"><?php echo $page_lang['explore_desc']; ?></p>
@@ -66,22 +44,22 @@ $schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY sc
             $has_file = !empty($scheme['image']) && file_exists($upload_path . $scheme['image']);
             $img_src = $has_file ? ($upload_path . htmlspecialchars($scheme['image'])) : ('https://picsum.photos/seed/' . $scheme['id'] . '/600/400');
         ?>
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex overflow-hidden hover:shadow-xl transition-all">
-            <div class="w-2/5 relative bg-slate-200">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row overflow-hidden hover:shadow-xl transition-all">
+            <div class="w-full sm:w-2/5 h-48 sm:h-auto relative bg-slate-200">
                 <img src="<?php echo $img_src; ?>" alt="<?php echo htmlspecialchars($scheme['scheme_name']); ?>" 
                      class="absolute inset-0 w-full h-full object-cover">
             </div>
             
-            <div class="flex-1 p-6 flex flex-col justify-between">
+            <div class="flex-1 p-5 sm:p-6 flex flex-col justify-between">
                 <div>
-                    <div class="flex justify-between items-start">
-                        <h4 class="font-bold text-lg text-slate-900"><?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
-                        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded"><?php echo $page_lang['badge_active']; ?></span>
+                    <div class="flex justify-between items-start gap-2">
+                        <h4 class="font-bold text-base sm:text-lg text-slate-900"><?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
+                        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded shrink-0"><?php echo $page_lang['badge_active']; ?></span>
                     </div>
                     <p class="text-sm text-slate-500 mt-3 line-clamp-2"><?php echo htmlspecialchars($scheme['description'] ?? ''); ?></p>
                 </div>
                 
-                <div class="mt-6 pt-4 border-t flex items-center justify-between">
+                <div class="mt-4 sm:mt-6 pt-4 border-t flex items-center justify-between">
                     <span class="text-xs font-bold text-teal-700"><?php echo $page_lang['funding_label']; ?></span>
                     
                     <?php if ($is_logged_in): ?>
@@ -100,5 +78,3 @@ $schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY sc
     </div>
 </div>
 <?php include_once("../includes/footer.php");?>
-</body>
-</html>

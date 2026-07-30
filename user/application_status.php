@@ -28,32 +28,20 @@ if (!empty($app_no)) {
         die("Access Denied: You do not have permission to view this application.");
     }
 }
+
+$is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
+$lang_param = $is_mm ? 'mm' : 'en';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Application Status</title>
-    <style>
-        @font-face {
-            font-family: 'MyanmarTaungyi';
-            src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-        }
-    </style>
-</head>
-<body class="bg-slate-50 min-h-screen p-8">
-    <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-        <h2 class="text-2xl font-bold text-slate-800 mb-6">Application Details</h2>
+<?php include_once('../includes/header.php'); ?>
+
+<div class="min-h-screen flex flex-col">
+    <main class="flex-grow max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-10">
+        <div class="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Application Details</h2>
 
         <?php if ($application): ?>
-            <div class="grid grid-cols-2 gap-6 text-sm mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm mb-8">
                 <div><p class="text-slate-500">Application No</p><p class="font-bold text-lg"><?php echo htmlspecialchars($application['application_no']); ?></p></div>
                 <div><p class="text-slate-500">Status</p><span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold"><?php echo htmlspecialchars($application['status']); ?></span></div>
                 <div><p class="text-slate-500">Student Name</p><p class="font-medium"><?php echo htmlspecialchars($application['student_name']); ?></p></div>
@@ -65,9 +53,9 @@ if (!empty($app_no)) {
                 <!-- SHOW TO REVIEWER ONLY -->
                 <div class="border-t pt-6 mt-6 border-slate-100">
                     <h3 class="text-md font-bold mb-4">Reviewer Controls</h3>
-                    <div class="flex gap-4">
-                        <a href="evaluate.php?id=<?php echo $application['id']; ?>" class="bg-[#004D4A] text-white px-6 py-2 rounded-lg hover:bg-[#003D3B]">Evaluate Application</a>
-                        <a href="reviewer_dashboard.php" class="bg-slate-100 text-slate-700 px-6 py-2 rounded-lg hover:bg-slate-200">Back to Queue</a>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                        <a href="evaluate.php?id=<?php echo $application['id']; ?>" class="bg-[#004D4A] text-white px-6 py-2 rounded-lg hover:bg-[#003D3B] text-center">Evaluate Application</a>
+                        <a href="reviewer_dashboard.php" class="bg-slate-100 text-slate-700 px-6 py-2 rounded-lg hover:bg-slate-200 text-center">Back to Queue</a>
                     </div>
                 </div>
             <?php else: ?>
@@ -81,6 +69,7 @@ if (!empty($app_no)) {
         <?php else: ?>
             <p class="text-red-500 p-4 bg-red-50 rounded-lg">No application found with that number.</p>
         <?php endif; ?>
-    </div>
-</body>
-</html>
+    </main>
+</div>
+
+<?php include_once('../includes/footer.php'); ?>

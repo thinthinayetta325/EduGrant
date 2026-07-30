@@ -86,72 +86,8 @@ if (isset($_SESSION['student_id'])) {
         font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
     }
 </style>
-<!DOCTYPE html>
-<html lang="<?php echo $is_mm ? 'my' : 'en'; ?>">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduGrant Portal - Home</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-    <!-- <style>
-        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
-
-        .myanmar-font {
-            font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
-            line: height 1.8;
-        }
-
-        .myanmar-font section h1 {
-            letter-spacing: 0.02em;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style> -->
-   <!-- myanmartaungyi -->
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
-
-    @font-face {
-        font-family: 'MyanmarTaungyi';
-        src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
-        font-weight: normal;
-        font-style: normal;
-    }
-
-    .myanmar-font {
-        font-family: 'Padauk', 'Pyidaungsu', sans-serif !important;
-        line-height: 1.8;
-    }
-
-    .myanmar-font section h1 {
-        letter-spacing: 0.04em;
-    }
-
-    body {
-        font-family: 'Inter', sans-serif;
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
-    }
-</style>
-</head>
-
-<body class="bg-slate-50 text-slate-800 <?php echo $is_mm ? 'myanmar-font' : ''; ?>">
-
-    <div class="min-h-screen flex flex-col justify-between">
-
-        <?php
+<?php
         // Define content words for bilingual support
         if (isset($is_mm) && $is_mm) {
             $page_lang = [
@@ -264,12 +200,12 @@ if (isset($_SESSION['student_id'])) {
                 <?php endforeach; ?>
             </div>
 
-            <div class="relative z-20 max-w-4xl mx-auto px-6 lg:px-12 py-40 text-center">
+            <div class="relative z-20 max-w-4xl mx-auto px-6 lg:px-12 py-24 sm:py-32 lg:py-40 text-center">
                 <span
-                    class="inline-block text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
+                    class="inline-block text-[10px] sm:text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
                     <?php echo $page_lang['badge']; ?>
                 </span>
-                <h1 class="mt-4 text-4xl md:text-5xl font-bold text-slate-900" style="line-height:1.4;">
+                <h1 class="mt-4 text-2xl sm:text-4xl md:text-5xl font-bold text-slate-900" style="line-height:1.4;">
                     <?php echo $page_lang['hero_title']; ?>
                 </h1>
                 <p class="mt-4 text-slate-100 max-w-2xl mx-auto text-lg">
@@ -290,9 +226,9 @@ if (isset($_SESSION['student_id'])) {
         </section>
 
         <!-- scholarships section -->
-        <section class="max-w-7xl mx-auto px-6 lg:px-12 py-16">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
             <div class="mb-10">
-                <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['explore_title']; ?></h3>
+                <h3 class="text-2xl sm:text-3xl font-bold text-slate-900"><?php echo $page_lang['explore_title']; ?></h3>
                 <p class="text-slate-500 mt-2"><?php echo $page_lang['explore_desc']; ?></p>
             </div>
 
@@ -305,27 +241,27 @@ if (isset($_SESSION['student_id'])) {
                     $img_src = $has_file ? ($upload_path . htmlspecialchars($scheme['image'])) : ('https://picsum.photos/seed/' . $scheme['id'] . '/600/400');
                     ?>
                     <div
-                        class="bg-white rounded-2xl border border-slate-100 shadow-sm flex overflow-hidden hover:shadow-xl transition-all">
-                        <div class="w-2/5 relative bg-slate-200">
+                        class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row overflow-hidden hover:shadow-xl transition-all">
+                        <div class="w-full sm:w-2/5 h-48 sm:h-auto relative bg-slate-200">
                             <img src="<?php echo $img_src; ?>" alt="<?php echo htmlspecialchars($scheme['scheme_name']); ?>"
                                 class="absolute inset-0 w-full h-full object-cover">
                         </div>
 
-                        <div class="flex-1 p-6 flex flex-col justify-between">
+                        <div class="flex-1 p-5 sm:p-6 flex flex-col justify-between">
                             <div>
-                                <div class="flex justify-between items-start">
-                                    <h4 class="font-bold text-lg text-slate-900">
+                                <div class="flex justify-between items-start gap-2">
+                                    <h4 class="font-bold text-base sm:text-lg text-slate-900">
                                         <?php echo htmlspecialchars($scheme['scheme_name']); ?>
                                     </h4>
                                     <span
-                                        class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">Active</span>
+                                        class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded shrink-0">Active</span>
                                 </div>
                                 <p class="text-sm text-slate-500 mt-3 line-clamp-2">
                                     <?php echo htmlspecialchars($scheme['description'] ?? ''); ?>
                                 </p>
                             </div>
 
-                            <div class="mt-6 pt-4 border-t flex items-center justify-between">
+                            <div class="mt-4 sm:mt-6 pt-4 border-t flex items-center justify-between">
                                 <span
                                     class="text-xs font-bold text-teal-700"><?php echo $is_mm ? 'ထောက်ပံ့မှု -၁၅၀,၀၀၀ ကျပ်' : 'Funding: 150,000 MMK'; ?></span>
                                 <a href="apply.php?scheme_id=<?php echo $scheme['id']; ?>"
@@ -340,7 +276,7 @@ if (isset($_SESSION['student_id'])) {
         </section>
 
         <!-- impact section -->
-        <section id="impact-section" class="px-6 py-16 max-w-7xl mx-auto">
+        <section id="impact-section" class="px-4 sm:px-6 py-12 sm:py-16 max-w-7xl mx-auto">
             <div class="max-w-7xl mx-auto text-center mb-10">
                 <h3 class="text-3xl font-bold text-slate-900"><?php echo $page_lang['impact_title']; ?></h3>
             </div>
@@ -395,9 +331,9 @@ if (isset($_SESSION['student_id'])) {
                 border-color: #003D3B;
             }
         </style>
-        <section id="stories-section" class="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
+        <section id="stories-section" class="px-4 sm:px-6 lg:px-12 py-12 sm:py-16 max-w-7xl mx-auto">
             <div class="mb-10">
-                <h3 class="text-2xl font-bold text-slate-900"><?php echo $page_lang['story_title']; ?></h3>
+                <h3 class="text-xl sm:text-2xl font-bold text-slate-900"><?php echo $page_lang['story_title']; ?></h3>
                 <p class="text-sm text-slate-500 mt-2"><?php echo $page_lang['story_desc']; ?></p>
             </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -445,7 +381,7 @@ if (isset($_SESSION['student_id'])) {
         </section>
 
         <!-- stay informed -->
-        <section class="px-6 lg:px-12 py-16 max-w-7xl mx-auto w-full">
+        <section class="px-4 sm:px-6 lg:px-12 py-12 sm:py-16 max-w-7xl mx-auto w-full">
             <!-- Changed max-w-4xl to max-w-6xl for a beautifully balanced wide-width display card layout -->
             <div
                 class="bg-[#006D69] rounded-3xl p-8 sm:p-12 text-center shadow-lg max-w-6xl mx-auto mb-16 border border-white/5">

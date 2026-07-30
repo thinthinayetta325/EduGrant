@@ -320,7 +320,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
-<main class="max-w-4xl mx-auto px-4 py-10">
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
     <?php if ($is_mm): ?>
     <style>
@@ -339,11 +339,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </style>
     <?php endif; ?>
 
-    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-8">
 
-        <div class="mb-8">
+        <div class="mb-6 sm:mb-8">
 
-            <h1 class="text-3xl font-bold text-slate-900">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
                 <?= $page_lang['title'] ?>
             </h1>
 
@@ -366,7 +366,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endif; ?>
 
         <!-- Student Information -->
-        <div class="grid md:grid-cols-3 gap-4 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
 
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">
