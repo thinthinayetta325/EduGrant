@@ -8,9 +8,15 @@ if (!isset($_SESSION['student_id'])) {
 }
 
 $student_id = $_SESSION['student_id'];
+$app_id = isset($_GET['app_id']) ? (int)$_GET['app_id'] : 0;
 
-$stmt = $conn->prepare("SELECT id, filename FROM receipts WHERE student_id = ? AND (downloaded = 0 OR downloaded IS NULL) ORDER BY created_at DESC LIMIT 1");
-$stmt->bind_param("i", $student_id);
+if ($app_id > 0) {
+    $stmt = $conn->prepare("SELECT id, filename FROM receipts WHERE application_id = ? AND student_id = ? ORDER BY id DESC LIMIT 1");
+    $stmt->bind_param("ii", $app_id, $student_id);
+} else {
+    $stmt = $conn->prepare("SELECT id, filename FROM receipts WHERE student_id = ? AND (downloaded = 0 OR downloaded IS NULL) ORDER BY created_at DESC LIMIT 1");
+    $stmt->bind_param("i", $student_id);
+}
 $stmt->execute();
 $receipt = $stmt->get_result()->fetch_assoc();
 $stmt->close();

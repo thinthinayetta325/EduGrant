@@ -148,7 +148,7 @@ if ($reviewer_id && isset($conn)) {
         transition: var(--transition);
         z-index: 1000; overflow: hidden;
     }
-    .profile-dropdown:hover .profile-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+    .profile-dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
     .profile-dropdown-menu a {
         display: flex; align-items: center; gap: 10px;
         padding: 10px 16px; font-size: 13px;
@@ -306,8 +306,8 @@ if ($reviewer_id && isset($conn)) {
             <span class="notif-count <?php echo $unread_count === 0 ? 'zero' : ''; ?>"><?php echo $unread_count > 99 ? '99+' : $unread_count; ?></span>
         </a>
 
-        <div class="profile-dropdown">
-            <a href="profile.php?lang=<?php echo $lang_param; ?>" class="profile-link">
+        <div class="profile-dropdown" id="reviewerProfileDropdown">
+            <button type="button" onclick="toggleReviewerProfileMenu(event)" class="profile-link" style="border:none;cursor:pointer;font-family:inherit;">
                 <div class="profile-image">
                     <?php if (!empty($reviewer_img) && file_exists("../uploads/profile_pics/" . $reviewer_img)): ?>
                         <img src="../uploads/profile_pics/<?php echo htmlspecialchars($reviewer_img); ?>" alt="Profile">
@@ -322,9 +322,9 @@ if ($reviewer_id && isset($conn)) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);">
                     <path d="m6 9 6 6 6-6"></path>
                 </svg>
-            </a>
+            </button>
 
-            <div class="profile-dropdown-menu">
+            <div id="reviewerProfileMenu" class="profile-dropdown-menu">
                 <a href="profile.php?lang=<?php echo $lang_param; ?>">
                     <span class="menu-icon">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -365,4 +365,17 @@ function toggleTheme() {
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('reviewer_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 }
+
+function toggleReviewerProfileMenu(e) {
+    e.stopPropagation();
+    document.getElementById('reviewerProfileMenu').classList.toggle('show');
+}
+
+document.addEventListener('click', function(e) {
+    var dropdown = document.querySelector('.profile-dropdown');
+    var menu = document.getElementById('reviewerProfileMenu');
+    if (dropdown && menu && !dropdown.contains(e.target)) {
+        menu.classList.remove('show');
+    }
+});
 </script>

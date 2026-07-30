@@ -98,16 +98,15 @@ if ($is_mm) {
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
 
-        /* Mobile/Desktop fallback - works without Tailwind CDN */
+        html, body { overflow-x: hidden; max-width: 100vw; width: 100%; }
+
+        /* Mobile/Desktop fallback */
         #mobileMenuBtn { display: none; }
-        #mobileMenuOverlay { display: none; }
         #mobileMenuPanel { display: none; }
-        #mobileMenuPanel.open { display: block !important; transform: translateY(0) !important; }
 
         @media (max-width: 767px) {
             #mobileMenuBtn { display: flex !important; }
-            #mobileMenuOverlay.visible { display: block !important; }
-            #mobileMenuPanel.visible { display: block !important; transform: translateY(0) !important; }
+            #mobileMenuPanel.open { display: block !important; }
             .desktop-nav, .desktop-actions { display: none !important; }
         }
         @media (min-width: 768px) {
@@ -389,11 +388,10 @@ if ($is_mm) {
         </div>
     </header>
 
-    <!-- Mobile Menu Overlay -->
-    <div id="mobileMenuOverlay" class="fixed inset-0 bg-black/40 z-[99]" onclick="toggleMobileMenu()"></div>
+    <div style="height:64px;"></div>
 
-    <!-- Mobile Slide-Down Menu Panel -->
-    <div id="mobileMenuPanel" class="fixed top-[64px] left-0 right-0 z-[100] bg-[#004D4A] shadow-2xl transition-transform duration-300 ease-in-out" style="max-height: calc(100vh - 64px); overflow-y:auto; transform: translateY(-100%);">
+    <!-- Mobile Menu Panel (normal flow, pushes content down) -->
+    <div id="mobileMenuPanel" class="w-full bg-[#004D4A] shadow-2xl" style="overflow-y:auto;">
         <div class="px-5 py-5 space-y-1">
 
             <!-- Nav Links -->
@@ -477,8 +475,6 @@ if ($is_mm) {
         </div>
     </div>
 
-    <div style="height:64px;"></div>
-
     <script>
     document.addEventListener('click', function(e) {
         var dropdown = document.querySelector('.profile-dropdown');
@@ -490,23 +486,18 @@ if ($is_mm) {
 
     function toggleMobileMenu() {
         var panel = document.getElementById('mobileMenuPanel');
-        var overlay = document.getElementById('mobileMenuOverlay');
         var hamburger = document.getElementById('hamburgerIcon');
         var close = document.getElementById('closeIcon');
-        var isOpen = panel.classList.contains('visible');
+        var isOpen = panel.classList.contains('open');
 
         if (isOpen) {
-            panel.classList.remove('visible');
-            overlay.classList.remove('visible');
+            panel.classList.remove('open');
             hamburger.classList.remove('hidden');
             close.classList.add('hidden');
-            document.body.style.overflow = '';
         } else {
-            panel.classList.add('visible');
-            overlay.classList.add('visible');
+            panel.classList.add('open');
             hamburger.classList.add('hidden');
             close.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
         }
     }
     </script>

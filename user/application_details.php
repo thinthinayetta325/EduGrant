@@ -50,6 +50,16 @@ if ($app['status'] === 'Rejected') {
     $stmt2->close();
 }
 
+// Fetch receipt if payment is Paid
+$receipt = null;
+if ($app['payment_status'] === 'Paid') {
+    $stmt3 = $conn->prepare("SELECT filename, created_at, downloaded FROM receipts WHERE application_id = ? ORDER BY id DESC LIMIT 1");
+    $stmt3->bind_param("i", $app_id);
+    $stmt3->execute();
+    $receipt = $stmt3->get_result()->fetch_assoc();
+    $stmt3->close();
+}
+
 
 $is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
 $lang_param = $is_mm ? 'mm' : 'en';
@@ -147,6 +157,17 @@ $lang_param = $is_mm ? 'mm' : 'en';
                     <span class="inline-block px-3 py-1 rounded-full text-sm font-bold <?= $p_status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">
                         <?= htmlspecialchars($p_status) ?>
                     </span>
+                    <?php if ($p_status === 'Paid' && $receipt): ?>
+                    <div class="mt-4 space-y-3">
+                        <img src="../uploads/receipts/<?= htmlspecialchars($receipt['filename']) ?>" alt="Payment Receipt" class="rounded-xl border border-slate-200 max-h-80 w-auto object-contain shadow-sm">
+                        <?php if (!$receipt['downloaded'] || $receipt['downloaded'] == 0): ?>
+                        <a href="download_receipt.php?app_id=<?= $app_id ?>" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition shadow">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Download Receipt
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="md:col-span-2">
