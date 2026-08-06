@@ -144,20 +144,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $conn->query("UPDATE applications SET status='Rejected' WHERE id=$app_id");
         header("Location: bank_verify.php?rejected=1");
         exit();
+    } elseif ($_POST['action'] === 'delete_verified') {
+        $del_id = (int)$_POST['application_id'];
+        $app_row = $conn->query("SELECT student_id, status FROM applications WHERE id = $del_id")->fetch_assoc();
+        if ($app_row) {
+            $stu_id = $app_row['student_id'];
+            $conn->query("DELETE FROM payment_records WHERE recipient_id IN (SELECT id FROM scholarship_recipients WHERE application_id = $del_id)");
+            $conn->query("DELETE FROM receipts WHERE application_id = $del_id");
+            $conn->query("DELETE FROM scholarship_recipients WHERE application_id = $del_id");
+            $conn->query("DELETE FROM bank_details WHERE student_id = $stu_id");
+            $new_status = ($app_row['status'] === 'Rejected') ? 'Recommended' : 'Approved';
+            $conn->query("UPDATE applications SET status = '$new_status', payment_status = NULL WHERE id = $del_id");
+        }
+        header("Location: bank_verify.php?deleted=1");
+        exit();
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_verified') {
-    $del_id = (int)$_POST['application_id'];
-    $app_row = $conn->query("SELECT student_id FROM applications WHERE id = $del_id")->fetch_assoc();
-    if ($app_row) {
-        $stu_id = $app_row['student_id'];
-        $conn->query("DELETE FROM payment_records WHERE recipient_id IN (SELECT id FROM scholarship_recipients WHERE application_id = $del_id)");
-        $conn->query("DELETE FROM receipts WHERE application_id = $del_id");
-        $conn->query("DELETE FROM scholarship_recipients WHERE application_id = $del_id");
-        $conn->query("UPDATE bank_details SET is_verified = FALSE WHERE student_id = $stu_id");
-        $conn->query("UPDATE applications SET status = 'Approved', payment_status = NULL WHERE id = $del_id");
-    }
-    header("Location: bank_verify.php?deleted=1");
-    exit();
 }
 
 $pending_bank = $conn->query("SELECT COUNT(*) FROM applications a LEFT JOIN bank_details b ON a.student_id = b.student_id WHERE a.status='Approved' AND b.id IS NULL")->fetch_row()[0] ?? 0;
@@ -170,7 +171,7 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
     JOIN student s ON a.student_id = s.id
     JOIN schemes sc ON a.scheme_id = sc.id
     JOIN bank_details bd ON bd.student_id = a.student_id
-    WHERE a.status IN ('Recommended', 'Approved')
+    WHERE a.status IN ('Recommended', 'Approved', 'Rejected')
     ORDER BY bd.is_verified ASC, a.id DESC");
 ?>
 <!DOCTYPE html>
@@ -323,13 +324,11 @@ $pending = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.schem
                                 <?php if ($row['receipt_file']): ?>
                                     <span class="badge badge-verified" style="margin-left:4px;">📄 Receipt Uploaded</span>
                                 <?php endif; ?>
-                                <?php if ($row['is_verified'] && $row['receipt_file']): ?>
-                                    <form method="POST" class="inline-form" onsubmit="return confirm('Delete this verified record and reset to Approved status?')">
-                                        <input type="hidden" name="action" value="delete_verified">
-                                        <input type="hidden" name="application_id" value="<?php echo $row['id']; ?>">
-                                        <button type="submit" class="btn-red-sm" style="padding:4px 10px; font-size:10px;">✕ Delete</button>
-                                    </form>
-                                <?php endif; ?>
+                                <form method="POST" class="inline-form" onsubmit="return confirm('Delete this bank verification record and remove all its data?')">
+                                    <input type="hidden" name="action" value="delete_verified">
+                                    <input type="hidden" name="application_id" value="<?php echo $row['id']; ?>">
+                                    <button type="submit" class="btn-red-sm" style="padding:4px 10px; font-size:10px;">✕ Delete</button>
+                                </form>
                             </div>
                         </div>
                         <?php if (!$row['is_verified'] || !$row['receipt_file']): ?>

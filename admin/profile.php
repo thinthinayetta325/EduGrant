@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $current = $_POST['current_password'];
             $new = $_POST['new_password'];
             $confirm = $_POST['confirm_password'];
-            if (password_verify($current, $admin_data['password'])) {
+            if (password_verify($current, $admin_data['password']) || $current === $admin_data['password']) {
                 if ($new === $confirm) {
                     if (strlen($new) >= 6) {
                         $hash = password_hash($new, PASSWORD_DEFAULT);

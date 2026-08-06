@@ -238,21 +238,6 @@ if ($bank_check) {
 }
 $needs_bank = $approved_count > 0 && !$has_bank_details;
 
-// Check if student has a receipt to download
-$receipt_data = null;
-$receipt_query = $conn->prepare("SELECT r.id, r.filename, sc.scheme_name, r.created_at
-    FROM receipts r
-    JOIN applications a ON r.application_id = a.id
-    JOIN schemes sc ON a.scheme_id = sc.id
-    WHERE r.student_id = ? AND (r.downloaded = 0 OR r.downloaded IS NULL)
-    ORDER BY r.created_at DESC LIMIT 1");
-if ($receipt_query) {
-    $receipt_query->bind_param("i", $student_id);
-    $receipt_query->execute();
-    $receipt_data = $receipt_query->get_result()->fetch_assoc();
-    $receipt_query->close();
-}
-
 // 8. Handle profile image upload
 $upload_success = false;
 $upload_error = false;
@@ -302,26 +287,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     <div class="max-w-md mx-auto space-y-6">
 
-        <?php if ($receipt_data): ?>
-            <div id="fundReleasedBox" class="bg-white border-2 border-emerald-300 rounded-2xl shadow-lg overflow-hidden relative z-10">
-                <div class="px-6 py-5 border-b border-emerald-100 bg-emerald-50">
-                    <h3 class="font-bold text-emerald-800 text-base flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <?php echo $is_mm ? 'ငွေထုတ်ပေးပြီးပါပြီ' : 'Funds Released'; ?> 🎉
-                    </h3>
-                </div>
-                <div class="p-6">
-                    <p class="text-sm text-slate-600">
-                        <?php echo $is_mm ? 'သင်၏ ' : 'Your scholarship for '; ?><strong><?php echo htmlspecialchars($receipt_data['scheme_name']); ?></strong><?php echo $is_mm ? ' အတွက် ငွေကြေးထောက်ပံ့မှု ထုတ်ပေးပြီးပါပြီ။' : ' has been disbursed.'; ?>
-                    </p>
-                    <a href="download_receipt.php" onclick="setTimeout(function(){ document.getElementById('fundReleasedBox').style.display='none'; var pc = document.getElementById('profileContent'); pc.classList.remove('blur-sm','pointer-events-none','select-none'); }, 1500);" class="mt-4 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition shadow">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <?php echo $is_mm ? 'ငွေလက်ခံဖြတ်ပိုင်း ဒေါင်းလုဒ်' : 'Download Receipt'; ?>
-                    </a>
-                </div>
-            </div>
-        <?php endif; ?>
-
         <?php if ($needs_bank): ?>
             <div class="bg-white border-2 border-amber-300 rounded-2xl shadow-lg overflow-hidden relative z-10">
                 <div class="px-6 py-5 border-b border-amber-100 bg-amber-50">
@@ -340,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
         <?php endif; ?>
 
-        <div id="profileContent" class="<?php echo ($needs_bank || $receipt_data) ? 'blur-sm pointer-events-none select-none' : ''; ?>">
+        <div id="profileContent" class="<?php echo $needs_bank ? 'blur-sm pointer-events-none select-none' : ''; ?>">
         <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6 text-center">
             <form method="POST" action="" enctype="multipart/form-data" id="profileImageForm">
                 <input type="hidden" name="action" value="upload_image">

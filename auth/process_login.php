@@ -15,14 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = null;
     $role = null;
 
-    // Try student table first
-    $stmt = $conn->prepare("SELECT id, name, password FROM student WHERE email = ? LIMIT 1");
+    // Try admin table first
+    $stmt = $conn->prepare("SELECT id, name, password, profile_image FROM admin WHERE email = ? LIMIT 1");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result && $result->num_rows === 1) {
         $user = $result->fetch_assoc();
-        $role = 'student';
+        $role = 'admin';
         $stmt->close();
     }
 
@@ -39,15 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Try admin table if not found
+    // Try student table if not found
     if (!$user) {
-        $stmt = $conn->prepare("SELECT id, name, password, profile_image FROM admin WHERE email = ? LIMIT 1");
+        $stmt = $conn->prepare("SELECT id, name, password FROM student WHERE email = ? LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
         if ($result && $result->num_rows === 1) {
             $user = $result->fetch_assoc();
-            $role = 'admin';
+            $role = 'student';
             $stmt->close();
         }
     }
