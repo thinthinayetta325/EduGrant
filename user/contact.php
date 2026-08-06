@@ -110,6 +110,25 @@ if ($is_mm) {
  include("../includes/header.php");
 ?>
 
+<!-- myanmartaungyi -->
+<style>
+    @font-face {
+        font-family: 'MyanmarTaungyi';
+        src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+    }
+</style>
+
 <!-- Main Contact Section -->
 <main class="max-w-6xl mx-auto px-4 sm:px-6 my-12 flex-grow w-full">
     <div class="mb-10 text-center md:text-left">

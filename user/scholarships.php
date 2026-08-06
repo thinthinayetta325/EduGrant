@@ -24,6 +24,26 @@ $page_lang = $is_mm ? [
     'no_records' => 'No active scholarship records available at the moment.'
 ];
  include("../includes/header.php");
+?>
+<!-- myanmartaungyi -->
+<style>
+    @font-face {
+        font-family: 'MyanmarTaungyi';
+        src: url('../MyanmarTaungyi/MyanmarTaungyi.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'MyanmarTaungyi', 'Padauk', 'Pyidaungsu', sans-serif !important;
+    }
+</style>
+<?php
 // --- Database Connection ---
 include '../config/db.php';
 

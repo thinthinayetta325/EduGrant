@@ -216,7 +216,6 @@ $current_page = 'reviewers';
                                 <td><?php echo htmlspecialchars($row['email']); ?></td>
                                 <td><?php echo htmlspecialchars($row['assigned_schemes'] ?? 'None'); ?></td>
                                 <td>
-                                    <button class="btn-blue-sm" style="padding:4px 10px; font-size:10px;" onclick="openAssign(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars(addslashes($row['name'])); ?>')">📎 Assign</button>
                                     <form method="POST" class="inline-form" onsubmit="return confirm('Delete this reviewer?')">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
