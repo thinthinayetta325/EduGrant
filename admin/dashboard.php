@@ -876,53 +876,6 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
                 <a href="schemes.php?action=add" class="btn-primary" style="margin-top:10px;width:100%;justify-content:center;">+ Add Scheme</a>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h3><?php echo $sidebar_lang['reviewers_online']; ?></h3>
-                        <p class="card-subtitle">Assigned to schemes</p>
-                    </div>
-                    <a href="reviewers.php" class="card-action">Manage →</a>
-                </div>
-                <?php if ($reviewers_quick && $reviewers_quick->num_rows > 0): ?>
-                    <?php while ($r = $reviewers_quick->fetch_assoc()): ?>
-                        <div class="flex-list-item">
-                            <div>
-                                <div class="name"><?php echo htmlspecialchars($r['name']); ?></div>
-                                <div class="meta"><?php echo htmlspecialchars($r['department'] ?? 'General'); ?></div>
-                            </div>
-                            <span style="background:#4ade80;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;">Reviewer</span>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">No reviewers</div>
-                <?php endif; ?>
-                <a href="reviewers.php?action=add" class="btn-primary" style="margin-top:10px;width:100%;justify-content:center;">+ Add Reviewer</a>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h3><?php echo $sidebar_lang['recent_recipients']; ?></h3>
-                        <p class="card-subtitle">Recently awarded scholarships</p>
-                    </div>
-                    <a href="recipients.php" class="card-action">View All →</a>
-                </div>
-                <?php if ($recipients_quick && $recipients_quick->num_rows > 0): ?>
-                    <?php while ($r = $recipients_quick->fetch_assoc()): ?>
-                        <div class="flex-list-item">
-                            <div>
-                                <div class="name"><?php echo htmlspecialchars($r['student_name']); ?></div>
-                                <div class="meta"><?php echo htmlspecialchars($r['scheme_name']); ?></div>
-                            </div>
-                            <span class="badge badge-approved">Awarded</span>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">No recipients yet</div>
-                <?php endif; ?>
-                <a href="recipients.php" class="btn-primary" style="margin-top:10px;width:100%;justify-content:center;">Manage Recipients</a>
-            </div>
         </div>
 
     

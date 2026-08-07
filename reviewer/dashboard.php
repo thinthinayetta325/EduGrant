@@ -18,13 +18,22 @@ $reviewer_img = $conn->query("SELECT profile_image FROM reviewers WHERE id = " .
 // UPDATED QUERY: Check if application already recommended by another reviewer
 $reviewer_id = $_SESSION['reviewer_id'];
 
+// Search filter (student name or scheme name)
+$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
+$search_where = '';
+if ($search !== '') {
+    $search_where = " WHERE s.name LIKE '%$search%' OR sc.scheme_name LIKE '%$search%'";
+}
+
 // Pagination
 $per_page = 10;
 $current_page = max(1, intval($_GET['page'] ?? 1));
 $offset = ($current_page - 1) * $per_page;
 
 // Get total rows for pagination
-$total_rows = $conn->query("SELECT COUNT(*) as c FROM applications")->fetch_assoc()['c'] ?? 0;
+$total_rows = $conn->query("SELECT COUNT(*) as c FROM applications a
+    LEFT JOIN student s ON a.student_id = s.id
+    LEFT JOIN schemes sc ON a.scheme_id = sc.id$search_where")->fetch_assoc()['c'] ?? 0;
 $total_pages = max(1, ceil($total_rows / $per_page));
 
 $query = "SELECT a.id as app_id, a.application_no, a.family_income, a.apply_date, a.status,
@@ -37,6 +46,7 @@ $query = "SELECT a.id as app_id, a.application_no, a.family_income, a.apply_date
           LEFT JOIN student s ON a.student_id = s.id
           LEFT JOIN schemes sc ON a.scheme_id = sc.id
           LEFT JOIN application_reviews ar ON a.id = ar.application_id AND ar.recommendation = 'Recommended'
+          $search_where
           ORDER BY a.apply_date DESC
           LIMIT $per_page OFFSET $offset";
 
@@ -111,9 +121,19 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
     </section>
 
     <main class="max-w-[1400px] mx-auto px-3 sm:px-4 pb-10">
-        <div class="mb-5">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">All Applications</h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Reviewing all incoming scholarship applications.</p>
+        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">All Applications</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Reviewing all incoming scholarship applications.</p>
+            </div>
+            <form method="get" action="dashboard.php" class="flex items-center gap-2">
+                <input type="hidden" name="lang" value="<?php echo $is_mm ? 'mm' : 'en'; ?>">
+                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search student or scheme..." class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#004D4A]/40 w-64">
+                <button type="submit" class="bg-[#004D4A] hover:bg-[#003D3B] text-white font-medium px-4 py-2 rounded-lg text-sm transition">Search</button>
+                <?php if ($search !== ''): ?>
+                    <a href="?lang=<?php echo $is_mm ? 'mm' : 'en'; ?>" class="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 underline">Clear</a>
+                <?php endif; ?>
+            </form>
         </div>
 
         <div class="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
@@ -205,13 +225,15 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                     $reviewed_by = $row['reviewed_by'] ?? null;
                     $already_by_other = ($status === 'Recommended') && $reviewed_by && ($reviewed_by != $reviewer_id);
                     $is_approved = ($status === 'Approved');
+                    $is_rejected = ($status === 'Rejected');
+                    $is_admin_decided = ($is_approved || $is_rejected);
                     ?>
                     <?php if ($already_by_other): ?>
                         <span class="bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium px-3 py-1.5 rounded-lg text-[11px] cursor-not-allowed" title="Already recommended by another reviewer">
                             Evaluate
                         </span>
-                    <?php elseif ($is_approved): ?>
-                        <span class="bg-[#004D4A] text-white font-medium px-3 py-1.5 rounded-lg text-[11px] opacity-60 cursor-not-allowed pointer-events-none" title="Application already approved">
+                    <?php elseif ($is_admin_decided): ?>
+                        <span class="bg-[#004D4A] text-white font-medium px-3 py-1.5 rounded-lg text-[11px] opacity-60 cursor-not-allowed pointer-events-none" title="<?php echo $is_rejected ? 'Application already rejected by admin' : 'Application already approved by admin'; ?>">
                             Evaluate
                         </span>
                     <?php else: ?>
@@ -243,9 +265,10 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                 <div class="flex gap-1">
                     <?php
                     $lang_param = $is_mm ? '&lang=mm' : '';
+                    $search_param = ($search !== '') ? '&search=' . urlencode($search) : '';
                     ?>
                     <?php if ($current_page > 1): ?>
-                        <a href="?page=<?php echo $current_page - 1; ?><?php echo $lang_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Prev</a>
+                        <a href="?page=<?php echo $current_page - 1; ?><?php echo $lang_param; ?><?php echo $search_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Prev</a>
                     <?php endif; ?>
 
                     <?php
@@ -253,11 +276,11 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
                     $end = min($total_pages, $current_page + 2);
                     for ($i = $start; $i <= $end; $i++):
                     ?>
-                        <a href="?page=<?php echo $i; ?><?php echo $lang_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border transition <?php echo $i == $current_page ? 'bg-[#004D4A] text-white border-[#004D4A]' : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'; ?>"><?php echo $i; ?></a>
+                        <a href="?page=<?php echo $i; ?><?php echo $lang_param; ?><?php echo $search_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border transition <?php echo $i == $current_page ? 'bg-[#004D4A] text-white border-[#004D4A]' : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'; ?>"><?php echo $i; ?></a>
                     <?php endfor; ?>
 
                     <?php if ($current_page < $total_pages): ?>
-                        <a href="?page=<?php echo $current_page + 1; ?><?php echo $lang_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Next</a>
+                        <a href="?page=<?php echo $current_page + 1; ?><?php echo $lang_param; ?><?php echo $search_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Next</a>
                     <?php endif; ?>
                 </div>
             </div>

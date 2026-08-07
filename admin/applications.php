@@ -117,12 +117,12 @@ $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : 
 
 $where = "WHERE 1=1";
 if ($status_filter) $where .= " AND a.status = '$status_filter'";
-if ($search) $where .= " AND (s.name LIKE '%$search%' OR a.application_no LIKE '%$search%')";
+if ($search) $where .= " AND (s.name LIKE '%$search%' OR sc.scheme_name LIKE '%$search%' OR a.application_no LIKE '%$search%')";
 
 $per_page = 10;
 $page = isset($_GET['p']) ? max(1, (int)$_GET['p']) : 1;
 
-$count_result = $conn->query("SELECT COUNT(*) FROM (SELECT a.id FROM applications a JOIN student s ON a.student_id = s.id $where GROUP BY a.id) sub");
+$count_result = $conn->query("SELECT COUNT(*) FROM (SELECT a.id FROM applications a JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id $where GROUP BY a.id) sub");
 $total_rows = $count_result->fetch_row()[0];
 $total_pages = max(1, ceil($total_rows / $per_page));
 if ($page > $total_pages) $page = $total_pages;
@@ -299,13 +299,22 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
             </div>
 
             <div class="filter-bar">
-                <a href="applications.php?lang=<?php echo $lang_param; ?>" class="status-link <?php echo !$status_filter ? 'active' : ''; ?>">All</a>
-                <a href="applications.php?status=Submitted&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Submitted' ? 'active' : ''; ?>">Submitted</a>
-                <a href="applications.php?status=Recommended&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Recommended' ? 'active' : ''; ?>">Recommended</a>
-                <a href="applications.php?status=Approved&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Approved' ? 'active' : ''; ?>">Approved</a>
-                <a href="applications.php?status=Rejected&amp;lang=<?php echo $lang_param; ?>" class="status-link <?php echo $status_filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
+                <?php $search_qs = ($search !== '') ? '&amp;search=' . urlencode($search) : ''; ?>
+                <a href="applications.php?lang=<?php echo $lang_param; ?><?php echo $search_qs; ?>" class="status-link <?php echo !$status_filter ? 'active' : ''; ?>">All</a>
+                <a href="applications.php?status=Submitted&amp;lang=<?php echo $lang_param; ?><?php echo $search_qs; ?>" class="status-link <?php echo $status_filter === 'Submitted' ? 'active' : ''; ?>">Submitted</a>
+                <a href="applications.php?status=Recommended&amp;lang=<?php echo $lang_param; ?><?php echo $search_qs; ?>" class="status-link <?php echo $status_filter === 'Recommended' ? 'active' : ''; ?>">Recommended</a>
+                <a href="applications.php?status=Approved&amp;lang=<?php echo $lang_param; ?><?php echo $search_qs; ?>" class="status-link <?php echo $status_filter === 'Approved' ? 'active' : ''; ?>">Approved</a>
+                <a href="applications.php?status=Rejected&amp;lang=<?php echo $lang_param; ?><?php echo $search_qs; ?>" class="status-link <?php echo $status_filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
                 <div style="flex-grow:1;"></div>
-                <input type="text" id="liveSearch" class="form-input" placeholder="🔍 Search name or ID..." style="width:200px;" autocomplete="off">
+                <form method="get" action="applications.php" style="display:flex; gap:8px; align-items:center; margin:0;">
+                    <input type="hidden" name="lang" value="<?php echo $lang_param; ?>">
+                    <?php if ($status_filter): ?><input type="hidden" name="status" value="<?php echo htmlspecialchars($status_filter); ?>"><?php endif; ?>
+                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="form-input" placeholder="🔍 Search name, scheme or ID..." style="width:200px;" autocomplete="off">
+                    <button type="submit" class="btn-blue-sm">Search</button>
+                    <?php if ($search !== ''): ?>
+                        <a href="applications.php?lang=<?php echo $lang_param; ?><?php echo $status_filter ? '&amp;status=' . urlencode($status_filter) : ''; ?>" class="action-link" style="font-size:11px;">Clear</a>
+                    <?php endif; ?>
+                </form>
             </div>
 
             <table class="admin-table">
@@ -411,18 +420,6 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
 
     
 </div>
-
-<script>
-document.getElementById('liveSearch').addEventListener('input', function() {
-    var query = this.value.toLowerCase();
-    var rows = document.querySelectorAll('.admin-table tbody tr');
-    rows.forEach(function(row) {
-        if (row.querySelector('td[colspan]')) return;
-        var text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
-    });
-});
-</script>
 
 </body>
 </html>

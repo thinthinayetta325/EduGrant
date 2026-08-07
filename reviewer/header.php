@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $is_mm = (isset($_GET['lang']) && $_GET['lang'] === 'mm');
 $lang_param = $is_mm ? 'mm' : 'en';
 
-$page_title = $page_title ?? 'Reviewer Workspace';
+$page_title = $page_title ?? 'Dashboard';
 $reviewer_name = $_SESSION['reviewer_name'] ?? 'Reviewer';
 $reviewer_id = $_SESSION['reviewer_id'] ?? 0;
 $reviewer_img = null;
@@ -267,12 +267,11 @@ if ($reviewer_id && isset($conn)) {
         <a href="dashboard.php?lang=<?php echo $lang_param; ?>" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
             <svg width="32" height="32" style="color:#FFD700;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
             <div>
-                <div style="font-size:16px;font-weight:700;color:#fff;line-height:1.2;">EduGrant</div>
-                <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:400;">Reviewer</div>
+                <div style="font-size:18px;font-weight:800;line-height:1.2;letter-spacing:-0.5px;background:linear-gradient(135deg,#FFD700,#ff9f43);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 2px 8px rgba(255,215,0,0.25);">Scholarship</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;">Reviewer</div>
             </div>
         </a>
         <div>
-            <h1><?php echo htmlspecialchars($page_title); ?></h1>
             <span class="sub"><?php echo date("l, F j, Y"); ?></span>
         </div>
     </div>

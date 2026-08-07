@@ -149,7 +149,7 @@ $images = [
             class="inline-block text-[10px] sm:text-xs font-semibold tracking-widest uppercase bg-teal-600 text-white px-3 py-1 rounded-full">
             <?php echo $page_lang['badge']; ?>
         </span>
-        <h1 class="mt-4 text-2xl sm:text-4xl md:text-5xl font-bold text-yellow-600/50" style="line-height:1.4;">
+        <h1 class="mt-4 text-2xl sm:text-4xl md:text-5xl font-bold text-slate-900" style="line-height:1.4;">
             <?php echo $page_lang['hero_title']; ?>
         </h1>
         <p class="mt-4 text-white max-w-2xl mx-auto text-lg">

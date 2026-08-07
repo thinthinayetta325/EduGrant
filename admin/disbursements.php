@@ -263,16 +263,6 @@ $current_page = 'disbursements';
         </div>
 
     </div>
-<!-- footer -->
-    <!-- <footer class="bottom-bar">
-        <div>⚡ <strong>UCSMT Education Grant Portal Workspace</strong></div>
-        <div style="font-weight: 500;">စီမံခန့်ခွဲရေး ကွန်ပျူတာတက္ကသိုလ် (မိတ္ထီလာ)</div>
-        <div class="bottom-links">
-            <span>📞 +95 9 123 456 789</span>
-            <a href="mailto:info@ucsmt.edu.mm">📧 info@ucsmt.edu.mm</a>
-            <span style="margin-left:15px;">© 2026 Computer University</span>
-        </div>
-    </footer> -->
 </div>
 
 <div id="addModal" class="modal-overlay">
@@ -314,8 +304,12 @@ $current_page = 'disbursements';
                 <div>
                     <label class="field-lbl">Semester</label>
                     <select name="semester" class="form-select">
-                        <option value="First Semester">First Semester</option>
-                        <option value="Second Semester">Second Semester</option>
+                        <?php
+                        $sem_names = ['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth'];
+                        foreach ($sem_names as $i => $sn):
+                        ?>
+                            <option value="<?php echo $sn; ?> Semester"><?php echo $sn; ?> Semester</option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div>

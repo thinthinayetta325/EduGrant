@@ -123,6 +123,17 @@ else {
             }
             $stmt->close();
         }
+
+        // Check if this reviewer already recommended the application
+        $existing_recommendation = null;
+        $review_q = $conn->prepare("SELECT recommendation FROM application_reviews WHERE application_id = ? AND reviewer_id = ? ORDER BY id DESC LIMIT 1");
+        if ($review_q) {
+            $review_q->bind_param("ii", $application_id, $reviewer_id);
+            $review_q->execute();
+            $review_q->bind_result($existing_recommendation);
+            $review_q->fetch();
+            $review_q->close();
+        }
     } else {
         header("Location: dashboard.php");
         exit();
@@ -252,7 +263,7 @@ else {
                         rows="5"
                         required
                         placeholder="Type verified eligibility checks, certificate matching status, or regional evaluation comments here..."
-                        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-[#004D4A] focus:ring-2 focus:ring-[#004D4A]/10 transition resize-none"></textarea>
+                        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-[#004D4A] focus:ring-2 focus:ring-[#004D4A]/10 transition resize-none"><?php echo ($existing_recommendation === 'Recommended') ? 'Recommended' : ''; ?></textarea>
                 </div>
 
                 <div class="flex gap-4">

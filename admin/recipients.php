@@ -36,33 +36,22 @@ $sidebar_lang = $is_mm ? [
     'page_title' => 'Recipients',
 ];
 // include "header.php";
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'add') {
-        $app_id = (int)$_POST['application_id'];
-        $year = $conn->real_escape_string($_POST['start_year']);
-        $conn->query("INSERT INTO scholarship_recipients (application_id, start_year) VALUES ($app_id, '$year')");
-        $conn->query("UPDATE applications SET status='Approved' WHERE id=$app_id");
-    } elseif ($_POST['action'] === 'delete') {
-        $id = (int)$_POST['id'];
-        $conn->query("DELETE FROM scholarship_recipients WHERE id=$id");
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    $id = (int)$_POST['id'];
+    $conn->query("DELETE FROM scholarship_recipients WHERE id=$id");
     header("Location: recipients.php");
     exit();
 }
+
+$search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
+$search_where = ($search !== '') ? " WHERE s.name LIKE '%$search%' OR sc.scheme_name LIKE '%$search%' OR a.application_no LIKE '%$search%' OR s.roll_no LIKE '%$search%'" : '';
 
 $recipients = $conn->query("SELECT sr.*, s.name AS student_name, s.roll_no, sc.scheme_name, a.application_no
     FROM scholarship_recipients sr
     JOIN applications a ON sr.application_id = a.id
     JOIN student s ON a.student_id = s.id
-    JOIN schemes sc ON a.scheme_id = sc.id
+    JOIN schemes sc ON a.scheme_id = sc.id$search_where
     ORDER BY sr.id DESC");
-
-$approved_apps = $conn->query("SELECT a.id, a.application_no, s.name AS student_name, sc.scheme_name
-    FROM applications a
-    JOIN student s ON a.student_id = s.id
-    JOIN schemes sc ON a.scheme_id = sc.id
-    WHERE a.status='Approved' AND a.id NOT IN (SELECT application_id FROM scholarship_recipients)
-    ORDER BY a.id DESC");
 $current_page = 'recipients';
 ?>
 <!DOCTYPE html>
@@ -195,7 +184,14 @@ $current_page = 'recipients';
                         <h2 class="card-title">🏅 <?php echo $sidebar_lang['page_title']; ?></h2>
                     </div>
                 </div>
-                <button class="btn-green-sm" onclick="openModal('addModal')">+ Add Recipient</button>
+                <form method="get" action="recipients.php" style="display:flex; gap:8px; align-items:center; margin:0;">
+                    <input type="hidden" name="lang" value="<?php echo $lang_param; ?>">
+                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="form-input" placeholder="🔍 Search name, scheme or ID..." style="width:200px; margin:0;" autocomplete="off">
+                    <button type="submit" class="btn-green-sm">Search</button>
+                    <?php if ($search !== ''): ?>
+                        <a href="recipients.php?lang=<?php echo $lang_param; ?>" class="action-link" style="font-size:11px; text-decoration:none; color:#006D69;">Clear</a>
+                    <?php endif; ?>
+                </form>
             </div>
 
             <table class="admin-table">
@@ -249,38 +245,6 @@ $current_page = 'recipients';
     </footer> -->
 </div>
 
-<div id="addModal" class="modal-overlay">
-    <div class="modal-box">
-        <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
-        <h3>➕ Add Scholarship Recipient</h3>
-        <form method="POST">
-            <input type="hidden" name="action" value="add">
-            <label class="field-lbl">Approved Application</label>
-            <select name="application_id" class="form-select" required>
-                <option value="">-- Select --</option>
-                <?php if ($approved_apps): while ($a = $approved_apps->fetch_assoc()): ?>
-                    <option value="<?php echo $a['id']; ?>"><?php echo htmlspecialchars($a['application_no'] . ' - ' . $a['student_name'] . ' (' . $a['scheme_name'] . ')'); ?></option>
-                <?php endwhile; endif; ?>
-            </select>
-            <label class="field-lbl">Academic Year</label>
-            <select name="start_year" class="form-select">
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-            </select>
-            <button type="submit" class="btn-green-sm" style="width:100%;">Create Recipient</button>
-        </form>
-    </div>
-</div>
-
-<script>
-function openModal(id) { document.getElementById(id).classList.add('show'); }
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-document.querySelectorAll('.modal-overlay').forEach(el => {
-    el.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('show');
-    });
-});
-</script>
 </body>
 </html>
 <?php $conn->close(); ?>

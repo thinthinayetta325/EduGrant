@@ -118,8 +118,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         <!-- Header -->
         <div class="px-6 sm:px-8 pt-8 pb-2 text-center">
-            <div class="w-14 h-14 bg-[#006D69]/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <svg class="w-7 h-7 text-[#006D69]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+            <div class="inline-flex bg-[#006D69] p-3 rounded-2xl shadow-lg mx-auto mb-4">
+                <div class="bg-white/10 p-1.5 rounded-xl">
+                    <svg class="w-8 h-8" style="color:#FFD700;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
+                </div>
             </div>
             <h2 class="text-slate-900 text-2xl font-bold"><?php echo $r_lang['title']; ?></h2>
         </div>
