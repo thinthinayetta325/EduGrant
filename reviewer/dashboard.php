@@ -258,31 +258,44 @@ $flagged = $conn->query("SELECT COUNT(*) as c FROM applications WHERE status IN 
             </div>
 
             <?php if ($total_pages > 1): ?>
-            <div class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700">
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Showing <?php echo $offset + 1; ?>–<?php echo min($offset + $per_page, $total_rows); ?> of <?php echo $total_rows; ?>
-                </p>
-                <div class="flex gap-1">
-                    <?php
-                    $lang_param = $is_mm ? '&lang=mm' : '';
-                    $search_param = ($search !== '') ? '&search=' . urlencode($search) : '';
-                    ?>
+            <?php
+            $lang_param = $is_mm ? '&lang=mm' : '';
+            $search_param = ($search !== '') ? '&search=' . urlencode($search) : '';
+            $base_params = $lang_param . $search_param;
+            $pg_btn = 'inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-lg border transition ';
+            $pg_idle = $pg_btn . 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700';
+            $pg_active = $pg_btn . 'bg-[#004D4A] text-white border-[#004D4A] pointer-events-none';
+            $pg_dots = 'text-slate-400 dark:text-slate-500 text-xs px-0.5';
+            ?>
+            <div class="flex items-center justify-between flex-wrap gap-2 px-4 py-3 border-t border-slate-100 dark:border-slate-700">
+                <span class="text-xs text-slate-500 dark:text-slate-400"><?php echo $total_rows; ?> total</span>
+                <div class="flex gap-1 items-center">
                     <?php if ($current_page > 1): ?>
-                        <a href="?page=<?php echo $current_page - 1; ?><?php echo $lang_param; ?><?php echo $search_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Prev</a>
+                        <a href="?page=1<?php echo $base_params; ?>" class="<?php echo $pg_idle; ?>" title="First">&laquo;</a>
+                        <a href="?page=<?php echo $current_page - 1; ?><?php echo $base_params; ?>" class="<?php echo $pg_idle; ?>" title="Prev">&lsaquo;</a>
                     <?php endif; ?>
 
                     <?php
                     $start = max(1, $current_page - 2);
                     $end = min($total_pages, $current_page + 2);
-                    for ($i = $start; $i <= $end; $i++):
-                    ?>
-                        <a href="?page=<?php echo $i; ?><?php echo $lang_param; ?><?php echo $search_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border transition <?php echo $i == $current_page ? 'bg-[#004D4A] text-white border-[#004D4A]' : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'; ?>"><?php echo $i; ?></a>
+                    if ($start > 1): ?>
+                        <a href="?page=1<?php echo $base_params; ?>" class="<?php echo $pg_idle; ?>">1</a>
+                        <?php if ($start > 2): ?><span class="<?php echo $pg_dots; ?>">...</span><?php endif; ?>
+                    <?php endif; ?>
+                    <?php for ($i = $start; $i <= $end; $i++): ?>
+                        <a href="?page=<?php echo $i; ?><?php echo $base_params; ?>" class="<?php echo $i == $current_page ? $pg_active : $pg_idle; ?>"><?php echo $i; ?></a>
                     <?php endfor; ?>
+                    <?php if ($end < $total_pages): ?>
+                        <?php if ($end < $total_pages - 1): ?><span class="<?php echo $pg_dots; ?>">...</span><?php endif; ?>
+                        <a href="?page=<?php echo $total_pages; ?><?php echo $base_params; ?>" class="<?php echo $pg_idle; ?>"><?php echo $total_pages; ?></a>
+                    <?php endif; ?>
 
                     <?php if ($current_page < $total_pages): ?>
-                        <a href="?page=<?php echo $current_page + 1; ?><?php echo $lang_param; ?><?php echo $search_param; ?>" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Next</a>
+                        <a href="?page=<?php echo $current_page + 1; ?><?php echo $base_params; ?>" class="<?php echo $pg_idle; ?>" title="Next">&rsaquo;</a>
+                        <a href="?page=<?php echo $total_pages; ?><?php echo $base_params; ?>" class="<?php echo $pg_idle; ?>" title="Last">&raquo;</a>
                     <?php endif; ?>
                 </div>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Page <?php echo $current_page; ?> of <?php echo $total_pages; ?></span>
             </div>
             <?php endif; ?>
         </div>

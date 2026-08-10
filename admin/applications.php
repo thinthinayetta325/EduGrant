@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
                 $stmt->close();
             }
         } elseif ($action === 'reject') {
-            $reject_reason = trim($_POST['reject_reason'] ?? '');
+            $reject_reason = urldecode(trim($_POST['reject_reason'] ?? ''));
             $conn->query("UPDATE applications SET status='Rejected', approved_by=$admin_id, approved_at=NOW() WHERE id=$id AND status NOT IN ('Approved','Rejected')");
 
             // Save rejection reason in application_reviews
@@ -306,11 +306,11 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
                 <a href="applications.php?status=Approved&amp;lang=<?php echo $lang_param; ?><?php echo $search_qs; ?>" class="status-link <?php echo $status_filter === 'Approved' ? 'active' : ''; ?>">Approved</a>
                 <a href="applications.php?status=Rejected&amp;lang=<?php echo $lang_param; ?><?php echo $search_qs; ?>" class="status-link <?php echo $status_filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
                 <div style="flex-grow:1;"></div>
-                <form method="get" action="applications.php" style="display:flex; gap:8px; align-items:center; margin:0;">
+                <form method="get" action="applications.php" style="display:flex; gap:8px; align-items:center; margin:0;" id="searchForm">
                     <input type="hidden" name="lang" value="<?php echo $lang_param; ?>">
                     <?php if ($status_filter): ?><input type="hidden" name="status" value="<?php echo htmlspecialchars($status_filter); ?>"><?php endif; ?>
-                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="form-input" placeholder="🔍 Search name, scheme or ID..." style="width:200px;" autocomplete="off">
-                    <button type="submit" class="btn-blue-sm">Search</button>
+                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="form-input" placeholder="🔍 Search name, scheme or ID..." style="width:200px;" autocomplete="off" id="searchInput">
+                    <button type="submit" class="btn-blue-sm" style="display:none;">Search</button>
                     <?php if ($search !== ''): ?>
                         <a href="applications.php?lang=<?php echo $lang_param; ?><?php echo $status_filter ? '&amp;status=' . urlencode($status_filter) : ''; ?>" class="action-link" style="font-size:11px;">Clear</a>
                     <?php endif; ?>
@@ -421,6 +421,32 @@ $apps = $conn->query("SELECT a.*, s.name AS student_name, s.roll_no, sc.scheme_n
     
 </div>
 
+    <script>
+        (function () {
+            var input = document.getElementById('searchInput');
+            var form = document.getElementById('searchForm');
+            if (!input || !form) return;
+            var timer = null;
+            input.addEventListener('input', function () {
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    var val = input.value.trim();
+                    if (val === '<?php echo htmlspecialchars($search, ENT_QUOTES); ?>') return;
+                    var url = new URL(form.action, window.location.href);
+                    url.searchParams.set('lang', '<?php echo $lang_param; ?>');
+                    <?php if ($status_filter): ?>
+                    url.searchParams.set('status', '<?php echo htmlspecialchars($status_filter, ENT_QUOTES); ?>');
+                    <?php endif; ?>
+                    if (val !== '') {
+                        url.searchParams.set('search', val);
+                    } else {
+                        url.searchParams.delete('search');
+                    }
+                    window.location.href = url.toString();
+                }, 400);
+            });
+        })();
+    </script>
 </body>
 </html>
 <?php $conn->close(); ?>

@@ -58,7 +58,7 @@ style="<?php echo $is_mm ? "font-family:'Padauk','Pyidaungsu',sans-serif;" : '';
 <div>
 
 <h3 class="text-white text-2xl font-bold mb-4">
-EduGrant Myanmar
+Educatin Scholarship 
 </h3>
 
 <p class="leading-7 text-slate-200">
@@ -202,7 +202,7 @@ class="hover:text-white transition">
 
 <p class="text-center text-sm text-slate-100">
 
-© 2026 EduGrant Myanmar.
+© 2026 Education Scholarship Myanmar.
 <?php echo $f_lang['rights']; ?>
 
 </p>

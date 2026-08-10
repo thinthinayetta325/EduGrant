@@ -224,9 +224,10 @@ $current_page = 'applications';
                     <input type="hidden" name="redirect_user" value="1">
                     <button type="submit" name="action" value="approve" class="btn-primary" style="padding:6px 14px;font-size:11px;" onclick="return confirm('Approve this application?')">✓ Approve</button>
                 </form>
-                <form method="POST" action="applications.php" style="display:inline;" onsubmit="var r=prompt('Enter rejection reason:');if(!r){return false;}this.insertAdjacentHTML('beforeend','<input type=hidden name=reject_reason value='+encodeURIComponent(r)+'>');">
+                <form method="POST" action="applications.php" style="display:inline;" onsubmit="var r=prompt('Enter rejection reason:');if(r===null||r.trim()===''){return false;}this.reject_reason.value=r;">
                     <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
                     <input type="hidden" name="redirect_user" value="1">
+                    <input type="hidden" name="reject_reason" value="">
                     <button type="submit" name="action" value="reject" class="btn-red" style="padding:6px 14px;font-size:11px;">✕ Reject</button>
                 </form>
             </div>

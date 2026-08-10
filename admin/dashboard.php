@@ -107,11 +107,20 @@ $recent_apps = $conn->query("SELECT a.id, a.application_no, s.name AS student_na
 $status_counts = $conn->query("SELECT status, COUNT(*) AS cnt FROM applications GROUP BY status");
 $chart_data = [];
 $chart_max = 1;
+$status_colors_map = ['Submitted'=>'#006D69','Under Review'=>'#f59e0b','Recommended'=>'#10b981','Approved'=>'#0d9488','Rejected'=>'#ef4444'];
 if ($status_counts) {
     while ($s = $status_counts->fetch_assoc()) {
         $chart_data[] = $s;
         if ($s['cnt'] > $chart_max) $chart_max = $s['cnt'];
     }
+}
+$pie_labels = [];
+$pie_values = [];
+$pie_colors = [];
+foreach ($chart_data as $c) {
+    $pie_labels[] = $c['status'];
+    $pie_values[] = (int)$c['cnt'];
+    $pie_colors[] = $status_colors_map[$c['status']] ?? '#94a3b8';
 }
 
 $schemes_quick = $conn->query("SELECT scheme_name, amount FROM schemes WHERE status='Active' ORDER BY id DESC LIMIT 4");
@@ -130,6 +139,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
     <title>Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -834,21 +844,28 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
                         <h3><?php echo $sidebar_lang['application_status']; ?></h3>
                         <p class="card-subtitle">Breakdown of all submissions</p>
                     </div>
-                    <a href="applications.php" class="card-action">View All →</a>
                 </div>
-                <div class="chart-bar-group">
-                    <?php
-                    $colors = ['Submitted'=>'#006D69','Under Review'=>'#f59e0b','Recommended'=>'#10b981','Approved'=>'#0d9488','Rejected'=>'#ef4444'];
-                    foreach ($chart_data as $c):
-                        $pct = $c['cnt'] > 0 ? round(($c['cnt'] / $chart_max) * 100) : 0;
-                    ?>
-                    <div class="chart-row">
-                        <span class="chart-label"><?php echo $c['status']; ?></span>
-                        <div class="chart-track">
-                            <div class="chart-fill" style="width:<?php echo $pct; ?>%;background:<?php echo $colors[$c['status']] ?? '#94a3b8'; ?>;"><?php echo $c['cnt']; ?></div>
-                        </div>
+                <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;flex:1;">
+                    <div style="width:200px;height:200px;margin:0 auto;position:relative;">
+                        <canvas id="statusPieChart"></canvas>
                     </div>
-                    <?php endforeach; ?>
+                    <div style="flex:1;min-width:170px;">
+                        <?php foreach ($chart_data as $i => $c):
+                            $total_cnt = array_sum($pie_values) ?: 1;
+                            $pct = round(($c['cnt'] / $total_cnt) * 100);
+                        ?>
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span style="width:10px;height:10px;border-radius:3px;background:<?php echo $pie_colors[$i] ?? '#94a3b8'; ?>;display:inline-block;"></span>
+                                    <span style="font-size:12px;font-weight:500;color:var(--text-secondary);"><?php echo htmlspecialchars($c['status']); ?></span>
+                                </div>
+                                <span style="font-size:12px;font-weight:700;color:var(--text-primary);"><?php echo $c['cnt']; ?> <span style="color:var(--text-muted);font-weight:400;">(<?php echo $pct; ?>%)</span></span>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php if (empty($chart_data)): ?>
+                            <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">No application data yet</div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
 
@@ -882,6 +899,52 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
     </div>
 </div>
 
+    <script>
+    (function () {
+        var ctx = document.getElementById('statusPieChart');
+        if (!ctx || !window.Chart) return;
+        var labels = <?php echo json_encode($pie_labels); ?>;
+        var values = <?php echo json_encode($pie_values); ?>;
+        var colors = <?php echo json_encode($pie_colors); ?>;
+        if (!values.length) return;
+        var dark = document.documentElement.classList.contains('dark-mode');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderColor: dark ? '#1e293b' : '#ffffff',
+                    borderWidth: 3,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '62%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: dark ? '#1e293b' : '#0f172a',
+                        titleColor: '#fff',
+                        bodyColor: '#e2e8f0',
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function (c) {
+                                var total = values.reduce(function (a, b) { return a + b; }, 0);
+                                var pct = total ? Math.round((c.parsed / total) * 100) : 0;
+                                return ' ' + c.label + ': ' + c.parsed + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })();
+    </script>
 </body>
 </html>
 <?php $conn->close(); ?>
