@@ -37,6 +37,7 @@ $sidebar_lang = $is_mm ? [
 // include "header.php";
 $date_from = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
 $date_to = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
+$sem_names = ['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth'];
 function is_valid_date($d) { return (bool)preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); }
 
 $app_date_where = '';
@@ -91,6 +92,35 @@ $disbursements = $conn->query("SELECT pr.*, s.name AS student_name, s.roll_no, s
     WHERE 1=1 $pay_date_where
     ORDER BY pr.payment_date DESC");
 $current_page = 'reports';
+
+if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="disbursements_report.xls"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body>';
+    echo '<table border="1">';
+    echo '<tr><th>No.</th><th>Student</th><th>Roll No</th><th>Scheme</th><th>Bank</th><th>Amount (MMK)</th><th>Year</th><th>Semester</th><th>Date</th></tr>';
+    if ($disbursements && $disbursements->num_rows > 0) {
+        $no = 1;
+        while ($d = $disbursements->fetch_assoc()) {
+            echo '<tr>';
+            echo '<td>' . $no++ . '</td>';
+            echo '<td>' . htmlspecialchars($d['student_name']) . '</td>';
+            echo '<td>' . htmlspecialchars($d['roll_no'] ?? '-') . '</td>';
+            echo '<td>' . htmlspecialchars($d['scheme_name']) . '</td>';
+            echo '<td>' . htmlspecialchars($d['bank_name'] ?? 'N/A') . '</td>';
+            echo '<td>' . number_format(floatval($d['amount'])) . '</td>';
+            echo '<td>' . htmlspecialchars($d['academic_year'] ?? '-') . '</td>';
+            echo '<td>' . htmlspecialchars($d['semester'] ?? '-') . '</td>';
+            echo '<td>' . htmlspecialchars($d['payment_date'] ?? '-') . '</td>';
+            echo '</tr>';
+        }
+    }
+    echo '</table></body></html>';
+    $conn->close();
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -300,14 +330,25 @@ $current_page = 'reports';
         </div>
 
         <div class="admin-card" id="disbursements-section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;" class="report-toolbar">
                 <div>
                     <h2 class="card-title">💵 Disbursements</h2>
                     <p class="card-subtitle">All payment records</p>
                 </div>
-                <button onclick="printDisbursements()" class="btn-blue-sm" style="display:flex;align-items:center;gap:6px;">
-                    🖨️ Print
-                </button>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <select id="semFilter" class="date-input" style="cursor:pointer;">
+                        <option value="">All Semesters</option>
+                        <?php foreach ($sem_names as $sn): ?>
+                            <option value="<?php echo $sn; ?> Semester"><?php echo $sn; ?> Semester</option>
+                        <?php endforeach; ?>
+                    </select>
+                    <a href="reports.php?export=excel&lang=<?php echo $lang_param; ?><?php echo is_valid_date($date_from) ? '&date_from=' . $date_from : ''; ?><?php echo is_valid_date($date_to) ? '&date_to=' . $date_to : ''; ?>" class="btn-green-sm" style="display:flex;align-items:center;gap:6px;">
+                        📊 Export Excel
+                    </a>
+                    <button onclick="printDisbursements()" class="btn-blue-sm" style="display:flex;align-items:center;gap:6px;">
+                        🖨️ Print
+                    </button>
+                </div>
             </div>
 
             <table class="admin-table">
@@ -439,34 +480,97 @@ function setRange(type) {
     from.form.submit();
 }
 
-document.getElementById('liveSearch').addEventListener('input', function() {
-    var query = this.value.toLowerCase();
+function applyDisbursementFilter() {
+    var semEl = document.getElementById('semFilter');
+    var sem = semEl ? semEl.value.toLowerCase() : '';
+    var searchEl = document.getElementById('liveSearch');
+    var query = searchEl ? searchEl.value.toLowerCase() : '';
     var rows = document.querySelectorAll('#disbursements-section .admin-table tbody tr');
+    var no = 1;
     rows.forEach(function(row) {
         if (row.querySelector('td[colspan]')) return;
         var text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
+        var semCell = row.children[7] ? row.children[7].textContent.toLowerCase() : '';
+        var show = text.includes(query) && (sem === '' || semCell.includes(sem));
+        row.style.display = show ? '' : 'none';
+        if (show) row.children[0].textContent = no++;
     });
-});
+}
+
+var semFilterEl = document.getElementById('semFilter');
+if (semFilterEl) semFilterEl.addEventListener('change', applyDisbursementFilter);
+var liveSearchEl = document.getElementById('liveSearch');
+if (liveSearchEl) liveSearchEl.addEventListener('input', applyDisbursementFilter);
 
 function printDisbursements() {
-    var content = document.getElementById('disbursements-section').innerHTML;
-    var printWindow = window.open('', '_blank');
-    printWindow.document.write('<html><head><title>Disbursements Report</title>');
-    printWindow.document.write('<style>');
-    printWindow.document.write('body { font-family: sans-serif; padding: 20px; }');
-    printWindow.document.write('table { width: 100%; border-collapse: collapse; font-size: 12px; }');
-    printWindow.document.write('th, td { padding: 8px; border: 1px solid #e2e8f0; text-align: left; }');
-    printWindow.document.write('th { background: #f8fafc; font-weight: bold; }');
-    printWindow.document.write('h2 { margin-bottom: 10px; }');
-    printWindow.document.write('p { color: #64748b; margin-bottom: 15px; }');
-    printWindow.document.write('button { display: none; }');
-    printWindow.document.write('</style></head><body>');
-    printWindow.document.write(content);
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+    var section = document.getElementById('disbursements-section');
+    var clone = section.cloneNode(true);
+
+    var toolbar = clone.querySelector('.report-toolbar');
+    if (toolbar) toolbar.remove();
+
+    var rows = clone.querySelectorAll('.admin-table tbody tr');
+    var visible = [];
+    rows.forEach(function(row) {
+        if (row.querySelector('td[colspan]')) return;
+        if (row.style.display === 'none') { row.remove(); return; }
+        visible.push(row);
+    });
+
+    if (!visible.length) {
+        alert('No records to print.');
+        return;
+    }
+
+    var no = 1;
+    visible.forEach(function(row) { row.children[0].textContent = no++; });
+
+    var semSel = document.getElementById('semFilter');
+    var semText = semSel && semSel.value ? semSel.value : 'All Semesters';
+    var fromEl = document.getElementById('dateFrom');
+    var toEl = document.getElementById('dateTo');
+    var rangeText = '';
+    if (fromEl && fromEl.value) rangeText += 'From: ' + fromEl.value + ' ';
+    if (toEl && toEl.value) rangeText += 'To: ' + toEl.value + ' ';
+
+    var html = '<html><head><title>Disbursements Report</title><style>';
+    html += 'body { font-family: sans-serif; padding: 20px; }';
+    html += 'h2 { margin: 0 0 4px 0; }';
+    html += 'p { color: #64748b; margin: 0 0 15px 0; font-size: 12px; }';
+    html += 'table { width: 100%; border-collapse: collapse; font-size: 12px; }';
+    html += 'th, td { padding: 8px; border: 1px solid #e2e8f0; text-align: left; }';
+    html += 'th { background: #f8fafc; font-weight: bold; }';
+    html += '</style></head><body>';
+    html += '<h2>Disbursements Report</h2>';
+    html += '<p>Semester: ' + semText + (rangeText ? ' &nbsp;|&nbsp; ' + rangeText.trim() : '') + '</p>';
+    html += clone.innerHTML;
+    html += '</body></html>';
+
+    var iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    var win = iframe.contentWindow;
+    var doc = win.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    function cleanup() {
+        if (iframe.parentNode) document.body.removeChild(iframe);
+    }
+    win.focus();
+    win.onafterprint = cleanup;
+    if (win.matchMedia && win.matchMedia.addEventListener) {
+        win.matchMedia('print').addEventListener('change', function (e) { if (!e.matches) cleanup(); });
+    }
+    win.print();
+    setTimeout(cleanup, 10000);
 }
 </script>
 

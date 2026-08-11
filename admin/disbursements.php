@@ -35,15 +35,30 @@ $sidebar_lang = $is_mm ? [
     'page_title' => 'Disbursements',
 ];
 // include "header.php";
+$sem_names = ['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'add') {
+    if ($_POST['action'] === 'continue') {
         $recipient_id = (int)$_POST['recipient_id'];
-        $bank_id = (int)$_POST['bank_id'];
-        $amount = $conn->real_escape_string($_POST['amount']);
-        $year = $conn->real_escape_string($_POST['academic_year']);
-        $sem = $conn->real_escape_string($_POST['semester']);
-        $date = $conn->real_escape_string($_POST['payment_date']);
-$conn->query("INSERT INTO payment_records (recipient_id, bank_id, amount, academic_year, semester, payment_date) VALUES ($recipient_id, $bank_id, '$amount', '$year', '$sem', '$date')");    }
+        $last = $conn->query("SELECT * FROM payment_records WHERE recipient_id = $recipient_id ORDER BY id DESC LIMIT 1")->fetch_assoc();
+        if ($last) {
+            $cur_i = array_search(trim(str_replace(' Semester', '', $last['semester'])), $sem_names);
+            if ($cur_i !== false && $cur_i < count($sem_names) - 1) {
+                $next_i = $cur_i + 1;
+                $next_sem = $sem_names[$next_i] . ' Semester';
+                $base_year = (int)substr($last['academic_year'], 0, 4);
+                $next_start = $base_year + (int)floor($next_i / 2);
+                $next_year = $next_start . '-' . ($next_start + 1);
+                $dup = $conn->query("SELECT COUNT(*) FROM payment_records WHERE recipient_id = $recipient_id AND semester = '$next_sem'")->fetch_row()[0];
+                if (!$dup) {
+                    $conn->query("INSERT INTO payment_records (recipient_id, bank_id, amount, academic_year, semester, payment_date) VALUES ($recipient_id, " . (int)$last['bank_id'] . ", " . (float)$last['amount'] . ", '$next_year', '$next_sem', CURDATE())");
+                }
+            }
+        }
+        header("Location: disbursements.php?cont=1");
+        exit();
+    }
+
     header("Location: disbursements.php");
     exit();
 }
@@ -55,14 +70,8 @@ $disbursements = $conn->query("SELECT pr.*, s.name AS student_name, s.roll_no, s
     JOIN student s ON a.student_id = s.id
     JOIN schemes sc ON a.scheme_id = sc.id
     LEFT JOIN bank_details bd ON pr.bank_id = bd.id
-    ORDER BY pr.payment_date DESC");
+    ORDER BY pr.payment_date DESC, pr.id DESC");
 
-$recipients_list = $conn->query("SELECT sr.id, s.name AS student_name, a.application_no
-    FROM scholarship_recipients sr
-    JOIN applications a ON sr.application_id = a.id
-    JOIN student s ON a.student_id = s.id");
-$banks = $conn->query("SELECT bd.id, bd.bank_name, bd.account_number, s.name AS student_name
-    FROM bank_details bd JOIN student s ON bd.student_id = s.id");
 $current_page = 'disbursements';
 ?>
 <!DOCTYPE html>
@@ -127,16 +136,9 @@ $current_page = 'disbursements';
         .badge-paid { background-color: #dcfce7; color: #15803d; }
         .btn-green-sm { background-color: #10b981; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
         .btn-blue-sm { background-color: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        .form-input, .form-select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; box-sizing: border-box; margin-bottom: 10px; }
-        .field-lbl { display: block; font-size: 11px; font-weight: bold; color: #475569; margin-bottom: 4px; }
+        .form-input { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; box-sizing: border-box; margin-bottom: 10px; }
         .bottom-bar { background-color: #003D3B; color: #94a3b8; font-size: 11px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
         .bottom-links a { color: #fff; text-decoration: none; margin-left: 15px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-overlay.show { display: flex; }
-        .modal-box { background: #fff; border-radius: 10px; padding: 25px; width: 500px; max-height: 80vh; overflow-y: auto; }
-        .modal-box h3 { margin-bottom: 15px; font-size: 16px; }
-        .close-btn { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
         .summary-strip { display: flex; gap: 15px; margin-bottom: 20px; }
         .summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; flex: 1; text-align: center; }
         .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
@@ -170,10 +172,6 @@ $current_page = 'disbursements';
         html.dark-mode .field-lbl { color: #94a3b8; }
         html.dark-mode .bottom-bar { background: #0f172a; border-top-color: #334155; }
         html.dark-mode .bottom-links a { color: #94a3b8; }
-        html.dark-mode .modal-overlay { background: rgba(15,23,42,0.7); }
-        html.dark-mode .modal-box { background: #1e293b; border-color: #334155; }
-        html.dark-mode .modal-box h3 { color: #f1f5f9; }
-        html.dark-mode .close-btn { color: #94a3b8; }
         html.dark-mode .language-switch { background: linear-gradient(135deg, #334155, #1e293b); border-color: #475569; }
         html.dark-mode .profile-link { background: #334155; border-color: #475569; }
         html.dark-mode .profile-dropdown-menu { background: #1e293b; border-color: #334155; }
@@ -200,10 +198,19 @@ $current_page = 'disbursements';
                     <h2 class="card-title">💵 <?php echo $sidebar_lang['page_title']; ?></h2>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <input type="text" id="liveSearch" class="form-input" placeholder="🔍 Search name, scheme..." style="width:220px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;margin-bottom:0;" autocomplete="off">
-                    <button class="btn-green-sm" onclick="openModal('addModal')">+ New Disbursement</button>
+                    <input type="text" id="liveSearch" class="form-input" placeholder="🔍 Search name, scheme, semester..." style="width:220px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;margin-bottom:0;" autocomplete="off">
+                    <select id="semFilter" class="form-input" style="width:150px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;margin-bottom:0;cursor:pointer;">
+                        <option value="">All Semesters</option>
+                        <?php foreach ($sem_names as $sn): ?>
+                            <option value="<?php echo $sn; ?> Semester"><?php echo $sn; ?> Semester</option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
+
+            <?php if (isset($_GET['cont'])): ?>
+                <div style="background:#dcfce7; color:#15803d; padding:10px 14px; border-radius:6px; font-size:12px; margin-bottom:15px;">✔ Next semester disbursement created successfully.</div>
+            <?php endif; ?>
 
             <?php
             $total_disbursed = 0;
@@ -239,11 +246,19 @@ $current_page = 'disbursements';
                         <th>Year</th>
                         <th>Semester</th>
                         <th>Date</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if ($count > 0): ?>
-                        <?php $no = 1; while ($row = $disbursements->fetch_assoc()): ?>
+                        <?php $no = 1; $seen_cont = []; while ($row = $disbursements->fetch_assoc()): ?>
+                            <?php
+                            $rid = (int)$row['recipient_id'];
+                            $cur_i = array_search(trim(str_replace(' Semester', '', $row['semester'] ?? '')), $sem_names);
+                            $show_cont = !isset($seen_cont[$rid]) && $cur_i !== false && $cur_i < count($sem_names) - 1;
+                            $seen_cont[$rid] = true;
+                            $next_sem_label = $show_cont ? $sem_names[$cur_i + 1] . ' Semester' : '';
+                            ?>
                             <tr>
                                 <td><?php echo $no++; ?></td>
                                 <td><strong><?php echo htmlspecialchars($row['student_name']); ?></strong></td>
@@ -253,10 +268,21 @@ $current_page = 'disbursements';
                                 <td><?php echo $row['academic_year']; ?></td>
                                 <td><?php echo $row['semester']; ?></td>
                                 <td><?php echo $row['payment_date']; ?></td>
+                                <td>
+                                    <?php if ($show_cont): ?>
+                                        <form method="POST" style="display:inline;margin:0;">
+                                            <input type="hidden" name="action" value="continue">
+                                            <input type="hidden" name="recipient_id" value="<?php echo $rid; ?>">
+                                            <button type="submit" class="btn-green-sm" style="padding:4px 10px; font-size:10px; margin:0;">Continue ➜ <?php echo htmlspecialchars($next_sem_label); ?></button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span style="color:#cbd5e1; font-size:11px;">—</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">No disbursement records found.</td></tr>
+                        <tr><td colspan="9" style="text-align:center; padding:20px; color:#94a3b8;">No disbursement records found.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -265,81 +291,46 @@ $current_page = 'disbursements';
     </div>
 </div>
 
-<div id="addModal" class="modal-overlay">
-    <div class="modal-box">
-        <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
-        <h3>➕ New Disbursement</h3>
-        <form method="POST">
-            <input type="hidden" name="action" value="add">
-            <div class="grid-2">
-                <div>
-                    <label class="field-lbl">Recipient</label>
-                    <select name="recipient_id" class="form-select" required>
-                        <option value="">-- Select --</option>
-                        <?php if ($recipients_list): while ($r = $recipients_list->fetch_assoc()): ?>
-                            <option value="<?php echo $r['id']; ?>"><?php echo htmlspecialchars($r['student_name'] . ' (' . $r['application_no'] . ')'); ?></option>
-                        <?php endwhile; endif; ?>
-                    </select>
-                </div>
-                <div>
-                    <label class="field-lbl">Bank Account</label>
-                    <select name="bank_id" class="form-select" required>
-                        <option value="">-- Select --</option>
-                        <?php if ($banks): $banks->data_seek(0); while ($b = $banks->fetch_assoc()): ?>
-                            <option value="<?php echo $b['id']; ?>"><?php echo htmlspecialchars($b['bank_name'] . ' - ' . $b['account_number'] . ' (' . $b['student_name'] . ')'); ?></option>
-                        <?php endwhile; endif; ?>
-                    </select>
-                </div>
-                <div>
-                    <label class="field-lbl">Amount (MMK)</label>
-                    <input type="number" name="amount" class="form-input" required>
-                </div>
-                <div>
-                    <label class="field-lbl">Academic Year</label>
-                    <select name="academic_year" class="form-select">
-                        <option value="2026-2027">2026-2027</option>
-                        <option value="2025-2026">2025-2026</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="field-lbl">Semester</label>
-                    <select name="semester" class="form-select">
-                        <?php
-                        $sem_names = ['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth'];
-                        foreach ($sem_names as $i => $sn):
-                        ?>
-                            <option value="<?php echo $sn; ?> Semester"><?php echo $sn; ?> Semester</option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label class="field-lbl">Payment Date</label>
-                    <input type="date" name="payment_date" class="form-input" value="<?php echo date('Y-m-d'); ?>">
-                </div>
-            </div>
-            <button type="submit" class="btn-blue-sm" style="width:100%;">Create Disbursement</button>
-        </form>
-    </div>
-</div>
-
 <script>
-document.getElementById('liveSearch').addEventListener('input', function() {
-    var query = this.value.toLowerCase();
+function applyFilter() {
+    var query = document.getElementById('liveSearch').value.toLowerCase();
+    var sem = document.getElementById('semFilter').value.toLowerCase();
+    var semIndex = -1;
+    var headers = document.querySelectorAll('.admin-table thead th');
+    for (var h = 0; h < headers.length; h++) {
+        if (headers[h].textContent.trim().toLowerCase() === 'semester') { semIndex = h; break; }
+    }
     var rows = document.querySelectorAll('.admin-table tbody tr');
+    var visibleCount = 0;
+    var visibleTotal = 0;
+    var no = 1;
     rows.forEach(function(row) {
         if (row.querySelector('td[colspan]')) return;
-        var text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
+        var text = '';
+        for (var i = 0; i < row.children.length - 1; i++) {
+            text += row.children[i].textContent.toLowerCase() + ' ';
+        }
+        var semCell = semIndex >= 0 && row.children[semIndex] ? row.children[semIndex].textContent.toLowerCase() : '';
+        var matchText = text.includes(query);
+        var matchSem = sem === '' || semCell.includes(sem);
+        var show = matchText && matchSem;
+        row.style.display = show ? '' : 'none';
+        if (show) {
+            var amount = parseFloat((row.children[4] ? row.children[4].textContent : '').replace(/,/g, '')) || 0;
+            visibleCount++;
+            visibleTotal += amount;
+            row.children[0].textContent = no++;
+        }
     });
-});
+    var boxes = document.querySelectorAll('.summary-box .num');
+    if (boxes.length >= 2) {
+        boxes[0].textContent = visibleCount;
+        boxes[1].textContent = visibleTotal.toLocaleString('en-US');
+    }
+}
 
-function openModal(id) { document.getElementById(id).classList.add('show'); }
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-document.querySelectorAll('.modal-overlay').forEach(el => {
-    el.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('show');
-    });
-});
+document.getElementById('liveSearch').addEventListener('input', applyFilter);
+document.getElementById('semFilter').addEventListener('change', applyFilter);
 </script>
 </body>
 </html>

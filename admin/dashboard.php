@@ -74,6 +74,21 @@ $sidebar_lang = $is_mm ? [
     'all' => 'All',
 ];
 // include "header.php";
+$date_from = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
+$date_to = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
+function is_valid_date($d) { return (bool)preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); }
+
+$app_date_where = '';
+$pay_date_where = '';
+if (is_valid_date($date_from)) {
+    $app_date_where .= " AND a.apply_date >= '$date_from'";
+    $pay_date_where .= " AND pr.payment_date >= '$date_from'";
+}
+if (is_valid_date($date_to)) {
+    $app_date_where .= " AND a.apply_date <= '$date_to 23:59:59'";
+    $pay_date_where .= " AND pr.payment_date <= '$date_to 23:59:59'";
+}
+
 $pending_bank = $conn->query("SELECT COUNT(*) FROM applications a LEFT JOIN bank_details b ON a.student_id = b.student_id WHERE a.status='Approved' AND b.id IS NULL")->fetch_row()[0] ?? 0;
 
 $pending_bank_list = $conn->query("SELECT a.id, a.application_no, s.name AS student_name, sc.scheme_name
@@ -85,10 +100,10 @@ $pending_bank_list = $conn->query("SELECT a.id, a.application_no, s.name AS stud
     ORDER BY a.approved_at DESC LIMIT 5");
 
 $total_schemes = $conn->query("SELECT COUNT(*) FROM schemes")->fetch_row()[0] ?? 0;
-$total_apps = $conn->query("SELECT COUNT(*) FROM applications")->fetch_row()[0] ?? 0;
-$pending_apps = $conn->query("SELECT COUNT(*) FROM applications WHERE status = 'Submitted' OR status = 'Under Review'")->fetch_row()[0] ?? 0;
-$approved_apps = $conn->query("SELECT COUNT(*) FROM applications WHERE status = 'Approved'")->fetch_row()[0] ?? 0;
-$total_disbursed = $conn->query("SELECT COALESCE(SUM(amount),0) FROM payment_records")->fetch_row()[0] ?? 25000000;
+$total_apps = $conn->query("SELECT COUNT(*) FROM applications a WHERE 1=1 $app_date_where")->fetch_row()[0] ?? 0;
+$pending_apps = $conn->query("SELECT COUNT(*) FROM applications a WHERE (status = 'Submitted' OR status = 'Under Review') $app_date_where")->fetch_row()[0] ?? 0;
+$approved_apps = $conn->query("SELECT COUNT(*) FROM applications a WHERE status = 'Approved' $app_date_where")->fetch_row()[0] ?? 0;
+$total_disbursed = $conn->query("SELECT COALESCE(SUM(pr.amount),0) FROM payment_records pr WHERE 1=1 $pay_date_where")->fetch_row()[0] ?? 25000000;
 $total_students = $conn->query("SELECT COUNT(*) FROM student")->fetch_row()[0] ?? 0;
 
 $recent_apps = $conn->query("SELECT a.id, a.application_no, s.name AS student_name, s.roll_no, sc.scheme_name,
@@ -101,10 +116,11 @@ $recent_apps = $conn->query("SELECT a.id, a.application_no, s.name AS student_na
     JOIN schemes sc ON a.scheme_id = sc.id
     LEFT JOIN application_reviews ar ON a.id = ar.application_id
     LEFT JOIN reviewers r ON ar.reviewer_id = r.id
+    WHERE 1=1 $app_date_where
     GROUP BY a.id
     ORDER BY a.id DESC LIMIT 5");
 
-$status_counts = $conn->query("SELECT status, COUNT(*) AS cnt FROM applications GROUP BY status");
+$status_counts = $conn->query("SELECT status, COUNT(*) AS cnt FROM applications a WHERE 1=1 $app_date_where GROUP BY status");
 $chart_data = [];
 $chart_max = 1;
 $status_colors_map = ['Submitted'=>'#006D69','Under Review'=>'#f59e0b','Recommended'=>'#10b981','Approved'=>'#0d9488','Rejected'=>'#ef4444'];
@@ -663,6 +679,14 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         .welcome-banner .btn-primary { background: #FFD700; color: #004D4A; }
         .welcome-banner .btn-primary:hover { background: #fff; color: #006D69; }
 
+        .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; }
+        .filter-label { font-size: 11px; font-weight: bold; color: #64748b; }
+        .filter-range { font-size: 11px; font-weight: bold; color: #006D69; background: rgba(0,109,105,0.08); padding: 4px 10px; border-radius: 20px; }
+        .date-input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; background: #fff; color: #1e293b; font-family: inherit; }
+        .preset-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #334155; text-decoration: none; padding: 7px 14px; border-radius: 8px; background: #fff; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: all 0.15s ease; cursor: pointer; font-family: inherit; }
+        .preset-btn:hover { border-color: #006D69; color: #006D69; background: #f0fdfa; box-shadow: 0 2px 6px rgba(0,109,105,0.15); transform: translateY(-1px); }
+        .preset-btn:active { transform: translateY(0); }
+
         /* Dark Mode */
         html.dark-mode .sidebar { background: #1e293b; }
         html.dark-mode .sidebar-brand { border-bottom-color: rgba(255,255,255,0.06); }
@@ -696,6 +720,12 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         html.dark-mode .badge-rejected { background: rgba(220,38,38,0.15); color: #f87171; }
         html.dark-mode .badge-under-review, html.dark-mode .badge-under\ review { background: rgba(245,158,11,0.15); color: #fbbf24; }
         html.dark-mode .recipient-avatars span { border-color: #1e293b; }
+        html.dark-mode .filter-bar { background: #1e293b; border-color: #334155; }
+        html.dark-mode .filter-label { color: #94a3b8; }
+        html.dark-mode .filter-range { background: rgba(16,185,129,0.15); color: #4ade80; }
+        html.dark-mode .date-input { background: #1e293b; border-color: #475569; color: #f1f5f9; }
+        html.dark-mode .preset-btn { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+        html.dark-mode .preset-btn:hover { border-color: #10b981; color: #4ade80; background: rgba(16,185,129,0.1); }
     </style>
     <style>
         /* Override admin-style.php for dashboard */
@@ -724,6 +754,30 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
     <?php include 'header.php'; ?>
 
     <div class="dashboard-body">
+
+        <div class="filter-bar">
+            <form method="get" action="dashboard.php" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:0;">
+                <input type="hidden" name="lang" value="<?php echo $lang_param; ?>">
+                <span class="filter-label">From</span>
+                <input type="date" name="date_from" value="<?php echo htmlspecialchars($date_from); ?>" class="date-input" id="dateFrom">
+                <span class="filter-label">To</span>
+                <input type="date" name="date_to" value="<?php echo htmlspecialchars($date_to); ?>" class="date-input" id="dateTo">
+                <button type="submit" class="btn-blue-sm" style="padding:8px 18px;">Filter</button>
+                <a href="?lang=<?php echo $lang_param; ?>" class="btn-primary btn-sm" style="text-decoration:none;">Reset</a>
+                <span style="color:#cbd5e1; font-size:11px;">|</span>
+                <a href="javascript:void(0)" class="preset-btn" onclick="setRange('today')">◉ Today</a>
+                <a href="javascript:void(0)" class="preset-btn" onclick="setRange('year')">◧ This Year</a>
+                <?php if (is_valid_date($date_from) || is_valid_date($date_to)): ?>
+                    <span class="filter-range">
+                        <?php
+                        $disp_from = is_valid_date($date_from) ? date('d.m.Y', strtotime($date_from)) : '...';
+                        $disp_to = is_valid_date($date_to) ? date('d.m.Y', strtotime($date_to)) : '...';
+                        echo 'Showing: ' . $disp_from . ' – ' . $disp_to;
+                        ?>
+                    </span>
+                <?php endif; ?>
+            </form>
+        </div>
 
         <!-- <div class="welcome-banner">
             <div>
@@ -945,6 +999,37 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
         });
     })();
     </script>
+
+<script>
+function setRange(type) {
+    var from = document.getElementById('dateFrom');
+    var to = document.getElementById('dateTo');
+    var now = new Date();
+    function fmt(d) {
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+    if (type === 'today') {
+        from.value = fmt(now);
+        to.value = fmt(now);
+    } else if (type === 'week') {
+        var day = now.getDay() || 7;
+        var start = new Date(now);
+        start.setDate(now.getDate() - day + 1);
+        from.value = fmt(start);
+        to.value = fmt(now);
+    } else if (type === 'month') {
+        from.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+        to.value = fmt(now);
+    } else if (type === 'year') {
+        from.value = now.getFullYear() + '-01-01';
+        to.value = fmt(now);
+    }
+    from.form.submit();
+}
+</script>
 </body>
 </html>
 <?php $conn->close(); ?>
