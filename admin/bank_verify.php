@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/mailer.php';
 if (!isset($_SESSION['admin_id'])) {
     header("Location: ../auth/login.php");
     exit();
@@ -68,6 +69,18 @@ $conn->query("CREATE TABLE IF NOT EXISTS receipts (
     FOREIGN KEY (uploaded_by) REFERENCES admin(id)
 )");
 
+// Auto-migration: email tracking columns on notifications
+$col_check = $conn->query("SHOW COLUMNS FROM notifications LIKE 'application_id'");
+if ($col_check && $col_check->num_rows === 0) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN application_id INT DEFAULT NULL, ADD INDEX (application_id)");
+}
+$col_check = $conn->query("SHOW COLUMNS FROM notifications LIKE 'email_status'");
+if ($col_check && $col_check->num_rows === 0) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_status ENUM('pending','sent','failed') DEFAULT 'pending'");
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_sent_at DATETIME DEFAULT NULL");
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_error TEXT DEFAULT NULL");
+}
+
 // Handle form submission: verify bank + upload receipt
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $app_id = (int)$_POST['application_id'];
@@ -123,16 +136,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 // Update application payment_status to Paid
                 $conn->query("UPDATE applications SET payment_status = 'Paid' WHERE id = $app_id");
 
-                // Send notification to student
-                $app_info = $conn->query("SELECT application_no FROM applications WHERE id = $app_id")->fetch_assoc();
+                // Send notification to student + send real payment email
+                $student_data = $conn->query("SELECT s.name AS student_name, s.email AS student_email, sc.scheme_name, a.application_no FROM applications a JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id WHERE a.id = $app_id")->fetch_assoc();
                 $title = "Funds Released";
-                $message = "Your scholarship funds for application #{$app_info['application_no']} have been released. Download your receipt now.";
-                $stmt2 = $conn->prepare("INSERT INTO notifications (student_id, title, message, type) VALUES (?, ?, ?, 'disbursement')");
-                $stmt2->bind_param("iss", $stu_id, $title, $message);
+                $message = "Your scholarship funds for application #{$student_data['application_no']} have been released. Download your receipt now.";
+                $stmt2 = $conn->prepare("INSERT INTO notifications (student_id, application_id, title, message, type, email_status) VALUES (?, ?, ?, ?, 'disbursement', 'pending')");
+                $stmt2->bind_param("iiss", $stu_id, $app_id, $title, $message);
                 if (!$stmt2->execute()) {
                     die("Error inserting notification: " . $stmt2->error);
                 }
+                $notif_id = $stmt2->insert_id;
                 $stmt2->close();
+
+                if ($student_data) {
+                    $email_data = [
+                        'student_name'   => $student_data['student_name'],
+                        'scheme_name'    => $student_data['scheme_name'],
+                        'application_no' => $student_data['application_no'],
+                        'amount'         => $amount,
+                        'academic_year'  => $academic_year,
+                        'semester'       => $semester,
+                    ];
+                    $subject = "Scholarship Funds Released";
+                    $email_result = edugrant_send_email($student_data['student_email'], $subject, edugrant_payment_email_body($email_data));
+                    if ($email_result === true) {
+                        $conn->query("UPDATE notifications SET email_status = 'sent', email_sent_at = NOW() WHERE id = $notif_id");
+                    } else {
+                        $conn->query("UPDATE notifications SET email_status = 'failed', email_error = '" . $conn->real_escape_string($email_result) . "' WHERE id = $notif_id");
+                    }
+                }
 
                 header("Location: bank_verify.php?verified=1");
                 exit();
@@ -142,6 +174,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     } elseif ($_POST['action'] === 'reject_bank') {
         $conn->query("UPDATE applications SET status='Rejected' WHERE id=$app_id");
+
+        // Notify the student + send a real rejection email (one per application)
+        $dup_reject = $conn->query("SELECT id FROM notifications WHERE application_id = $app_id AND type = 'rejection' LIMIT 1");
+        if ($dup_reject && $dup_reject->num_rows === 0) {
+            $student_data = $conn->query("SELECT a.student_id, a.application_no, s.name AS student_name, s.email AS student_email, sc.scheme_name FROM applications a JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id WHERE a.id = $app_id")->fetch_assoc();
+            if ($student_data) {
+                $title = "Application Rejected";
+                $message = "Your application #{$student_data['application_no']} has been rejected during bank verification.";
+                $stmt = $conn->prepare("INSERT INTO notifications (student_id, application_id, title, message, type, email_status) VALUES (?, ?, ?, ?, 'rejection', 'pending')");
+                $stmt->bind_param("iiss", $student_data['student_id'], $app_id, $title, $message);
+                $stmt->execute();
+                $notif_id = $stmt->insert_id;
+                $stmt->close();
+
+                $subject = "Application Rejected";
+                $email_result = edugrant_send_email($student_data['student_email'], $subject, edugrant_rejection_email_body($student_data));
+                if ($email_result === true) {
+                    $conn->query("UPDATE notifications SET email_status = 'sent', email_sent_at = NOW() WHERE id = $notif_id");
+                } else {
+                    $conn->query("UPDATE notifications SET email_status = 'failed', email_error = '" . $conn->real_escape_string($email_result) . "' WHERE id = $notif_id");
+                }
+            }
+        }
+
         header("Location: bank_verify.php?rejected=1");
         exit();
     } elseif ($_POST['action'] === 'delete_verified') {

@@ -1,9 +1,22 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/mailer.php';
 if (!isset($_SESSION['admin_id'])) {
     header("Location: ../auth/login.php");
     exit();
+}
+
+// Auto-migration: email tracking + duplicate-prevention columns on notifications
+$col_check = $conn->query("SHOW COLUMNS FROM notifications LIKE 'application_id'");
+if ($col_check && $col_check->num_rows === 0) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN application_id INT DEFAULT NULL, ADD INDEX (application_id)");
+}
+$col_check = $conn->query("SHOW COLUMNS FROM notifications LIKE 'email_status'");
+if ($col_check && $col_check->num_rows === 0) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_status ENUM('pending','sent','failed') DEFAULT 'pending'");
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_sent_at DATETIME DEFAULT NULL");
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_error TEXT DEFAULT NULL");
 }
 
 $admin_name = $_SESSION['admin_name'] ?? "Admin Clerk";
@@ -52,6 +65,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $dup = $conn->query("SELECT COUNT(*) FROM payment_records WHERE recipient_id = $recipient_id AND semester = '$next_sem'")->fetch_row()[0];
                 if (!$dup) {
                     $conn->query("INSERT INTO payment_records (recipient_id, bank_id, amount, academic_year, semester, payment_date) VALUES ($recipient_id, " . (int)$last['bank_id'] . ", " . (float)$last['amount'] . ", '$next_year', '$next_sem', CURDATE())");
+
+                    // Fetch student + scheme details for notification and email
+                    $student_info = $conn->query("SELECT a.student_id, a.id AS application_id, a.application_no, s.name AS student_name, s.email AS student_email, sc.scheme_name FROM scholarship_recipients sr JOIN applications a ON sr.application_id = a.id JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id WHERE sr.id = $recipient_id")->fetch_assoc();
+                    if ($student_info) {
+                        // Create notification for the student (one per new semester record)
+                        $title = "Next Semester Payment Released";
+                        $message = "Your next semester payment (" . $next_sem . ", " . $next_year . ") of " . number_format((float)$last['amount']) . " MMK for application #" . $student_info['application_no'] . " has been released.";
+                        $stmt = $conn->prepare("INSERT INTO notifications (student_id, application_id, title, message, type, email_status) VALUES (?, ?, ?, ?, 'disbursement', 'pending')");
+                        $stmt->bind_param("iiss", $student_info['student_id'], $student_info['application_id'], $title, $message);
+                        $stmt->execute();
+                        $notif_id = $stmt->insert_id;
+                        $stmt->close();
+
+                        // Send the real email to the student's registered address
+                        $email_data = [
+                            'student_name'   => $student_info['student_name'],
+                            'scheme_name'    => $student_info['scheme_name'],
+                            'application_no' => $student_info['application_no'],
+                            'amount'         => $last['amount'],
+                            'semester'       => $next_sem,
+                            'academic_year'  => $next_year,
+                        ];
+                        $subject = "Next Semester Scholarship Payment Released";
+                        $email_result = edugrant_send_email($student_info['student_email'], $subject, edugrant_disbursement_email_body($email_data));
+                        if ($email_result === true) {
+                            $conn->query("UPDATE notifications SET email_status = 'sent', email_sent_at = NOW() WHERE id = $notif_id");
+                        } else {
+                            $conn->query("UPDATE notifications SET email_status = 'failed', email_error = '" . $conn->real_escape_string($email_result) . "' WHERE id = $notif_id");
+                        }
+                    }
                 }
             }
         }

@@ -1,9 +1,22 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/mailer.php';
 if (!isset($_SESSION['admin_id'])) {
     header("Location: ../auth/login.php");
     exit();
+}
+
+// Auto-migration: email tracking + duplicate-prevention columns on notifications
+$col_check = $conn->query("SHOW COLUMNS FROM notifications LIKE 'application_id'");
+if ($col_check && $col_check->num_rows === 0) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN application_id INT DEFAULT NULL, ADD INDEX (application_id)");
+}
+$col_check = $conn->query("SHOW COLUMNS FROM notifications LIKE 'email_status'");
+if ($col_check && $col_check->num_rows === 0) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_status ENUM('pending','sent','failed') DEFAULT 'pending'");
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_sent_at DATETIME DEFAULT NULL");
+    $conn->query("ALTER TABLE notifications ADD COLUMN email_error TEXT DEFAULT NULL");
 }
 
 $admin_name = $_SESSION['admin_name'] ?? "Admin Clerk";
@@ -45,22 +58,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
         if ($action === 'approve') {
             $conn->query("UPDATE applications SET status='Approved', approved_by=$admin_id, approved_at=NOW() WHERE id=$id AND status NOT IN ('Approved','Rejected')");
 
-            // Insert into scholarship_recipients if not already there
-            $app_data = $conn->query("SELECT student_id, scheme_id, application_no FROM applications WHERE id=$id")->fetch_assoc();
-            if ($app_data) {
-                $existing = $conn->query("SELECT id FROM scholarship_recipients WHERE application_id=$id")->num_rows;
-                if ($existing === 0) {
-                    $conn->query("INSERT INTO scholarship_recipients (application_id, start_year) VALUES ($id, YEAR(CURDATE()))");
-                }
+            // Only proceed if this click actually changed the status (prevents duplicate work on repeated clicks)
+            if ($conn->affected_rows > 0) {
+                // Fetch student + scheme details needed for notification and email
+                $app_data = $conn->query("SELECT a.student_id, a.scheme_id, a.application_no, a.approved_at, s.name AS student_name, s.email AS student_email, sc.scheme_name FROM applications a JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id WHERE a.id=$id")->fetch_assoc();
+                if ($app_data) {
+                    $existing = $conn->query("SELECT id FROM scholarship_recipients WHERE application_id=$id")->num_rows;
+                    if ($existing === 0) {
+                        $conn->query("INSERT INTO scholarship_recipients (application_id, start_year) VALUES ($id, YEAR(CURDATE()))");
+                    }
 
-                // Create notification for the student
-                $student_id = $app_data['student_id'];
-                $title = "Application Approved";
-                $message = "Your application #{$app_data['application_no']} has been approved. Congratulations!";
-                $stmt = $conn->prepare("INSERT INTO notifications (student_id, title, message, type) VALUES (?, ?, ?, 'approval')");
-                $stmt->bind_param("iss", $student_id, $title, $message);
-                $stmt->execute();
-                $stmt->close();
+                    // Guard against duplicate notification for the same application
+                    $dup = $conn->query("SELECT id FROM notifications WHERE application_id = $id AND type = 'approval' LIMIT 1");
+                    if ($dup && $dup->num_rows === 0) {
+                        // Create notification for the student
+                        $student_id = $app_data['student_id'];
+                        $title = "Application Approved";
+                        $message = "Your application #{$app_data['application_no']} has been approved. Congratulations!";
+                        $stmt = $conn->prepare("INSERT INTO notifications (student_id, application_id, title, message, type, email_status) VALUES (?, ?, ?, ?, 'approval', 'pending')");
+                        $stmt->bind_param("iiss", $student_id, $id, $title, $message);
+                        $stmt->execute();
+                        $notif_id = $stmt->insert_id;
+                        $stmt->close();
+
+                        // Send the real approval email to the student's registered address
+                        $subject = "Scholarship Application Approved";
+                        $email_result = edugrant_send_email($app_data['student_email'], $subject, edugrant_approval_email_body($app_data));
+                        if ($email_result === true) {
+                            $conn->query("UPDATE notifications SET email_status = 'sent', email_sent_at = NOW() WHERE id = $notif_id");
+                        } else {
+                            $conn->query("UPDATE notifications SET email_status = 'failed', email_error = '" . $conn->real_escape_string($email_result) . "' WHERE id = $notif_id");
+                        }
+                    }
+                }
             }
         } elseif ($action === 'reject') {
             $reject_reason = urldecode(trim($_POST['reject_reason'] ?? ''));
