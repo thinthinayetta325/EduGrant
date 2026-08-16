@@ -41,6 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $amount = $conn->real_escape_string($_POST['amount']);
         $deadline = $conn->real_escape_string($_POST['deadline']);
         $status = $conn->real_escape_string($_POST['status']);
+        if ($deadline !== '' && $deadline < date('Y-m-d')) {
+            $status = 'Closed';
+        } elseif ($deadline !== '') {
+            $status = 'Active';
+        }
         $desc = $conn->real_escape_string($_POST['description']);
         $elig = $conn->real_escape_string($_POST['eligibility']);
         $image = '';
@@ -57,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $amount = $conn->real_escape_string($_POST['amount']);
         $deadline = $conn->real_escape_string($_POST['deadline']);
         $status = $conn->real_escape_string($_POST['status']);
+        if ($deadline !== '' && $deadline < date('Y-m-d')) {
+            $status = 'Closed';
+        }
         $desc = $conn->real_escape_string($_POST['description']);
         $elig = $conn->real_escape_string($_POST['eligibility']);
         $image_sql = '';
@@ -363,7 +371,13 @@ function editScheme(row) {
     document.getElementById('edit-name').value = row.scheme_name;
     document.getElementById('edit-amount').value = row.amount;
     document.getElementById('edit-deadline').value = row.deadline || '';
-    document.getElementById('edit-status').value = row.status;
+    var now = new Date();
+    var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    var statusVal = row.status;
+    if (row.deadline && row.deadline < todayStr) {
+        statusVal = 'Closed';
+    }
+    document.getElementById('edit-status').value = statusVal;
     document.getElementById('edit-desc').value = row.description || '';
     document.getElementById('edit-elig').value = row.eligibility || '';
     var preview = document.getElementById('edit-image-preview');

@@ -115,6 +115,15 @@ $disbursements = $conn->query("SELECT pr.*, s.name AS student_name, s.roll_no, s
     LEFT JOIN bank_details bd ON pr.bank_id = bd.id
     ORDER BY pr.payment_date DESC, pr.id DESC");
 
+$all_schemes = $conn->query("SELECT id, scheme_name FROM schemes ORDER BY scheme_name");
+
+$scheme_stats = $conn->query("SELECT sc.id, sc.scheme_name, sc.status,
+    (SELECT COUNT(*) FROM applications a2 WHERE a2.scheme_id = sc.id) AS app_count,
+    (SELECT COUNT(*) FROM scholarship_recipients sr2 JOIN applications a3 ON sr2.application_id = a3.id WHERE a3.scheme_id = sc.id) AS recipient_count,
+    (SELECT COALESCE(SUM(pr2.amount),0) FROM payment_records pr2 JOIN scholarship_recipients sr3 ON pr2.recipient_id = sr3.id JOIN applications a4 ON sr3.application_id = a4.id WHERE a4.scheme_id = sc.id) AS total_amount
+    FROM schemes sc ORDER BY sc.scheme_name");
+$scheme_icons = ['🎓','🏆','📚','💡','🔬','🎨','⚖️','🌏','🧠','📐','💻','🩺'];
+
 $current_page = 'disbursements';
 ?>
 <!DOCTYPE html>
@@ -182,6 +191,50 @@ $current_page = 'disbursements';
         .form-input { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; box-sizing: border-box; margin-bottom: 10px; }
         .bottom-bar { background-color: #003D3B; color: #94a3b8; font-size: 11px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
         .bottom-links a { color: #fff; text-decoration: none; margin-left: 15px; }
+        .scheme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .scheme-card {
+            background: #fff; border-radius: 14px; padding: 16px;
+            border: 1px solid #e2e8f0; position: relative; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .scheme-card:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(0,0,0,0.10), 0 4px 10px rgba(0,0,0,0.06); }
+        .scheme-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, #006D69, #10b981);
+        }
+        .scheme-card .scheme-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .scheme-card .scheme-icon {
+            width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff;
+            background: linear-gradient(135deg, #006D69, #0d9488);
+            box-shadow: 0 4px 10px rgba(0,109,105,0.25);
+        }
+        .scheme-card .scheme-name { font-size: 13px; font-weight: 700; line-height: 1.3; color: #0f172a; }
+        .scheme-card .scheme-meta { font-size: 10px; color: #94a3b8; margin-top: 1px; }
+        .scheme-card .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 0; border-top: 1px solid #f1f5f9;
+        }
+        .scheme-card .stat-row:first-of-type { border-top: none; }
+        .scheme-card .stat-label { font-size: 11px; color: #64748b; font-weight: 500; }
+        .scheme-card .stat-value { font-size: 15px; font-weight: 800; color: #0f172a; }
+        .scheme-card .bar-track { height: 5px; background: #f1f5f9; border-radius: 10px; overflow: hidden; margin-top: 8px; }
+        .scheme-card .bar-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #006D69, #10b981); transition: width .6s ease; }
+        .scheme-card .bar-lbl { font-size: 9px; color: #94a3b8; margin-top: 5px; text-align: right; }
+        .scheme-card:nth-child(3n+1)::before { background: linear-gradient(90deg, #006D69, #0d9488); }
+        .scheme-card:nth-child(3n+1) .scheme-icon { background: linear-gradient(135deg, #006D69, #0d9488); box-shadow: 0 4px 10px rgba(0,109,105,0.25); }
+        .scheme-card:nth-child(3n+2)::before { background: linear-gradient(90deg, #f59e0b, #f97316); }
+        .scheme-card:nth-child(3n+2) .scheme-icon { background: linear-gradient(135deg, #f59e0b, #f97316); box-shadow: 0 4px 10px rgba(245,158,11,0.25); }
+        .scheme-card:nth-child(3n+3)::before { background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+        .scheme-card:nth-child(3n+3) .scheme-icon { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 4px 10px rgba(139,92,246,0.25); }
+        html.dark-mode .scheme-card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .scheme-card .scheme-name { color: #f1f5f9; }
+        html.dark-mode .scheme-card .stat-row { border-top-color: #334155; }
+        html.dark-mode .scheme-card .stat-value { color: #f1f5f9; }
+        html.dark-mode .scheme-card .bar-track { background: #334155; }
+        html.dark-mode .scheme-card .scheme-meta { color: #64748b; }
         .summary-strip { display: flex; gap: 15px; margin-bottom: 20px; }
         .summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; flex: 1; text-align: center; }
         .myanmar-font { font-family: 'Padauk', 'Pyidaungsu', sans-serif !important; line-height: 1.4; }
@@ -235,6 +288,41 @@ $current_page = 'disbursements';
     <?php $page_title = $sidebar_lang['page_title'] ?? 'Disbursements'; include 'header.php'; ?>
     <div class="dashboard-body">
 
+        <div class="scheme-grid">
+            <?php if ($scheme_stats && $scheme_stats->num_rows > 0): ?>
+                <?php $ci = 0; while ($sc = $scheme_stats->fetch_assoc()): ?>
+                    <?php
+                    $sicon = $scheme_icons[$ci % count($scheme_icons)];
+                    $ci++;
+                    $pct = $sc['recipient_count'] > 0 ? 100 : 0;
+                    $amt = (float)$sc['total_amount'];
+                    $amt_label = $amt >= 1000000 ? number_format($amt / 1000000, 1) . 'M' : number_format($amt);
+                    ?>
+                    <div class="scheme-card">
+                        <div class="scheme-head">
+                            <div class="scheme-icon"><?php echo $sicon; ?></div>
+                            <div>
+                                <div class="scheme-name"><?php echo htmlspecialchars($sc['scheme_name']); ?></div>
+                                <div class="scheme-meta"><?php echo $sc['status'] === 'Active' ? '🟢 Active' : '⚪ ' . htmlspecialchars($sc['status']); ?></div>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">🏅 Recipients</span>
+                            <span class="stat-value"><?php echo (int)$sc['recipient_count']; ?></span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">💰 Disbursed</span>
+                            <span class="stat-value"><?php echo number_format($amt); ?></span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:<?php echo $pct; ?>%;"></div>
+                        </div>
+                        <div class="bar-lbl"><?php echo $amt_label; ?> MMK total</div>
+                    </div>
+                <?php endwhile; ?>
+            <?php endif; ?>
+        </div>
+
         <div class="admin-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div>
@@ -242,6 +330,12 @@ $current_page = 'disbursements';
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <input type="text" id="liveSearch" class="form-input" placeholder="🔍 Search name, scheme, semester..." style="width:220px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;margin-bottom:0;" autocomplete="off">
+                    <select id="schemeFilter" class="form-input" style="width:180px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;margin-bottom:0;cursor:pointer;">
+                        <option value="">All Schemes</option>
+                        <?php while ($sch = $all_schemes->fetch_assoc()): ?>
+                            <option value="<?php echo htmlspecialchars($sch['scheme_name']); ?>"><?php echo htmlspecialchars($sch['scheme_name']); ?></option>
+                        <?php endwhile; ?>
+                    </select>
                     <select id="semFilter" class="form-input" style="width:150px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;margin-bottom:0;cursor:pointer;">
                         <option value="">All Semesters</option>
                         <?php foreach ($sem_names as $sn): ?>
@@ -338,10 +432,15 @@ $current_page = 'disbursements';
 function applyFilter() {
     var query = document.getElementById('liveSearch').value.toLowerCase();
     var sem = document.getElementById('semFilter').value.toLowerCase();
+    var scheme = document.getElementById('schemeFilter').value.toLowerCase();
     var semIndex = -1;
+    var schemeIndex = -1;
     var headers = document.querySelectorAll('.admin-table thead th');
     for (var h = 0; h < headers.length; h++) {
         if (headers[h].textContent.trim().toLowerCase() === 'semester') { semIndex = h; break; }
+    }
+    for (var h = 0; h < headers.length; h++) {
+        if (headers[h].textContent.trim().toLowerCase() === 'scheme') { schemeIndex = h; break; }
     }
     var rows = document.querySelectorAll('.admin-table tbody tr');
     var visibleCount = 0;
@@ -354,9 +453,11 @@ function applyFilter() {
             text += row.children[i].textContent.toLowerCase() + ' ';
         }
         var semCell = semIndex >= 0 && row.children[semIndex] ? row.children[semIndex].textContent.toLowerCase() : '';
+        var schemeCell = schemeIndex >= 0 && row.children[schemeIndex] ? row.children[schemeIndex].textContent.toLowerCase() : '';
         var matchText = text.includes(query);
         var matchSem = sem === '' || semCell.includes(sem);
-        var show = matchText && matchSem;
+        var matchScheme = scheme === '' || schemeCell.includes(scheme);
+        var show = matchText && matchSem && matchScheme;
         row.style.display = show ? '' : 'none';
         if (show) {
             var amount = parseFloat((row.children[4] ? row.children[4].textContent : '').replace(/,/g, '')) || 0;
@@ -374,6 +475,7 @@ function applyFilter() {
 
 document.getElementById('liveSearch').addEventListener('input', applyFilter);
 document.getElementById('semFilter').addEventListener('change', applyFilter);
+document.getElementById('schemeFilter').addEventListener('change', applyFilter);
 </script>
 </body>
 </html>

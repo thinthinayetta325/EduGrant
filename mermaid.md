@@ -181,11 +181,13 @@ usecaseDiagram
     Student --> (Track Application Status)
     Student --> (View Application Details)
     Student --> (Download Receipt)
+    Student --> (View Next Semester Payment)
     Student --> (View Notifications)
     Student --> (Manage Profile)
     Student --> (Send Message to Admin)
     (Apply to Scheme) ..> (Login) : <<include>>
     (Submit Bank Details) ..> (Login) : <<include>>
+    (View Next Semester Payment) ..> (Login) : <<include>>
 ```
 
 ## Admin
@@ -203,6 +205,7 @@ usecaseDiagram
     Admin --> (Verify Bank & Disburse Funds)
     Admin --> (Manage Recipients)
     Admin --> (Record Disbursements)
+    Admin --> (Record Next Semester Disbursement)
     Admin --> (View Reports)
     Admin --> (Read Student Messages)
     Admin --> (View Notifications)
@@ -211,6 +214,9 @@ usecaseDiagram
     (Verify Bank & Disburse Funds) ..> (Upload Receipt) : <<include>>
     (Verify Bank & Disburse Funds) ..> (Notify Student) : <<include>>
     (Record Disbursements) ..> (Notify Student) : <<include>>
+    (Record Next Semester Disbursement) ..> (Record Disbursements) : <<extend>>
+    (Record Next Semester Disbursement) ..> (Notify Student) : <<include>>
+    (Record Next Semester Disbursement) ..> (Email Student) : <<include>>
 ```
 
 ## Reviewer
@@ -229,14 +235,14 @@ usecaseDiagram
     (Evaluate Applications) ..> (Login) : <<include>>
 ```
 
-# Flow Diagram (Application to Disbursement)
+# Flow Diagram (Application to Disbursement & Next Semester Payment)
 
 ```mermaid
 flowchart TD
     A[Student registers & logs in] --> B[Student browses schemes]
     B --> C{Is student eligible?}
     C -- No --> B
-    C -- Yes --> D[Student applies to scheme]
+    C -- Yes --> D[Student applies to scheme & uploads docs]
     D --> E[Application status: Submitted]
     E --> F[Reviewer evaluates application]
     F --> G{Reviewer recommendation}
@@ -245,20 +251,23 @@ flowchart TD
     H --> I{Admin decision}
     I -- Rejected --> J[Student notified: Rejected]
     I -- Approved --> K[Student notified: Approved]
-    K --> L[Student submits bank details]
-    L --> M[Admin verifies bank + uploads receipt]
-    M --> N{Are bank details valid?}
-    N -- No --> O[Application Rejected]
-    N -- Yes --> P[Payment record created: First Semester]
-    P --> Q[Student notified: Funds Released]
-    Q --> R[Application marked Paid]
-    R --> S[Student downloads receipt]
-    S --> T{Next semester?}
-    T -- Yes --> U[Admin records disbursement manually]
-    U --> Q
-    T -- No --> V[End]
-    J --> V
-    O --> V
+    K --> L[Admin adds application to Scholarship Recipients]
+    L --> M[Student submits bank details]
+    M --> N[Admin verifies bank + uploads receipt]
+    N --> O{Are bank details valid?}
+    O -- No --> P[Application Rejected]
+    O -- Yes --> Q[Payment record created: First Semester]
+    Q --> R[Student notified: Funds Released]
+    R --> S[Application marked Paid]
+    S --> T[Student downloads receipt]
+    T --> U{Next semester due?}
+    U -- Yes --> V[Admin clicks Continue: Next Semester in Disbursements]
+    V --> W[New payment record: next semester + academic year]
+    W --> X[Student notified & emailed: Next Semester Payment Released]
+    X --> U
+    U -- No --> Y[End]
+    J --> Y
+    P --> Y
 ```
 
 # Class Diagram

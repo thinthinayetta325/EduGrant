@@ -44,13 +44,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 $search = isset($_GET['search']) ? trim($conn->real_escape_string($_GET['search'])) : '';
-$search_where = ($search !== '') ? " WHERE s.name LIKE '%$search%' OR sc.scheme_name LIKE '%$search%' OR a.application_no LIKE '%$search%' OR s.roll_no LIKE '%$search%'" : '';
+$scheme_filter = isset($_GET['scheme']) ? (int)$_GET['scheme'] : 0;
+$where = [];
+if ($search !== '') {
+    $where[] = "(s.name LIKE '%$search%' OR sc.scheme_name LIKE '%$search%' OR a.application_no LIKE '%$search%' OR s.roll_no LIKE '%$search%')";
+}
+if ($scheme_filter > 0) {
+    $where[] = "sc.id = $scheme_filter";
+}
+$where_clause = $where ? ' WHERE ' . implode(' AND ', $where) : '';
+
+$all_schemes = $conn->query("SELECT id, scheme_name FROM schemes ORDER BY scheme_name");
+
+$scheme_stats = $conn->query("SELECT sc.id, sc.scheme_name, sc.status,
+    (SELECT COUNT(*) FROM applications a2 WHERE a2.scheme_id = sc.id) AS app_count,
+    (SELECT COUNT(*) FROM scholarship_recipients sr2 JOIN applications a3 ON sr2.application_id = a3.id WHERE a3.scheme_id = sc.id) AS recipient_count
+    FROM schemes sc ORDER BY sc.scheme_name");
+$scheme_icons = ['🎓','🏆','📚','💡','🔬','🎨','⚖️','🌏','🧠','📐','💻','🩺'];
 
 $recipients = $conn->query("SELECT sr.*, s.name AS student_name, s.roll_no, sc.scheme_name, a.application_no
     FROM scholarship_recipients sr
     JOIN applications a ON sr.application_id = a.id
     JOIN student s ON a.student_id = s.id
-    JOIN schemes sc ON a.scheme_id = sc.id$search_where
+    JOIN schemes sc ON a.scheme_id = sc.id$where_clause
     ORDER BY sr.id DESC");
 $current_page = 'recipients';
 ?>
@@ -121,6 +137,50 @@ $current_page = 'recipients';
         .bottom-bar { background-color: #003D3B; color: #94a3b8; font-size: 11px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
         .bottom-links a { color: #fff; text-decoration: none; margin-left: 15px; }
         .inline-form { display: inline; }
+        .scheme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .scheme-card {
+            background: #fff; border-radius: 14px; padding: 16px;
+            border: 1px solid #e2e8f0; position: relative; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .scheme-card:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(0,0,0,0.10), 0 4px 10px rgba(0,0,0,0.06); }
+        .scheme-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, #006D69, #10b981);
+        }
+        .scheme-card .scheme-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .scheme-card .scheme-icon {
+            width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff;
+            background: linear-gradient(135deg, #006D69, #0d9488);
+            box-shadow: 0 4px 10px rgba(0,109,105,0.25);
+        }
+        .scheme-card .scheme-name { font-size: 13px; font-weight: 700; line-height: 1.3; color: #0f172a; }
+        .scheme-card .scheme-meta { font-size: 10px; color: #94a3b8; margin-top: 1px; }
+        .scheme-card .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 0; border-top: 1px solid #f1f5f9;
+        }
+        .scheme-card .stat-row:first-of-type { border-top: none; }
+        .scheme-card .stat-label { font-size: 11px; color: #64748b; font-weight: 500; }
+        .scheme-card .stat-value { font-size: 15px; font-weight: 800; color: #0f172a; }
+        .scheme-card .bar-track { height: 5px; background: #f1f5f9; border-radius: 10px; overflow: hidden; margin-top: 8px; }
+        .scheme-card .bar-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #006D69, #10b981); transition: width .6s ease; }
+        .scheme-card .bar-lbl { font-size: 9px; color: #94a3b8; margin-top: 5px; text-align: right; }
+        .scheme-card:nth-child(3n+1)::before { background: linear-gradient(90deg, #006D69, #0d9488); }
+        .scheme-card:nth-child(3n+1) .scheme-icon { background: linear-gradient(135deg, #006D69, #0d9488); box-shadow: 0 4px 10px rgba(0,109,105,0.25); }
+        .scheme-card:nth-child(3n+2)::before { background: linear-gradient(90deg, #f59e0b, #f97316); }
+        .scheme-card:nth-child(3n+2) .scheme-icon { background: linear-gradient(135deg, #f59e0b, #f97316); box-shadow: 0 4px 10px rgba(245,158,11,0.25); }
+        .scheme-card:nth-child(3n+3)::before { background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+        .scheme-card:nth-child(3n+3) .scheme-icon { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 4px 10px rgba(139,92,246,0.25); }
+        html.dark-mode .scheme-card { background: #1e293b; border-color: #334155; }
+        html.dark-mode .scheme-card .scheme-name { color: #f1f5f9; }
+        html.dark-mode .scheme-card .stat-row { border-top-color: #334155; }
+        html.dark-mode .scheme-card .stat-value { color: #f1f5f9; }
+        html.dark-mode .scheme-card .bar-track { background: #334155; }
+        html.dark-mode .scheme-card .scheme-meta { color: #64748b; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-overlay.show { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 25px; width: 500px; }
@@ -177,6 +237,39 @@ $current_page = 'recipients';
     <?php $page_title = $sidebar_lang['page_title'] ?? 'Recipients'; include 'header.php'; ?>
     <div class="dashboard-body">
 
+        <div class="scheme-grid">
+            <?php if ($scheme_stats && $scheme_stats->num_rows > 0): ?>
+                <?php $ci = 0; while ($sc = $scheme_stats->fetch_assoc()): ?>
+                    <?php
+                    $sicon = $scheme_icons[$ci % count($scheme_icons)];
+                    $ci++;
+                    $rec_pct = $sc['app_count'] > 0 ? round(($sc['recipient_count'] / $sc['app_count']) * 100) : 0;
+                    ?>
+                    <div class="scheme-card">
+                        <div class="scheme-head">
+                            <div class="scheme-icon"><?php echo $sicon; ?></div>
+                            <div>
+                                <div class="scheme-name"><?php echo htmlspecialchars($sc['scheme_name']); ?></div>
+                                <div class="scheme-meta"><?php echo $sc['status'] === 'Active' ? '🟢 Active' : '⚪ ' . htmlspecialchars($sc['status']); ?></div>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">📁 Applications</span>
+                            <span class="stat-value"><?php echo (int)$sc['app_count']; ?></span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">🏅 Recipients</span>
+                            <span class="stat-value"><?php echo (int)$sc['recipient_count']; ?></span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:<?php echo $rec_pct; ?>%;"></div>
+                        </div>
+                        <div class="bar-lbl"><?php echo $rec_pct; ?>% awarded</div>
+                    </div>
+                <?php endwhile; ?>
+            <?php endif; ?>
+        </div>
+
         <div class="admin-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div style="display:flex; align-items:center; gap:12px;">
@@ -187,8 +280,14 @@ $current_page = 'recipients';
                 <form method="get" action="recipients.php" style="display:flex; gap:8px; align-items:center; margin:0;">
                     <input type="hidden" name="lang" value="<?php echo $lang_param; ?>">
                     <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="form-input" placeholder="🔍 Search name, scheme or ID..." style="width:200px; margin:0;" autocomplete="off">
-                    <button type="submit" class="btn-green-sm">Search</button>
-                    <?php if ($search !== ''): ?>
+                    <select name="scheme" class="form-input" style="width:180px; margin:0; cursor:pointer;">
+                        <option value="">All Schemes</option>
+                        <?php while ($sch = $all_schemes->fetch_assoc()): ?>
+                            <option value="<?php echo $sch['id']; ?>" <?php echo $scheme_filter == $sch['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($sch['scheme_name']); ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                    <button type="submit" class="btn-green-sm">Filter</button>
+                    <?php if ($search !== '' || $scheme_filter > 0): ?>
                         <a href="recipients.php?lang=<?php echo $lang_param; ?>" class="action-link" style="font-size:11px; text-decoration:none; color:#006D69;">Clear</a>
                     <?php endif; ?>
                 </form>

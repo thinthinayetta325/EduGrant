@@ -103,7 +103,12 @@ $total_schemes = $conn->query("SELECT COUNT(*) FROM schemes")->fetch_row()[0] ??
 $total_apps = $conn->query("SELECT COUNT(*) FROM applications a WHERE 1=1 $app_date_where")->fetch_row()[0] ?? 0;
 $pending_apps = $conn->query("SELECT COUNT(*) FROM applications a WHERE (status = 'Submitted' OR status = 'Under Review') $app_date_where")->fetch_row()[0] ?? 0;
 $approved_apps = $conn->query("SELECT COUNT(*) FROM applications a WHERE status = 'Approved' $app_date_where")->fetch_row()[0] ?? 0;
-$total_disbursed = $conn->query("SELECT COALESCE(SUM(pr.amount),0) FROM payment_records pr WHERE 1=1 $pay_date_where")->fetch_row()[0] ?? 25000000;
+$total_disbursed = $conn->query("SELECT COALESCE(SUM(pr.amount),0)
+    FROM payment_records pr
+    JOIN scholarship_recipients sr ON pr.recipient_id = sr.id
+    JOIN applications a ON sr.application_id = a.id
+    JOIN schemes sc ON a.scheme_id = sc.id
+    WHERE 1=1 $pay_date_where")->fetch_row()[0] ?? 0;
 $total_students = $conn->query("SELECT COUNT(*) FROM student")->fetch_row()[0] ?? 0;
 
 $recent_apps = $conn->query("SELECT a.id, a.application_no, s.name AS student_name, s.roll_no, sc.scheme_name,

@@ -250,9 +250,10 @@ $current_page = 'applications';
                 </div>
             </div>
             <div style="text-align:right;">
-                <?php if ($app['recommendation']): ?>
-                    <span class="badge <?php echo $app['recommendation'] === 'Recommended' ? 'badge-recommend' : 'badge-not-recommend'; ?>" style="font-size:12px;padding:5px 14px;">
-                        <?php echo $app['recommendation'] === 'Recommended' ? '👍 Recommended' : '👎 Not Recommended'; ?>
+                <?php $rec_reason = $app['recommendation'] ?: ($app['remarks'] ? 'Recommended' : ''); if (stripos($app['remarks'] ?? '', 'not recomm') !== false) $rec_reason = 'Not Recommended'; ?>
+                <?php if ($rec_reason): ?>
+                    <span class="badge <?php echo $rec_reason === 'Recommended' ? 'badge-recommend' : 'badge-not-recommend'; ?>" style="font-size:12px;padding:5px 14px;">
+                        <?php echo $rec_reason === 'Recommended' ? '👍 Recommended' : '👎 Not Recommended'; ?>
                     </span>
                 <?php else: ?>
                     <span class="badge badge-review" style="font-size:12px;padding:5px 14px;">⏳ Pending Review</span>
