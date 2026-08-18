@@ -102,6 +102,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
+    if ($_POST['action'] === 'reject') {
+        $recipient_id = (int)$_POST['recipient_id'];
+        $reject_reason = trim($_POST['reject_reason'] ?? '');
+
+        if (empty($reject_reason)) {
+            header("Location: disbursements.php?rej_err=1");
+            exit();
+        }
+
+        $student_info = $conn->query("SELECT a.student_id, a.id AS application_id, a.application_no, s.name AS student_name, s.email AS student_email, sc.scheme_name FROM scholarship_recipients sr JOIN applications a ON sr.application_id = a.id JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id WHERE sr.id = $recipient_id")->fetch_assoc();
+
+        if ($student_info) {
+            $conn->begin_transaction();
+            try {
+                $conn->query("UPDATE applications SET status = 'Rejected' WHERE id = " . (int)$student_info['application_id']);
+
+                $rev_stmt = $conn->prepare("INSERT INTO application_reviews (application_id, reviewer_id, recommendation, remarks) VALUES (?, 0, 'Rejected', ?)");
+                $rev_stmt->bind_param("is", $student_info['application_id'], $reject_reason);
+                $rev_stmt->execute();
+                $rev_stmt->close();
+
+                $title = "Disbursement Rejected";
+                $message = "Your scholarship disbursement for " . $student_info['scheme_name'] . " (Application #" . $student_info['application_no'] . ") has been rejected. Reason: " . $reject_reason;
+                $stmt = $conn->prepare("INSERT INTO notifications (student_id, application_id, title, message, type, email_status) VALUES (?, ?, ?, ?, 'disbursement_rejected', 'pending')");
+                $stmt->bind_param("iiss", $student_info['student_id'], $student_info['application_id'], $title, $message);
+                $stmt->execute();
+                $notif_id = $stmt->insert_id;
+                $stmt->close();
+
+                $email_data = [
+                    'student_name'   => $student_info['student_name'],
+                    'scheme_name'    => $student_info['scheme_name'],
+                    'application_no' => $student_info['application_no'],
+                ];
+                $subject = "Scholarship Disbursement Rejected";
+                $email_result = edugrant_send_email($student_info['student_email'], $subject, edugrant_rejection_email_body($email_data));
+                if ($email_result === true) {
+                    $conn->query("UPDATE notifications SET email_status = 'sent', email_sent_at = NOW() WHERE id = $notif_id");
+                } else {
+                    $conn->query("UPDATE notifications SET email_status = 'failed', email_error = '" . $conn->real_escape_string($email_result) . "' WHERE id = $notif_id");
+                }
+
+                $conn->commit();
+                header("Location: disbursements.php?rej=1");
+                exit();
+            } catch (Exception $e) {
+                $conn->rollback();
+                header("Location: disbursements.php?rej_err=1");
+                exit();
+            }
+        }
+
+        header("Location: disbursements.php");
+        exit();
+    }
+
     header("Location: disbursements.php");
     exit();
 }
@@ -276,6 +332,12 @@ $current_page = 'disbursements';
         html.dark-mode .notif-btn { background: #334155; border-color: #475569; }
         html.dark-mode .btn-outline { border-color: #475569; color: #94a3b8; }
         html.dark-mode .btn-outline:hover { background: #334155; }
+        html.dark-mode .btn-reject-sm { background: #dc2626; color: #fff; }
+        html.dark-mode #rejectModal > div { background: #1e293b; }
+        html.dark-mode #rejectModal .reject-header { background: rgba(220,38,38,0.1); border-bottom-color: rgba(220,38,38,0.2); }
+        html.dark-mode #rejectModal label { color: #94a3b8; }
+        html.dark-mode #rejectModal textarea { background: rgba(255,255,255,0.05); border-color: #475569; color: #f1f5f9; }
+        html.dark-mode #rejectModal .cancel-btn { background: #334155; border-color: #475569; color: #94a3b8; }
     </style>
          <?php include_once 'admin-style.php'; ?>
 </head>
@@ -348,18 +410,20 @@ $current_page = 'disbursements';
             <?php if (isset($_GET['cont'])): ?>
                 <div style="background:#dcfce7; color:#15803d; padding:10px 14px; border-radius:6px; font-size:12px; margin-bottom:15px;">✔ Next semester disbursement created successfully.</div>
             <?php endif; ?>
+            <?php if (isset($_GET['rej'])): ?>
+                <div style="background:#fee2e2; color:#b91c1c; padding:10px 14px; border-radius:6px; font-size:12px; margin-bottom:15px;">✔ Application rejected successfully. Student has been notified.</div>
+            <?php endif; ?>
+            <?php if (isset($_GET['rej_err'])): ?>
+                <div style="background:#fee2e2; color:#b91c1c; padding:10px 14px; border-radius:6px; font-size:12px; margin-bottom:15px;">✘ Rejection failed. Please provide a valid reason and try again.</div>
+            <?php endif; ?>
 
             <?php
-            $total_disbursed = 0;
-            $count = 0;
-            if ($disbursements) {
-                $disbursements->data_seek(0);
-                while ($d = $disbursements->fetch_assoc()) {
-                    $total_disbursed += $d['amount'];
-                    $count++;
-                }
-                $disbursements->data_seek(0);
-            }
+            $total_disbursed = $conn->query("SELECT COALESCE(SUM(pr.amount),0)
+                FROM payment_records pr
+                JOIN scholarship_recipients sr ON pr.recipient_id = sr.id
+                JOIN applications a ON sr.application_id = a.id
+                JOIN schemes sc ON a.scheme_id = sc.id")->fetch_row()[0] ?? 0;
+            $count = $disbursements ? $disbursements->num_rows : 0;
             ?>
             <div class="summary-strip">
                 <div class="summary-box">
@@ -407,11 +471,14 @@ $current_page = 'disbursements';
                                 <td><?php echo $row['payment_date']; ?></td>
                                 <td>
                                     <?php if ($show_cont): ?>
-                                        <form method="POST" style="display:inline;margin:0;">
-                                            <input type="hidden" name="action" value="continue">
-                                            <input type="hidden" name="recipient_id" value="<?php echo $rid; ?>">
-                                            <button type="submit" class="btn-green-sm" style="padding:4px 10px; font-size:10px; margin:0;">Continue ➜ <?php echo htmlspecialchars($next_sem_label); ?></button>
-                                        </form>
+                                        <div style="display:flex;gap:6px;align-items:center;">
+                                            <form method="POST" style="display:inline;margin:0;">
+                                                <input type="hidden" name="action" value="continue">
+                                                <input type="hidden" name="recipient_id" value="<?php echo $rid; ?>">
+                                                <button type="submit" class="btn-green-sm" style="padding:4px 10px; font-size:10px; margin:0;">Continue ➜ <?php echo htmlspecialchars($next_sem_label); ?></button>
+                                            </form>
+                                            <button type="button" class="btn-reject-sm" onclick="openRejectModal(<?php echo $rid; ?>)" style="background:#ef4444;color:#fff;border:none;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:bold;cursor:pointer;">Reject ✘</button>
+                                        </div>
                                     <?php else: ?>
                                         <span style="color:#cbd5e1; font-size:11px;">—</span>
                                     <?php endif; ?>
@@ -476,7 +543,46 @@ function applyFilter() {
 document.getElementById('liveSearch').addEventListener('input', applyFilter);
 document.getElementById('semFilter').addEventListener('change', applyFilter);
 document.getElementById('schemeFilter').addEventListener('change', applyFilter);
+
+function openRejectModal(rid) {
+    document.getElementById('rejectRecipientId').value = rid;
+    document.getElementById('rejectReason').value = '';
+    document.getElementById('rejectModal').style.display = 'flex';
+}
+function closeRejectModal() {
+    document.getElementById('rejectModal').style.display = 'none';
+}
+document.getElementById('rejectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeRejectModal();
+});
 </script>
+
+<div id="rejectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:10px;width:420px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;">
+        <div style="background:#fef2f2;padding:16px 20px;border-bottom:1px solid #fecaca;display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;background:#fee2e2;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:bold;color:#991b1b;">Reject Application</div>
+                    <div style="font-size:11px;color:#b91c1c;">This action will notify the student via email</div>
+                </div>
+            </div>
+            <button onclick="closeRejectModal()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:18px;padding:4px;">✕</button>
+        </div>
+        <form method="POST" style="padding:20px;">
+            <input type="hidden" name="action" value="reject">
+            <input type="hidden" name="recipient_id" id="rejectRecipientId" value="">
+            <label style="display:block;font-size:12px;font-weight:bold;color:#64748b;margin-bottom:6px;">Rejection Reason *</label>
+            <textarea name="reject_reason" id="rejectReason" rows="4" required placeholder="Enter the reason for rejection..." style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
+            <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+                <button type="button" onclick="closeRejectModal()" style="padding:8px 16px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;font-weight:bold;color:#64748b;cursor:pointer;">Cancel</button>
+                <button type="submit" style="padding:8px 16px;background:#dc2626;border:none;border-radius:6px;font-size:12px;font-weight:bold;color:#fff;cursor:pointer;">Confirm Reject</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
 <?php $conn->close(); ?>

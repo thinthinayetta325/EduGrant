@@ -832,7 +832,7 @@ $page_title = $sidebar_lang['dashboard_title'] ?? 'Admin Dashboard';
                 <div class="stat-glow"></div>
                 <div class="stat-icon">💰</div>
                 <div class="stat-label"><?php echo $sidebar_lang['total_disbursed']; ?></div>
-                <div class="stat-value"><?php echo number_format($total_disbursed / 1000000, 1); ?>M</div>
+                <div class="stat-value"><?php echo number_format($total_disbursed); ?></div>
                 <div class="stat-change up">MMK total</div>
             </div>
         </div>

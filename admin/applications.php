@@ -104,22 +104,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
                 $stmt->close();
             }
 
-            $app_data = $conn->query("SELECT student_id, application_no FROM applications WHERE id=$id")->fetch_assoc();
+            $app_data = $conn->query("SELECT a.student_id, a.application_no, a.id AS application_id, s.name AS student_name, s.email AS student_email, sc.scheme_name FROM applications a JOIN student s ON a.student_id = s.id JOIN schemes sc ON a.scheme_id = sc.id WHERE a.id=$id")->fetch_assoc();
             if ($app_data) {
                 $student_id = $app_data['student_id'];
                 $title = "Application Rejected";
                 $message = "Your application #{$app_data['application_no']} has been rejected.";
-                $stmt = $conn->prepare("INSERT INTO notifications (student_id, title, message, type) VALUES (?, ?, ?, 'rejection')");
-                $stmt->bind_param("iss", $student_id, $title, $message);
+                $stmt = $conn->prepare("INSERT INTO notifications (student_id, application_id, title, message, type, email_status) VALUES (?, ?, ?, ?, 'rejection', 'pending')");
+                $stmt->bind_param("iiss", $student_id, $app_data['application_id'], $title, $message);
                 $stmt->execute();
+                $notif_id = $stmt->insert_id;
                 $stmt->close();
+
+                $email_data = [
+                    'student_name'   => $app_data['student_name'],
+                    'scheme_name'    => $app_data['scheme_name'],
+                    'application_no' => $app_data['application_no'],
+                ];
+                $subject = "Scholarship Application Rejected";
+                $email_result = edugrant_send_email($app_data['student_email'], $subject, edugrant_rejection_email_body($email_data));
+                if ($email_result === true) {
+                    $conn->query("UPDATE notifications SET email_status = 'sent', email_sent_at = NOW() WHERE id = $notif_id");
+                } else {
+                    $conn->query("UPDATE notifications SET email_status = 'failed', email_error = '" . $conn->real_escape_string($email_result) . "' WHERE id = $notif_id");
+                }
             }
         }
     }
 
     // Redirect to user's application_details if requested
     if (isset($_POST['redirect_user']) && $action === 'reject' && !empty($ids)) {
-        header("Location: ../user/application_details.php?id=" . $ids[0]);
+        header("Location: dashboard.php");
         exit();
     }
 

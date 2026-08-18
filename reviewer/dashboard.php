@@ -122,26 +122,9 @@ function render_app_rows($res, $offset, $reviewer_id) {
                     </span>
                 </td>
                 <td class="px-4 py-3 text-center">
-                    <?php
-                    $reviewed_by = $row['reviewed_by'] ?? null;
-                    $already_by_other = ($status === 'Recommended') && $reviewed_by && ($reviewed_by != $reviewer_id);
-                    $is_approved = ($status === 'Approved');
-                    $is_rejected = ($status === 'Rejected');
-                    $is_admin_decided = ($is_approved || $is_rejected);
-                    ?>
-                    <?php if ($already_by_other): ?>
-                        <span class="bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium px-3 py-1.5 rounded-lg text-[11px] cursor-not-allowed" title="Already recommended by another reviewer">
-                            Evaluate
-                        </span>
-                    <?php elseif ($is_admin_decided): ?>
-                        <span class="bg-[#004D4A] text-white font-medium px-3 py-1.5 rounded-lg text-[11px] opacity-60 cursor-not-allowed pointer-events-none" title="<?php echo $is_rejected ? 'Application already rejected by admin' : 'Application already approved by admin'; ?>">
-                            Evaluate
-                        </span>
-                    <?php else: ?>
-                        <a href="evaluate.php?id=<?php echo $row['app_id']; ?>" class="bg-[#004D4A] hover:bg-[#003D3B] text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition">
-                            Evaluate
-                        </a>
-                    <?php endif; ?>
+                    <a href="evaluate.php?id=<?php echo $row['app_id']; ?>" class="bg-[#004D4A] hover:bg-[#003D3B] text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition">
+                        Evaluate
+                    </a>
                 </td>
             </tr>
     <?php

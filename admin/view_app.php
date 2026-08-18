@@ -219,16 +219,17 @@ $current_page = 'applications';
                 <span style="font-size:13px;font-weight:700;color:#004D4A;">Admin Decision</span>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                <form method="POST" action="applications.php" style="display:inline;">
+                <form method="POST" action="applications.php" id="approveForm" style="display:inline;">
                     <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
                     <input type="hidden" name="redirect_user" value="1">
-                    <button type="submit" name="action" value="approve" class="btn-primary" style="padding:6px 14px;font-size:11px;" onclick="return confirm('Approve this application?')">✓ Approve</button>
+                    <button type="button" class="btn-primary" style="padding:6px 14px;font-size:11px;" onclick="openApproveModal()">✓ Approve</button>
                 </form>
-                <form method="POST" action="applications.php" style="display:inline;" onsubmit="var r=prompt('Enter rejection reason:');if(r===null||r.trim()===''){return false;}this.reject_reason.value=r;">
+                <form method="POST" action="applications.php" id="rejectForm" style="display:inline;">
                     <input type="hidden" name="ids[]" value="<?php echo $app_id; ?>">
                     <input type="hidden" name="redirect_user" value="1">
-                    <input type="hidden" name="reject_reason" value="">
-                    <button type="submit" name="action" value="reject" class="btn-red" style="padding:6px 14px;font-size:11px;">✕ Reject</button>
+                    <input type="hidden" name="reject_reason" id="rejectReasonHidden" value="">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="button" class="btn-red" style="padding:6px 14px;font-size:11px;" onclick="openRejectModal()">✕ Reject</button>
                 </form>
             </div>
         </div>
@@ -327,6 +328,109 @@ $current_page = 'applications';
     </footer> -->
 </div>
 
+<div id="rejectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:12px;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;animation:modalIn 0.2s ease;">
+        <div class="reject-header" style="background:linear-gradient(135deg,#fee2e2,#fecaca);padding:20px 24px;text-align:center;border-bottom:1px solid #fca5a5;">
+            <div style="width:52px;height:52px;background:#ef4444;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 4px 12px rgba(239,68,68,0.3);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <h3 style="font-size:16px;font-weight:700;color:#991b1b;margin:0;">Reject Application?</h3>
+            <p style="font-size:12px;color:#dc2626;margin-top:4px;">This will reject the application and notify the student.</p>
+        </div>
+        <div style="padding:20px 24px;">
+            <p style="font-size:13px;color:#64748b;margin:0 0 12px;text-align:center;">Please provide a reason for rejecting <strong style="color:#0f172a;">Application #<?php echo htmlspecialchars($app['application_no']); ?></strong></p>
+            <textarea id="rejectReasonInput" rows="4" placeholder="Enter rejection reason here..." style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none;transition:0.2s;"></textarea>
+            <p id="rejectErrText" style="display:none;font-size:11px;color:#dc2626;margin:6px 0 0;">Please enter a rejection reason before submitting.</p>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+                <button type="button" onclick="closeRejectModal()" class="reject-cancel" style="flex:1;padding:9px 16px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;transition:0.2s;">Cancel</button>
+                <button type="button" onclick="submitReject()" class="reject-confirm" style="flex:1;padding:9px 16px;background:#ef4444;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:0.2s;box-shadow:0 2px 8px rgba(239,68,68,0.3);">✕ Confirm Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="approveModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:12px;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;animation:modalIn 0.2s ease;">
+        <div class="approve-header" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0);padding:20px 24px;text-align:center;border-bottom:1px solid #86efac;">
+            <div style="width:52px;height:52px;background:#10b981;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h3 style="font-size:16px;font-weight:700;color:#166534;margin:0;">Approve Application?</h3>
+            <p style="font-size:12px;color:#16a34a;margin-top:4px;">This will approve the application and notify the student.</p>
+        </div>
+        <div style="padding:20px 24px;">
+            <p style="font-size:13px;color:#64748b;margin:0 0 12px;text-align:center;">Are you sure you want to approve <strong style="color:#0f172a;">Application #<?php echo htmlspecialchars($app['application_no']); ?></strong>?</p>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+                <button type="button" onclick="closeApproveModal()" class="approve-cancel" style="flex:1;padding:9px 16px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;transition:0.2s;">Cancel</button>
+                <button type="button" onclick="submitApprove()" class="approve-confirm" style="flex:1;padding:9px 16px;background:#10b981;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:0.2s;box-shadow:0 2px 8px rgba(16,185,129,0.3);">✓ Confirm Approve</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes modalIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    html.dark-mode #approveModal > div { background:#1e293b; }
+    html.dark-mode #approveModal h3 { color:#a7f3d0; }
+    html.dark-mode #approveModal p { color:#94a3b8; }
+    html.dark-mode #approveModal strong { color:#f1f5f9; }
+    html.dark-mode #approveModal .approve-cancel { background:#334155; border-color:#475569; color:#94a3b8; }
+    html.dark-mode #approveModal .approve-cancel:hover { background:#475569; }
+    html.dark-mode #approveModal .approve-confirm { background:#059669; }
+    html.dark-mode #approveModal .approve-header { background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(16,185,129,0.1)); border-bottom-color:rgba(16,185,129,0.2); }
+    html.dark-mode #rejectModal > div { background:#1e293b; }
+    html.dark-mode #rejectModal h3 { color:#fca5a5; }
+    html.dark-mode #rejectModal p { color:#94a3b8; }
+    html.dark-mode #rejectModal strong { color:#f1f5f9; }
+    html.dark-mode #rejectModal textarea { background:rgba(255,255,255,0.05); border-color:#475569; color:#f1f5f9; }
+    html.dark-mode #rejectModal textarea::placeholder { color:#64748b; }
+    html.dark-mode #rejectModal .reject-cancel { background:#334155; border-color:#475569; color:#94a3b8; }
+    html.dark-mode #rejectModal .reject-cancel:hover { background:#475569; }
+    html.dark-mode #rejectModal .reject-confirm { background:#dc2626; }
+    html.dark-mode #rejectModal .reject-header { background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(239,68,68,0.1)); border-bottom-color:rgba(239,68,68,0.2); }
+</style>
+
+<script>
+function openApproveModal() {
+    document.getElementById('approveModal').style.display = 'flex';
+}
+function closeApproveModal() {
+    document.getElementById('approveModal').style.display = 'none';
+}
+function submitApprove() {
+    var form = document.getElementById('approveForm');
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'action';
+    input.value = 'approve';
+    form.appendChild(input);
+    form.submit();
+}
+document.getElementById('approveModal').addEventListener('click', function(e) {
+    if (e.target === this) closeApproveModal();
+});
+
+function openRejectModal() {
+    document.getElementById('rejectReasonInput').value = '';
+    document.getElementById('rejectErrText').style.display = 'none';
+    document.getElementById('rejectModal').style.display = 'flex';
+}
+function closeRejectModal() {
+    document.getElementById('rejectModal').style.display = 'none';
+}
+function submitReject() {
+    var reason = document.getElementById('rejectReasonInput').value.trim();
+    if (reason === '') {
+        document.getElementById('rejectErrText').style.display = 'block';
+        return;
+    }
+    document.getElementById('rejectReasonHidden').value = reason;
+    document.getElementById('rejectForm').submit();
+}
+document.getElementById('rejectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeRejectModal();
+});
+</script>
 </body>
 </html>
 <?php $conn->close(); ?>

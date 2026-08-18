@@ -55,8 +55,13 @@ $total_schemes = $conn->query("SELECT COUNT(*) FROM schemes")->fetch_row()[0] ??
 $total_apps = $conn->query("SELECT COUNT(*) FROM applications a WHERE 1=1 $app_date_where")->fetch_row()[0] ?? 0;
 $total_students = $conn->query("SELECT COUNT(*) FROM student")->fetch_row()[0] ?? 0;
 $total_reviewers = $conn->query("SELECT COUNT(*) FROM reviewers")->fetch_row()[0] ?? 0;
-$total_recipients = $conn->query("SELECT COUNT(*) FROM scholarship_recipients")->fetch_row()[0] ?? 0;
-$total_disbursed = $conn->query("SELECT COALESCE(SUM(pr.amount),0) FROM payment_records pr WHERE 1=1 $pay_date_where")->fetch_row()[0] ?? 0;
+$total_recipients = $conn->query("SELECT COUNT(*) FROM scholarship_recipients sr JOIN applications a ON sr.application_id = a.id")->fetch_row()[0] ?? 0;
+$total_disbursed = $conn->query("SELECT COALESCE(SUM(pr.amount),0)
+    FROM payment_records pr
+    JOIN scholarship_recipients sr ON pr.recipient_id = sr.id
+    JOIN applications a ON sr.application_id = a.id
+    JOIN schemes sc ON a.scheme_id = sc.id
+    WHERE 1=1 $pay_date_where")->fetch_row()[0] ?? 0;
 
 $status_breakdown = $conn->query("SELECT status, COUNT(*) AS cnt FROM applications a WHERE 1=1 $app_date_where GROUP BY status ORDER BY FIELD(status, 'Submitted','Under Review','Recommended','Approved','Rejected')");
 
