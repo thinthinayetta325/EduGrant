@@ -14,6 +14,7 @@ $sidebar_lang = $is_mm ? [
     'dashboard' => 'ဒက်ရှ်ဘုတ်',
     'schemes' => 'ပညာသင်ဆုအစီအစဉ်များ',
     'reviewers' => 'စိစစ်ရေးမှူးများ',
+        'students' => 'ကျောင်းသားများ',
     'applications' => 'လျှောက်လွှာများ',
     'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်းများ',
     'recipients' => 'ဆုရရှိသူများ',

@@ -75,8 +75,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = $is_mm ? "စကားဝှက်သည် အနည်းဆုံး ၈ လုံးရှိရပါမည်။" : "Password must be at least 8 characters long.";
     } elseif ($password !== $_POST['confirm_password']) {
         $message = $is_mm ? "စကားဝှက် နှစ်ခု မတူညီပါ။" : "Passwords do not match.";
-    } elseif (!preg_match('/^(09\d{9}|959\d{9})$/', preg_replace('/[\s\-]/', '', $phone))) {
-        $message = $is_mm ? "ဖုန်းနံပါတ်သည် 09 ဖြင့် စတင်ပါက ဂဏန်း ၁၁ လုံး ဖြစ်ရပါမည်။ 959 ဖြင့် စတင်ပါက ဂဏန်း ၁၂ လုံး ဖြစ်ရပါမည်။" : "If starting with 09, phone must be 11 digits. If starting with 959, phone must be 12 digits.";
+    } elseif (!preg_match('/^(09\d{9}|\+959\d{9})$/', preg_replace('/[\s\-]/', '', $phone))) {
+        $message = $is_mm ? "ဖုန်းနံပါတ်သည် 09 ဖြင့် စတင်ပါက ဂဏန်း ၁၁ လုံး ဖြစ်ရပါမည်။ +959 ဖြင့် စတင်ပါက ဂဏန်း ၁၂ လုံး ဖြစ်ရပါမည်။" : "Phone must start with 09 (11 digits) or +959 (12 characters including +).";
     } else {
         // Check if roll_no already exists
         $checkRoll = $conn->prepare("SELECT id FROM student WHERE roll_no = ? LIMIT 1");
@@ -170,10 +170,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $r_lang['phone']; ?></label>
-                        <input type="tel" name="phone" required pattern="(09[0-9]{9}|959[0-9]{9})"
+                        <input type="tel" name="phone" required
                                class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-[#006D69] transition outline-none"
-                               placeholder="09 123456789"
-                               oninput="this.value=this.value.replace(/[^0-9]/g,'');if(this.value.startsWith('959')){this.maxLength=12;}else{this.maxLength=11;}if(this.value.length>=2&&!this.value.startsWith('09')&&!this.value.startsWith('959')){this.value='';}">
+                               placeholder="09777950234 or +959 442 396 182"
+                               oninput="let raw=this.value.replace(/[^0-9+]/g,'');if(raw.startsWith('09')&&raw.length<=11){this.value=raw;this.maxLength=11;}else if(raw.startsWith('0')&&raw.length<=2){this.value=raw;this.maxLength=11;}else if(raw.startsWith('+959')){let d=raw.substring(4,13);let f='+959';if(d.length>0)f+=' '+d.substring(0,3);if(d.length>3)f+=' '+d.substring(3,6);if(d.length>6)f+=' '+d.substring(6,9);this.value=f;this.maxLength=16;}else if(raw.startsWith('+')){this.value=raw;this.maxLength=13;}else{this.value='';}">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"><?php echo $r_lang['gender']; ?></label>

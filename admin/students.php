@@ -122,7 +122,7 @@ $applied_count = $apps_count ? $apps_count->fetch_assoc()['cnt'] : 0;
             </div>
             <div class="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-5 text-center border-l-[3px] border-l-[#10b981] border-r-[3px] border-r-[#10b981]">
                 <div class="text-[26px] font-extrabold text-[#0f172a]"><?php echo $male_count; ?></div>
-                <div class="text-[10px] text-[#64748b] font-bold uppercase mt-1"><?php echo $is_mm ? ' erdote' : 'Male'; ?></div>
+                <div class="text-[10px] text-[#64748b] font-bold uppercase mt-1"><?php echo $is_mm ? 'ယောက်ျား' : 'Male'; ?></div>
             </div>
             <div class="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-5 text-center border-l-[3px] border-l-[#f59e0b] border-r-[3px] border-r-[#f59e0b]">
                 <div class="text-[26px] font-extrabold text-[#0f172a]"><?php echo $female_count; ?></div>
@@ -211,7 +211,7 @@ $applied_count = $apps_count ? $apps_count->fetch_assoc()['cnt'] : 0;
                     <a href="?page=<?php echo $total_pages; ?>&lang=<?php echo $lang_param; ?>" class="page-btn"><?php echo $total_pages; ?></a>
                 <?php endif; ?>
                 <a href="?page=<?php echo min($total_pages, $page + 1); ?>&lang=<?php echo $lang_param; ?>" class="page-btn <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">&raquo;</a>
-                <span class="page-info"><?php echo $is_mm ? 'စုစုပေါင်း' : 'Page'; ?> <?php echo $page; ?> / <?php echo $total_pages; ?> (<?php echo $total_students; ?> <?php echo $is_mm ? 'ယောက်ျား' : 'records'; ?>)</span>
+                <span class="page-info"><?php echo $is_mm ? 'စုစုပေါင်း' : 'Page'; ?> <?php echo $page; ?> / <?php echo $total_pages; ?> (<?php echo $total_students; ?> <?php echo $is_mm ? 'မှတ်တမ်းများ' : 'records'; ?>)</span>
             </div>
             <?php endif; ?>
         </div>

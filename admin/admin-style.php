@@ -1,4 +1,5 @@
  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
     /* ================= HEADER ================= */
 
 .top-header{

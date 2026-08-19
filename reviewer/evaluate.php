@@ -127,6 +127,7 @@ else {
         // Check if any reviewer already recommended the application
         $existing_recommendation = null;
         $any_recommended = false;
+        $last_remarks = '';
         $review_q = $conn->prepare("SELECT recommendation FROM application_reviews WHERE application_id = ? AND reviewer_id = ? ORDER BY id DESC LIMIT 1");
         if ($review_q) {
             $review_q->bind_param("ii", $application_id, $reviewer_id);
@@ -142,6 +143,14 @@ else {
             $any_res = $any_review_q->get_result()->fetch_assoc();
             if ($any_res) { $any_recommended = true; }
             $any_review_q->close();
+        }
+        $last_remarks_q = $conn->prepare("SELECT remarks FROM application_reviews WHERE application_id = ? ORDER BY id DESC LIMIT 1");
+        if ($last_remarks_q) {
+            $last_remarks_q->bind_param("i", $application_id);
+            $last_remarks_q->execute();
+            $last_remarks_q->bind_result($last_remarks);
+            $last_remarks_q->fetch();
+            $last_remarks_q->close();
         }
     } else {
         header("Location: dashboard.php");
@@ -432,7 +441,7 @@ else {
                         rows="5"
                         required
                         placeholder="Type verified eligibility checks, certificate matching status, or regional evaluation comments here..."
-                        class="eval-textarea"><?php echo ($existing_recommendation === 'Recommended' || $any_recommended) ? 'Recommended' : ''; ?></textarea>
+                        class="eval-textarea"><?php echo htmlspecialchars($last_remarks ?: ''); ?></textarea>
                     <div style="margin-top:8px;font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                         Required for submission. Be specific about your findings.

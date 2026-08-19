@@ -38,6 +38,7 @@ $sidebar_lang = $is_mm ? [
     'dashboard' => 'Dashboard',
     'schemes' => 'Schemes',
     'reviewers' => ' Reviewers',
+    'students' => 'Students',
     'applications' => 'Applications',
     'bank_verify' => 'Bank Verifications',
     'recipients' => 'Recipients',
@@ -407,9 +408,7 @@ $current_page = 'disbursements';
                 </div>
             </div>
 
-            <?php if (isset($_GET['cont'])): ?>
-                <div style="background:#dcfce7; color:#15803d; padding:10px 14px; border-radius:6px; font-size:12px; margin-bottom:15px;">✔ Next semester disbursement created successfully.</div>
-            <?php endif; ?>
+
             <?php if (isset($_GET['rej'])): ?>
                 <div style="background:#fee2e2; color:#b91c1c; padding:10px 14px; border-radius:6px; font-size:12px; margin-bottom:15px;">✔ Application rejected successfully. Student has been notified.</div>
             <?php endif; ?>
@@ -472,11 +471,7 @@ $current_page = 'disbursements';
                                 <td>
                                     <?php if ($show_cont): ?>
                                         <div style="display:flex;gap:6px;align-items:center;">
-                                            <form method="POST" style="display:inline;margin:0;">
-                                                <input type="hidden" name="action" value="continue">
-                                                <input type="hidden" name="recipient_id" value="<?php echo $rid; ?>">
-                                                <button type="submit" class="btn-green-sm" style="padding:4px 10px; font-size:10px; margin:0;">Continue ➜ <?php echo htmlspecialchars($next_sem_label); ?></button>
-                                            </form>
+                                            <button type="button" class="btn-green-sm" onclick="openContinueModal(<?php echo $rid; ?>, '<?php echo htmlspecialchars($next_sem_label); ?>')" style="padding:4px 10px; font-size:10px; margin:0;">Continue ➜ <?php echo htmlspecialchars($next_sem_label); ?></button>
                                             <button type="button" class="btn-reject-sm" onclick="openRejectModal(<?php echo $rid; ?>)" style="background:#ef4444;color:#fff;border:none;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:bold;cursor:pointer;">Reject ✘</button>
                                         </div>
                                     <?php else: ?>
@@ -555,7 +550,44 @@ function closeRejectModal() {
 document.getElementById('rejectModal').addEventListener('click', function(e) {
     if (e.target === this) closeRejectModal();
 });
+
+function openContinueModal(rid, semLabel) {
+    document.getElementById('continueRecipientId').value = rid;
+    document.getElementById('continueModalMsg').textContent = 'Are you sure you want to continue to ' + semLabel + '?';
+    document.getElementById('continueModal').style.display = 'flex';
+}
+function closeContinueModal() {
+    document.getElementById('continueModal').style.display = 'none';
+}
+document.getElementById('continueModal').addEventListener('click', function(e) {
+    if (e.target === this) closeContinueModal();
+});
 </script>
+
+<div id="continueModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:10px;width:400px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;">
+        <div style="background:#f0fdf4;padding:16px 20px;border-bottom:1px solid #bbf7d0;display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:bold;color:#15803d;">Continue Semester</div>
+                    <div style="font-size:11px;color:#16a34a;" id="continueModalMsg">Are you sure you want to continue to next semester?</div>
+                </div>
+            </div>
+            <button onclick="closeContinueModal()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:18px;padding:4px;">✕</button>
+        </div>
+        <form id="continueForm" method="POST" style="padding:20px;">
+            <input type="hidden" name="action" value="continue">
+            <input type="hidden" name="recipient_id" id="continueRecipientId" value="">
+            <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">
+                <button type="button" onclick="closeContinueModal()" style="padding:8px 16px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;font-weight:bold;color:#64748b;cursor:pointer;">Cancel</button>
+                <button type="submit" style="padding:8px 16px;background:#10b981;border:none;border-radius:6px;font-size:12px;font-weight:bold;color:#fff;cursor:pointer;">Continue ✔</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div id="rejectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
     <div style="background:#fff;border-radius:10px;width:420px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;">

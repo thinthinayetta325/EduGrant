@@ -47,8 +47,11 @@ $page_lang = $is_mm ? [
 // --- Database Connection ---
 include '../config/db.php';
 
+// --- Auto-close expired schemes ---
+$conn->query("UPDATE schemes SET status='Closed' WHERE status='Active' AND deadline IS NOT NULL AND deadline < CURDATE()");
+
 // --- Fetch Schemes ---
-$schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY scheme_name");
+$schemes = $conn->query("SELECT * FROM schemes ORDER BY scheme_name");
 ?>
 <!-- schemes -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
@@ -59,30 +62,39 @@ $schemes = $conn->query("SELECT * FROM schemes WHERE status='Active' ORDER BY sc
     
     <div class="grid md:grid-cols-2 gap-6">
         <?php while($scheme = $schemes->fetch_assoc()): 
-            // Logic: Use uploaded image if file exists, else use random generator
+            $is_closed = ($scheme['status'] === 'Closed');
             $upload_path = "../uploads/schemes/";
             $has_file = !empty($scheme['image']) && file_exists($upload_path . $scheme['image']);
             $img_src = $has_file ? ($upload_path . htmlspecialchars($scheme['image'])) : ('https://picsum.photos/seed/' . $scheme['id'] . '/600/400');
         ?>
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row overflow-hidden hover:shadow-xl transition-all">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row overflow-hidden<?php echo $is_closed ? ' opacity-60' : ' hover:shadow-xl transition-all'; ?>">
             <div class="w-full sm:w-2/5 h-48 sm:h-auto relative bg-slate-200">
                 <img src="<?php echo $img_src; ?>" alt="<?php echo htmlspecialchars($scheme['scheme_name']); ?>" 
-                     class="absolute inset-0 w-full h-full object-cover">
+                     class="absolute inset-0 w-full h-full object-cover<?php echo $is_closed ? ' grayscale' : ''; ?>">
             </div>
             
             <div class="flex-1 p-5 sm:p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-start gap-2">
                         <h4 class="font-bold text-base sm:text-lg text-slate-900"><?php echo htmlspecialchars($scheme['scheme_name']); ?></h4>
-                        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded shrink-0"><?php echo $page_lang['badge_active']; ?></span>
+                        <span class="<?php echo $is_closed ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'; ?> text-[10px] font-bold px-2 py-0.5 rounded shrink-0"><?php echo $scheme['status']; ?></span>
                     </div>
                     <p class="text-sm text-slate-500 mt-3 line-clamp-2"><?php echo htmlspecialchars($scheme['description'] ?? ''); ?></p>
+                    <?php if (!empty($scheme['deadline'])): ?>
+                    <p class="text-xs mt-2 <?php echo $is_closed ? 'text-red-600 font-semibold' : 'text-teal-600'; ?>">
+                        <?php echo $is_mm ? 'နောက်ဆုံးရက်' : 'Deadline'; ?>: <?php echo date('M d, Y', strtotime($scheme['deadline'])); ?>
+                    </p>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="mt-4 sm:mt-6 pt-4 border-t flex items-center justify-between">
                     <span class="text-xs font-bold text-teal-700"><?php echo $page_lang['funding_label']; ?></span>
                     
-                    <?php if ($is_logged_in): ?>
+                    <?php if ($is_closed): ?>
+                        <span class="bg-slate-200 text-slate-500 px-4 py-2 rounded-lg text-xs font-bold cursor-not-allowed">
+                            <?php echo $is_mm ? 'ပိတ်ထားသည်' : 'Closed'; ?>
+                        </span>
+                    <?php elseif ($is_logged_in): ?>
                         <a href="apply.php?scheme_id=<?php echo $scheme['id']; ?>" class="bg-[#004D4A] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#003D3B] transition">
                             <?php echo $page_lang['btn_apply_now']; ?>
                         </a>

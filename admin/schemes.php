@@ -13,6 +13,7 @@ $sidebar_lang = $is_mm ? [
     'dashboard' => 'ဒက်ရှ်ဘုတ်',
     'schemes' => 'ပညာသင်ဆုအစီအစဉ်များ',
     'reviewers' => 'စိစစ်ရေးမှူးများ',
+    'students' => 'ကျောင်းသားများ',
     'applications' => 'လျှောက်လွှာများ',
     'bank_verify' => 'ဘဏ်စစ်ဆေးခြင်းများ',
     'recipients' => 'ဆုရရှိသူများ',
@@ -25,6 +26,7 @@ $sidebar_lang = $is_mm ? [
     'dashboard' => 'Dashboard',
     'schemes' => 'Schemes',
     'reviewers' => 'Reviewers',
+    'students' => 'Students',
     'applications' => ' Applications',
     'bank_verify' => 'Bank Verifications',
     'recipients' => 'Recipients ',
@@ -84,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit();
 }
 
+$conn->query("UPDATE schemes SET status='Closed' WHERE status='Active' AND deadline IS NOT NULL AND deadline < CURDATE()");
 $schemes = $conn->query("SELECT * FROM schemes ORDER BY id DESC");
 $current_page = 'schemes';
 ?>
