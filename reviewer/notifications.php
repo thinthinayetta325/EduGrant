@@ -43,6 +43,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'mark_single' && isset($_GET['
         $stmt->execute();
         $stmt->close();
     }
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true]);
+        exit();
+    }
     header("Location: notifications.php?lang=" . $lang_param);
     exit();
 }
@@ -146,7 +151,10 @@ $unread_q->close();
 
     <script>
     function markSingleRead(btn, id) {
-        fetch('notifications.php?action=mark_single&id=' + id + '&lang=<?php echo $lang_param; ?>', { method: 'GET' })
+        fetch('notifications.php?action=mark_single&id=' + id + '&lang=<?php echo $lang_param; ?>', {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
             .then(() => {
                 const row = document.getElementById('notif-' + id);
                 if (row) {

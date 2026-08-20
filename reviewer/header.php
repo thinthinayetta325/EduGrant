@@ -11,8 +11,9 @@ $reviewer_name = $_SESSION['reviewer_name'] ?? 'Reviewer';
 $reviewer_id = $_SESSION['reviewer_id'] ?? 0;
 $reviewer_img = null;
 $unread_count = 0;
+$recent_notifications = [];
 
-// Fetch unread notification count for reviewer
+// Fetch unread notification count and recent notifications for reviewer
 if ($reviewer_id && isset($conn)) {
     $notif_q = $conn->prepare("SELECT COUNT(*) AS unread FROM notifications WHERE reviewer_id = ? AND is_read = 0");
     if ($notif_q) {
@@ -20,6 +21,13 @@ if ($reviewer_id && isset($conn)) {
         $notif_q->execute();
         $unread_count = $notif_q->get_result()->fetch_assoc()['unread'] ?? 0;
         $notif_q->close();
+    }
+    $recent_q = $conn->prepare("SELECT id, title, message, type, is_read, created_at FROM notifications WHERE reviewer_id = ? ORDER BY created_at DESC LIMIT 8");
+    if ($recent_q) {
+        $recent_q->bind_param("i", $reviewer_id);
+        $recent_q->execute();
+        $recent_notifications = $recent_q->get_result()->fetch_all(MYSQLI_ASSOC);
+        $recent_q->close();
     }
 }
 
@@ -197,6 +205,58 @@ if ($reviewer_id && isset($conn)) {
     }
     .notif-count.zero { display: none; }
 
+    /* Notification Dropdown */
+    .notif-wrapper { position: relative; }
+    .notif-dropdown {
+        position: absolute; top: calc(100% + 10px); right: 0;
+        width: 360px; max-height: 420px;
+        background: #fff; border: 1px solid var(--border);
+        border-radius: var(--radius); box-shadow: var(--shadow-lg);
+        opacity: 0; visibility: hidden; transform: translateY(-8px);
+        transition: var(--transition); z-index: 1000;
+        display: flex; flex-direction: column;
+    }
+    .notif-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .notif-dropdown-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 16px; border-bottom: 1px solid var(--border);
+    }
+    .notif-dropdown-header span { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .notif-dropdown-header a { font-size: 11px; font-weight: 600; color: #006D69; text-decoration: none; }
+    .notif-dropdown-header a:hover { text-decoration: underline; }
+    .notif-dropdown-list { overflow-y: auto; flex: 1; }
+    .notif-dropdown-item {
+        display: flex; align-items: flex-start; gap: 10px;
+        padding: 12px 16px; cursor: pointer; transition: var(--transition);
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .notif-dropdown-item:hover { background: var(--body-bg); }
+    .notif-dropdown-item.unread { background: #f0fdf4; }
+    .notif-dropdown-item.unread:hover { background: #dcfce7; }
+    .notif-dropdown-icon {
+        width: 32px; height: 32px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; flex-shrink: 0;
+    }
+    .notif-dropdown-icon.app { background: #dbeafe; }
+    .notif-dropdown-icon.other { background: #f1f5f9; }
+    .notif-dropdown-body { flex: 1; min-width: 0; }
+    .notif-dropdown-title { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+    .notif-dropdown-msg { font-size: 11px; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .notif-dropdown-time { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+    .notif-dropdown-badge {
+        font-size: 10px; font-weight: 600; padding: 2px 8px;
+        border-radius: 10px; flex-shrink: 0; margin-top: 2px; white-space: nowrap;
+    }
+    .notif-dropdown-badge.unread { background: #22c55e; color: #fff; cursor: pointer; }
+    .notif-dropdown-badge.read { background: #e2e8f0; color: #64748b; }
+    .notif-dropdown-empty { text-align: center; padding: 30px 16px; color: var(--text-muted); font-size: 13px; }
+
+    html.dark .notif-dropdown { background: #1e293b; border-color: #334155; }
+    html.dark .notif-dropdown-item.unread { background: rgba(16,185,129,0.08); }
+    html.dark .notif-dropdown-item.unread:hover { background: rgba(16,185,129,0.15); }
+    html.dark .notif-dropdown-item:hover { background: #334155; }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -259,6 +319,7 @@ if ($reviewer_id && isset($conn)) {
         .profile-info { display: none; }
         .profile-link { padding: 4px; }
         .profile-image { width: 32px; height: 32px; }
+        .notif-dropdown { width: 300px; right: -10px; }
     }
 </style>
 
@@ -297,13 +358,46 @@ if ($reviewer_id && isset($conn)) {
             <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </button>
 
-        <a href="notifications.php?lang=<?php echo $lang_param; ?>" class="notif-btn" title="Notifications">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            <span class="notif-count <?php echo $unread_count === 0 ? 'zero' : ''; ?>"><?php echo $unread_count > 99 ? '99+' : $unread_count; ?></span>
-        </a>
+        <div class="notif-wrapper" id="notifWrapper">
+            <button type="button" class="notif-btn" title="Notifications" onclick="toggleNotifDropdown(event)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span class="notif-count <?php echo $unread_count === 0 ? 'zero' : ''; ?>" id="notifCount"><?php echo $unread_count > 99 ? '99+' : $unread_count; ?></span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-dropdown-header">
+                    <span>Notifications</span>
+                    <a href="notifications.php?lang=<?php echo $lang_param; ?>">View All</a>
+                </div>
+                <div class="notif-dropdown-list" id="notifDropdownList">
+                    <?php if (empty($recent_notifications)): ?>
+                        <div class="notif-dropdown-empty">No notifications yet.</div>
+                    <?php else: ?>
+                        <?php foreach ($recent_notifications as $rn): ?>
+                            <div class="notif-dropdown-item <?php echo !$rn['is_read'] ? 'unread' : ''; ?>"
+                                 onclick="markNotifSeen(this, <?php echo $rn['id']; ?>)"
+                                 data-id="<?php echo $rn['id']; ?>">
+                                <div class="notif-dropdown-icon <?php echo ($rn['type'] ?? '') === 'new_application' ? 'app' : 'other'; ?>">
+                                    <?php echo ($rn['type'] ?? '') === 'new_application' ? '📝' : '🔔'; ?>
+                                </div>
+                                <div class="notif-dropdown-body">
+                                    <div class="notif-dropdown-title"><?php echo htmlspecialchars($rn['title']); ?></div>
+                                    <div class="notif-dropdown-msg"><?php echo htmlspecialchars($rn['message']); ?></div>
+                                    <div class="notif-dropdown-time"><?php echo date('M d, g:i A', strtotime($rn['created_at'])); ?></div>
+                                </div>
+                                <?php if (!$rn['is_read']): ?>
+                                    <span class="notif-dropdown-badge unread">Unread</span>
+                                <?php else: ?>
+                                    <span class="notif-dropdown-badge read">Read</span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
 
         <div class="profile-dropdown" id="reviewerProfileDropdown">
             <button type="button" onclick="toggleReviewerProfileMenu(event)" class="profile-link" style="border:none;cursor:pointer;font-family:inherit;">
@@ -376,5 +470,42 @@ document.addEventListener('click', function(e) {
     if (dropdown && menu && !dropdown.contains(e.target)) {
         menu.classList.remove('show');
     }
+    var notifWrapper = document.getElementById('notifWrapper');
+    var notifDropdown = document.getElementById('notifDropdown');
+    if (notifWrapper && notifDropdown && !notifWrapper.contains(e.target)) {
+        notifDropdown.classList.remove('show');
+    }
 });
+
+function toggleNotifDropdown(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('notifDropdown');
+    dd.classList.toggle('show');
+}
+
+function markNotifSeen(el, id) {
+    if (!el.classList.contains('unread')) return;
+    el.classList.remove('unread');
+    var badge = el.querySelector('.notif-dropdown-badge');
+    if (badge) {
+        badge.classList.remove('unread');
+        badge.classList.add('read');
+        badge.textContent = 'Read';
+    }
+    var countEl = document.getElementById('notifCount');
+    if (countEl) {
+        var current = parseInt(countEl.textContent) || 0;
+        if (current > 1) {
+            countEl.textContent = current > 99 ? '99+' : (current - 1);
+        } else {
+            countEl.textContent = '0';
+            countEl.classList.add('zero');
+        }
+    }
+    var lang = <?php echo json_encode($lang_param); ?>;
+    fetch('notifications.php?action=mark_single&id=' + id + '&lang=' + lang, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+}
 </script>
