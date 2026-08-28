@@ -37,18 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (!preg_match('/^\d{16}$/', $account_number)) {
         $error_msg = $is_mm ? "ဘဏ်အကောင့်နံပါတ်သည် ဂဏန်းများသာ ဖြစ်ရပါမည်။" : "Account number must contain only digits.";
     } else {
-        // Fetch registered student name for comparison
-        $name_check = $conn->prepare("SELECT name FROM student WHERE id = ?");
-        $name_check->bind_param("i", $student_id);
-        $name_check->execute();
-        $reg_name = trim($name_check->get_result()->fetch_assoc()['name'] ?? '');
-        $name_check->close();
-
-        if (strcasecmp(trim($account_holder), $reg_name) !== 0) {
-            $error_msg = $is_mm
-                ? "အကောင့်ပိုင်ရှင်အမည်သည် စာရင်းသွင်းထားသည့် ကျောင်းသားအမည်နှင့် မတူညီပါ။ အမည် '$reg_name' ဖြစ်ရပါမည်။"
-                : "Account Holder name must match your registered student name. Your registered name is '$reg_name'.";
-        } elseif (!empty($bank_name) && !empty($account_number) && !empty($account_holder)) {
+        if (!empty($bank_name) && !empty($account_number) && !empty($account_holder)) {
         // Check if records already exist for this student
         $check_query = $conn->prepare("SELECT id FROM bank_details WHERE student_id = ?");
         $check_query->bind_param("i", $student_id);
@@ -242,14 +231,6 @@ $conn->close();
                            value="<?php echo htmlspecialchars($bank_data['account_number'] ?? ''); ?>"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#006D69] focus:bg-white transition text-sm">
                 </div>
-
-                <?php if (empty($success_msg)): ?>
-                <!-- Warning Callout Box -->
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs font-medium text-amber-800 flex gap-3">
-                    <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    <p class="leading-relaxed"><?php echo $b_lang['warning_text']; ?></p>
-                </div>
-                <?php endif; ?>
 
                 <!-- Action Button -->
                 <div class="pt-2">
